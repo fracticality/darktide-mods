@@ -8,13 +8,16 @@ mod:add_global_localize_strings({
 
 return {
   psych_ward = {
-    en = "Psych Ward"
+    en = "Psych Ward",
+    ["zh-cn"] = "快速灵能室",
   },
   psych_ward_description = {
-    en = "Enables traveling to the Psykhanium and viewing various vendors without traveling to the Hub."
+    en = "Enables logging in straight to the Psykhanium, bypassing the Hub.",
+    ["zh-cn"] = "启用直接进入灵能室功能，无需进入大厅。",
   },
   enter_psykhanium = {
-    en = "Shooting Range"
+    en = "Shooting Range",
+    ["zh-cn"] = "训练场",
   },
   vendor_button= {
     en = "Armoury"
