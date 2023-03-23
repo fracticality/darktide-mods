@@ -1,5 +1,6 @@
 local mod = get_mod("psych_ward")
 
+local Promise = mod:original_require("scripts/foundation/utilities/promise")
 local UIWidget = mod:original_require("scripts/managers/ui/ui_widget")
 local ButtonPassTemplates = mod:original_require("scripts/ui/pass_templates/button_pass_templates")
 local Missions = mod:original_require("scripts/settings/mission/mission_templates")
@@ -10,6 +11,10 @@ local SINGLEPLAY_TYPES = MatchmakingConstants.SINGLEPLAY_TYPES
 local _go_to_shooting_range = false
 local _psykhanium_button = "psykhanium_button"
 local _exit_button = "exit_button"
+local _vendor_button = "vendor_button"
+local _contracts_button = "contracts_button"
+local _crafting_button = "crafting_button"
+local _inventory_button = "inventory_button"
 local _difficulty_stepper = "difficulty_stepper"
 local _stepper_content
 
@@ -33,16 +38,87 @@ local function _get_challenge_level()
   return challenge_level
 end
 
+local _button_names = {
+  _vendor_button,
+  _contracts_button,
+  _crafting_button,
+  _inventory_button
+}
+
+local MainMenuView = mod:original_require("scripts/ui/views/main_menu_view/main_menu_view")
+function MainMenuView:cb_on_toggle_view_buttons()
+  local widgets_by_name = self._widgets_by_name
+  for _, button_name in ipairs(_button_names) do
+    local button_widget = widgets_by_name[button_name]
+    if button_widget then
+      button_widget.content.visible = not button_widget.content.visible
+    end
+  end
+end
+
+local legend_input = {
+  is_custom = true,
+  input_action = "hotkey_inventory",
+  display_name = "loc_toggle_view_buttons",
+  alignment = "center_alignment",
+  on_pressed_callback = "cb_on_toggle_view_buttons",
+  visibility_function = function(parent)
+    return not parent._is_main_menu_open
+  end
+}
+
+local function _open_view(view_name)
+  local character_id = Managers.player:local_player(1):profile().character_id
+  local promise = Managers.narrative:load_character_narrative(character_id)
+
+  Promise.all(promise):next(function (_)
+    Managers.ui:open_view(view_name, nil, nil, nil, nil, {
+      hub_interaction = true,
+    })
+  end):catch(function ()
+    return
+  end)
+end
+
 local function _setup_psykhanium_button()
   local main_menu_definitions_file = "scripts/ui/views/main_menu_view/main_menu_view_definitions"
   mod:hook_require(main_menu_definitions_file, function(definitions)
+
+    local index = table.find_by_key(definitions.legend_inputs, "is_custom", true)
+    if index then
+      table.remove(definitions.legend_inputs, index)
+    end
+
+    table.insert(definitions.legend_inputs, legend_input)
+
+    definitions.scenegraph_definition[_vendor_button] = {
+      parent = "screen",
+      vertical_alignment = "top",
+      horizontal_alignment = "center",
+      size = ButtonPassTemplates.ready_button.size,
+      position = { 0, 0, 0 }
+    }
+    definitions.scenegraph_definition[_contracts_button] = {
+      parent = "screen",
+      vertical_alignment = "top",
+      horizontal_alignment = "center",
+      size = ButtonPassTemplates.ready_button.size,
+      position = { ButtonPassTemplates.ready_button.size[1], 0, 0 }
+    }
+    definitions.scenegraph_definition[_crafting_button] = {
+      parent = "screen",
+      vertical_alignment = "top",
+      horizontal_alignment = "center",
+      size = ButtonPassTemplates.ready_button.size,
+      position = { -ButtonPassTemplates.ready_button.size[1], 0, 0 }
+    }
 
     definitions.scenegraph_definition[_psykhanium_button] = {
       parent = "character_info",
       vertical_alignment = "top",
       horizontal_alignment = "center",
       size = ButtonPassTemplates.ready_button.size,
-      position = { 0, -ButtonPassTemplates.ready_button.size[2], 2 }
+      position = { 0, -ButtonPassTemplates.ready_button.size[2], 0 }
     }
     definitions.scenegraph_definition[_difficulty_stepper] = {
       parent = _psykhanium_button,
@@ -51,12 +127,28 @@ local function _setup_psykhanium_button()
       size = { 300, 60 },
       position = { -25, -200, 10 }
     }
+    definitions.scenegraph_definition[_inventory_button] = {
+      parent = "screen",
+      vertical_alignment = "bottom",
+      horizontal_alignment = "center",
+      size = ButtonPassTemplates.ready_button.size,
+      position = { 0, -ButtonPassTemplates.ready_button.size[2] / 2, 0 }
+    }
+
+    for _, button_name in ipairs(_button_names) do
+      local button = UIWidget.create_definition(ButtonPassTemplates.ready_button, button_name, {
+        text = mod:localize(button_name)
+      })
+      button.content.visible = false
+      definitions.widget_definitions[button_name] = button
+    end
 
     definitions.widget_definitions[_psykhanium_button] = UIWidget.create_definition(ButtonPassTemplates.ready_button, _psykhanium_button, {
-      text = (mod:localize("enter_psykhanium"))
+      text = mod:localize("enter_psykhanium")
     })
+
     local definition = UIWidget.create_definition(StepperPassTemplates.difficulty_stepper, _difficulty_stepper)
-    local index = table.find_by_key(definition.passes, "pass_type", "texture")
+    index = table.find_by_key(definition.passes, "pass_type", "texture")
     if index then
       table.remove(definition.passes, index)
     end
@@ -136,66 +228,86 @@ local function _setup_psykhanium_button()
   end)
 
   mod:hook_safe("MainMenuView", "_setup_interactions", function(self)
-    self._widgets_by_name[_psykhanium_button].content.hotspot.pressed_callback = function()
+
+    local widgets_by_name = self._widgets_by_name
+
+    widgets_by_name[_psykhanium_button].content.hotspot.pressed_callback = function()
       _go_to_shooting_range = true
       self:_on_play_pressed()
     end
 
+    widgets_by_name[_vendor_button].content.hotspot.pressed_callback = function()
+      _open_view("credits_vendor_background_view")
+    end
+
+    widgets_by_name[_vendor_button].content.hotspot.pressed_callback = function()
+      _open_view("inventory_background_view")
+    end
+
+    widgets_by_name[_contracts_button].content.hotspot.pressed_callback = function()
+      _open_view("contracts_background_view")
+    end
+
+    widgets_by_name[_crafting_button].content.hotspot.pressed_callback = function()
+      _open_view("crafting_view")
+    end
+
     local challenge_level = _get_challenge_level()
-    _stepper_content = self._widgets_by_name.difficulty_stepper.content
+    _stepper_content = widgets_by_name.difficulty_stepper.content
     _stepper_content.danger = challenge_level
   end)
 
 end
 
-
-
 --[[
   Title Screen Exit Button
 ]]--
 
-local function _quit_callback()
+local function _quit()
   Application.quit()
 end
 
-local title_view_definitions_file = "scripts/ui/views/title_view/title_view_definitions"
-mod:hook_require(title_view_definitions_file, function(definitions)
-  definitions.scenegraph_definition[_exit_button] = {
-    parent = "background_image",
-    vertical_alignment = "top",
-    horizontal_alignment = "right",
-    size = { 50, 50 },
-    position = { -55, 55, 4 }
-  }
-
-  definitions.widget_definitions[_exit_button] = UIWidget.create_definition({
-    {
-      pass_type = "hotspot",
-      content_id = "hotspot",
-      content = {
-        pressed_callback = _quit_callback
-      },
-    },
-    {
-      pass_type = "texture",
-      value = "content/ui/materials/icons/system/escape/quit",
+local function _setup_title_button()
+  local title_view_definitions_file = "scripts/ui/views/title_view/title_view_definitions"
+  mod:hook_require(title_view_definitions_file, function(definitions)
+    definitions.scenegraph_definition[_exit_button] = {
+      parent = "background_image",
+      vertical_alignment = "top",
+      horizontal_alignment = "right",
+      size = { 50, 50 },
+      position = { -55, 55, 4 }
     }
-  }, "exit_button")
 
-end)
+    definitions.widget_definitions[_exit_button] = UIWidget.create_definition({
+      {
+        pass_type = "hotspot",
+        content_id = "hotspot",
+        content = {
+          pressed_callback = _quit
+        },
+      },
+      {
+        pass_type = "texture",
+        value = "content/ui/materials/icons/system/escape/quit",
+      }
+    }, "exit_button")
 
-mod:hook_safe(TitleView, "update", function(self, dt, t, input_service)
-  if input_service:get("hotkey_system") then
-    _quit_callback()
-  end
-end)
+  end)
 
-mod:hook_safe(TitleView, "on_enter", function(self)
-  Managers.ui:load_view("system_view", "psych_ward")
-end)
+  mod:hook_safe(TitleView, "update", function(self, dt, t, input_service)
+    if input_service:get("hotkey_system") and not self._parent:is_loading() then
+      _quit()
+    end
+  end)
 
-mod:hook_safe(Managers.package, "load", function(self, package, reference)
+  mod:hook_safe(TitleView, "on_enter", function(self)
+    Managers.ui:load_view("system_view", "psych_ward")
+  end)
+end
 
-end)
+--[[
+  Init
+]]--
 
 _setup_psykhanium_button()
+_setup_title_button()
