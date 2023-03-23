@@ -371,85 +371,116 @@ function HudElementCrosshairHud:_update_ability(dt, t)
   style.charge_count.text_color = (remaining_ability_charges == 0 and UIHudSettings.color_tint_alert_2) or (missing_ability_charges == 0 and { 255, 255, 150, 0 }) or UIHudSettings.color_tint_1
 end
 
---TODO: separate ammo & reload updates
-function HudElementCrosshairHud:_update_ammo(dt, t)
+local _reload_actions = {
+  reload_state = true,
+  reload_shotgun = true
+}
+function HudElementCrosshairHud:_update_reload(dt, t)
   local reload_widget = self._widgets_by_name.reload_indicator
-  local ammo_widget = self._widgets_by_name.ammo_indicator
+  if not reload_widget then
+    return
+  end
 
-  ammo_widget.content.visible = mod:get("display_ammo_indicator")
-  reload_widget.content.visible = mod:get("display_reload_indicator")
+  local display_reload_indicator = mod:get("display_reload_indicator")
+  reload_widget.content.visible = display_reload_indicator
+
+  if not display_reload_indicator then
+    return
+  end
+
+  local player_extensions = self._parent:player_extensions()
+  local unit_data_extension = player_extensions and player_extensions.unit_data
+  local inventory_component = unit_data_extension and unit_data_extension:read_component("slot_secondary")
+  local weapon_action_component = unit_data_extension and unit_data_extension:read_component("weapon_action")
+  local weapon_template = weapon_action_component and WeaponTemplate.weapon_template(weapon_action_component.template_name)
+  local reload_template = weapon_template and weapon_template.reload_template
+  local current_action_name = weapon_action_component and weapon_action_component.current_action_name
+  local current_action_settings = weapon_template and weapon_template.actions[current_action_name]
+  local is_reload_action = current_action_settings and _reload_actions[current_action_settings.kind]
+
+  mod.reload_percent = 0
+
+  if reload_template then
+    local time_scale = weapon_action_component.time_scale
+    local total_time = is_reload_action and current_action_settings.total_time or 0
+    local scaled_time = total_time / time_scale
+    local time_in_action = mod.time_in_action or scaled_time
+
+    mod.reload_percent = math.min(1, time_in_action / time_scale)
+    mod.reload_time = math.max(0, scaled_time - time_in_action)
+
+  elseif mod:get("only_during_reload") then
+    reload_widget.content.visible = false
+    return
+  end
+
+  local reload_style = reload_widget.style
+  local reload_bar = reload_style.reload_bar
+  reload_widget.content.reload_time = mod.reload_time and string.format("%.2f", mod.reload_time) or ""
+  reload_bar.size[1] = reload_bar.max_height * (mod.reload_percent or 0)
+end
+
+function HudElementCrosshairHud:_update_ammo(dt, t)
+  local ammo_widget = self._widgets_by_name.ammo_indicator
+  if not ammo_widget then
+    return
+  end
+
+  local display_ammo_indicator = mod:get("display_ammo_indicator")
+  ammo_widget.content.visible = display_ammo_indicator
+
+  if not display_ammo_indicator then
+    return
+  end
 
   local player_extensions = self._parent:player_extensions()
   local unit_data_extension = player_extensions.unit_data
   local inventory_component = unit_data_extension:read_component("slot_secondary")
-  local weapon_action_component = unit_data_extension:read_component("weapon_action")
-  local weapon_template = WeaponTemplate.weapon_template(weapon_action_component.template_name)
-  local reload_template = weapon_template.reload_template
-  local current_action_name = weapon_action_component.current_action_name
-  local current_action_settings = weapon_template.actions[current_action_name]
 
-  mod.reload_percent = 0
-  local is_reload_action = current_action_settings and (current_action_settings.kind == "reload_state" or current_action_settings.kind == "reload_shotgun")
-  if reload_template then
-
-    local time_scale = weapon_action_component.time_scale
-    local total_time = is_reload_action and current_action_settings.total_time or 0
-
-    local scaled_time = total_time / time_scale
-    local time_in_action = mod.time_in_action or scaled_time
-    mod.reload_percent = math.min(time_in_action / scaled_time, 1)
-    mod.reload_time = math.max(scaled_time - time_in_action, 0)
-  elseif mod:get("only_during_reload") then
-    reload_widget.content.visible = false
+  if not inventory_component then
+    return
   end
 
-  if inventory_component then
-    local clip_max = inventory_component.max_ammunition_clip or 0
-    local reserve_max = inventory_component.max_ammunition_reserve or 0
-    if reserve_max == 0 or clip_max == 0 then
-      ammo_widget.content.visible = false
-      return
-    end
+  local clip_max = inventory_component.max_ammunition_clip or 0
+  local reserve_max = inventory_component.max_ammunition_reserve or 0
+  local max_ammo = clip_max + reserve_max
 
-    local clip_ammo = inventory_component.current_ammunition_clip or 0
-    local reserve_ammo = inventory_component.current_ammunition_reserve or 0
-
-    local max_ammo = clip_max + reserve_max
-    local current_ammo = clip_ammo + reserve_ammo
-    local current_ammo_percent = 0
-    local reserve_ammo_percent = 0
-    local clip_ammo_percent = 0
-
-
-    current_ammo_percent = current_ammo / max_ammo
-    reserve_ammo_percent = reserve_ammo / reserve_max
-    clip_ammo_percent = clip_ammo / clip_max
-
-    local is_clip_full = clip_ammo == clip_max
-    local is_reserve_full = reserve_ammo == reserve_max
-
-    local content = ammo_widget.content
-    content.max_ammo = max_ammo or 0
-    content.current_ammo = current_ammo or 0
-    content.reserve_ammo = reserve_ammo or 0
-    content.clip_ammo = clip_ammo or 0
-
-    local style = ammo_widget.style
-    local icon_style = style.ammo_icon
-    icon_style.color = self:_get_text_color_for_percent_threshold(current_ammo_percent, "ammo")
-
-    local clip_style = style.clip_ammo
-    clip_style.text_color = self:_get_text_color_for_percent_threshold(clip_ammo_percent, "ammo")
-
-    local reserve_style = style.reserve_ammo
-    reserve_style.text_color = self:_get_text_color_for_percent_threshold(reserve_ammo_percent, "ammo")
-
-    local reload_style = reload_widget.style
-    local reload_bar = reload_style.reload_bar
-    reload_widget.content.reload_time = mod.reload_time and string.format("%.2f", mod.reload_time) or ""
-    reload_bar.size[1] = reload_bar.max_height * (mod.reload_percent or 0)
+  if max_ammo == 0 then
+    ammo_widget.content.visible = false
+    return
   end
 
+  local clip_ammo = inventory_component.current_ammunition_clip or 0
+  local reserve_ammo = inventory_component.current_ammunition_reserve or 0
+  local current_ammo = clip_ammo + reserve_ammo
+  local current_ammo_percent = 0
+  local reserve_ammo_percent = 0
+  local clip_ammo_percent = 0
+
+  current_ammo_percent = current_ammo / max_ammo
+  reserve_ammo_percent = reserve_ammo / reserve_max
+  clip_ammo_percent = clip_ammo / clip_max
+
+  local content = ammo_widget.content
+  content.max_ammo = max_ammo or 0
+  content.current_ammo = current_ammo or 0
+  content.reserve_ammo = reserve_ammo or 0
+  content.clip_ammo = clip_ammo or 0
+
+  local style = ammo_widget.style
+  local icon_style = style.ammo_icon
+  icon_style.color = self:_get_text_color_for_percent_threshold(current_ammo_percent, "ammo")
+
+  local clip_style = style.clip_ammo
+  clip_style.text_color = self:_get_text_color_for_percent_threshold(clip_ammo_percent, "ammo")
+
+  local reserve_style = style.reserve_ammo
+  reserve_style.text_color = self:_get_text_color_for_percent_threshold(reserve_ammo_percent, "ammo")
+
+  if not mod:get("show_ammo_icon") then
+    icon_style.visible = false
+    style.ammo_icon_shadow.visible = false
+  end
 end
 
 function HudElementCrosshairHud:update(dt, t, ui_renderer, render_settings, input_service)
@@ -460,6 +491,7 @@ function HudElementCrosshairHud:update(dt, t, ui_renderer, render_settings, inpu
   self:_update_health(dt, t)
   self:_update_ability(dt, t)
   self:_update_ammo(dt, t)
+  self:_update_reload(dt, t)
 end
 
 function HudElementCrosshairHud:_get_cooldown_symbol_for_percent_threshold(percent, remaining_ability_charges)

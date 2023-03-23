@@ -1,9 +1,10 @@
 local mod = get_mod("crosshair_hud")
 
+--TODO: Separate indicators into "features", genericize hud element (merge definitions, loop through features)
+
 local ArchetypeTalents = mod:original_require("scripts/settings/ability/archetype_talents/archetype_talents")
 local UIViewHandler = mod:original_require("scripts/managers/ui/ui_view_handler")
 local ReloadStates = mod:original_require("scripts/extension_systems/weapon/utilities/reload_states")
-
 
 local class_name = "HudElementCrosshairHud"
 local filename = "crosshair_hud/scripts/mods/crosshair_hud/hud_element_crosshair_hud/hud_element_crosshair_hud"
@@ -111,7 +112,7 @@ end
 mod:hook("ActionReloadState", "fixed_update", fixed_update)
 mod:hook("ActionReloadShotgun", "fixed_update", fixed_update)
 
-local function _handle_state_transition(self, reload_template, inventory_slot_component, time_in_action, time_in_action)
+local function _handle_state_transition(self, reload_template, inventory_slot_component, time_in_action, time_scale)
   local total_time = ReloadStates.get_total_time(reload_template, inventory_slot_component)
 
   mod.time_in_action = total_time or 0

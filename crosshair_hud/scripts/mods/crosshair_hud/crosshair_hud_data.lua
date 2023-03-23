@@ -9,8 +9,13 @@ local mod = get_mod("crosshair_hud")
       [Blue]         (Numeric)  --> (0, 255)
 ]]--
 
-local width = RESOLUTION_LOOKUP.width
-local height = RESOLUTION_LOOKUP.height
+--TODO: Create mod.OPTIONS table that stores setting keys for use as constants in the hud element
+---     Maybe loop through .data files for each feature?
+--mod.OPTIONS = {}
+--mod:io_dofile(. . .)
+
+local width = (RESOLUTION_LOOKUP.width and RESOLUTION_LOOKUP.width > 0 and RESOLUTION_LOOKUP.width) or 1920
+local height = (RESOLUTION_LOOKUP.height and RESOLUTION_LOOKUP.height > 0 and RESOLUTION_LOOKUP.height) or 1080
 local range_x = width / 2
 local range_y = height / 2
 local _coordinates_settings = {
@@ -297,6 +302,11 @@ return {
             type = "checkbox",
             default_value = true,
             sub_widgets = {
+              {
+                setting_id = "show_ammo_icon",
+                type = "checkbox",
+                default_value = true
+              },
               create_coordinate_setting("ammo", "x", 22),
               create_coordinate_setting("ammo", "y", 90),
               unpack(create_threshold_settings("ammo"))

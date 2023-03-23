@@ -3,7 +3,7 @@ return {
     en = "CrosshairHUD"
   },
   crosshair_hud_description = {
-    en = "Provides a toughness counter on/near the crosshair.\nTemporarily displays health when receiving health damage."
+    en = "Adds customizable Toughness, Health, Coherency, Ammo, Reload, and/or Ability indicators near the crosshair."
   },
 
   x_offset = {
@@ -149,6 +149,9 @@ return {
   },
   display_ammo_indicator = {
     en = "Display Ammo Indicator"
+  },
+  show_ammo_icon = {
+    en = "Show Icon"
   },
 
   options_reload = {
