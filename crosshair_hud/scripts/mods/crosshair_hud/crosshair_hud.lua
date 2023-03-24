@@ -105,7 +105,7 @@ mod:hook_safe(UIViewHandler, "close_view", function(self, view_name, force_close
 end)
 
 local function fixed_update(func, self, dt, t, time_in_action)
-    mod.time_in_action = time_in_action or 0
+  mod.time_in_action = time_in_action or 0
 
   return func(self, dt, t, time_in_action)
 end

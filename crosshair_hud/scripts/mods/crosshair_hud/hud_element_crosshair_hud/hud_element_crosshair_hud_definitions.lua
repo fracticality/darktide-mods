@@ -71,7 +71,7 @@ local scenegraph_definition = {
     parent = "screen",
     vertical_alignment = "center",
     horizontal_alignment = "center",
-    size = { 44, 44 },
+    size = { 52, 44 },
     position = {
       global_x_offset + ammo_x_offset,
       global_y_offset + ammo_y_offset,
@@ -901,7 +901,7 @@ local widget_definitions = {
     },
     {
       pass_type = "text",
-      value = "000",
+      value = "0000",
       value_id = "reserve_ammo",
       style_id = "reserve_ammo",
       style = {
@@ -915,7 +915,7 @@ local widget_definitions = {
     },
     {
       pass_type = "text",
-      value = "000",
+      value = "0000",
       value_id = "reserve_ammo",
       style_id = "reserve_ammo_shadow",
       style = {

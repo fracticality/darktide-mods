@@ -397,7 +397,7 @@ function HudElementCrosshairHud:_update_reload(dt, t)
   local current_action_settings = weapon_template and weapon_template.actions[current_action_name]
   local is_reload_action = current_action_settings and _reload_actions[current_action_settings.kind]
 
-  mod.reload_percent = 0
+  --mod.reload_percent = 0
 
   if reload_template then
     local time_scale = weapon_action_component.time_scale
@@ -405,7 +405,7 @@ function HudElementCrosshairHud:_update_reload(dt, t)
     local scaled_time = total_time / time_scale
     local time_in_action = mod.time_in_action or scaled_time
 
-    mod.reload_percent = math.min(1, time_in_action / time_scale)
+    mod.reload_percent = math.min(1, time_in_action / scaled_time)
     mod.reload_time = math.max(0, scaled_time - time_in_action)
 
   elseif mod:get("only_during_reload") then
@@ -417,6 +417,7 @@ function HudElementCrosshairHud:_update_reload(dt, t)
   local reload_bar = reload_style.reload_bar
   reload_widget.content.reload_time = mod.reload_time and string.format("%.2f", mod.reload_time) or ""
   reload_bar.size[1] = reload_bar.max_height * (mod.reload_percent or 0)
+  --mod:echo(mod.reload_percent)
 end
 
 function HudElementCrosshairHud:_update_grenade_ability(dt, t)
@@ -437,7 +438,7 @@ function HudElementCrosshairHud:_update_grenade_ability(dt, t)
   local player_extensions = self._parent:player_extensions()
   local ability_extension = player_extensions.ability
 
-  if not ability_extension then
+  if not (ability_extension and ability_extension:ability_is_equipped("grenade_ability")) then
     return
   end
 
