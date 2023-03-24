@@ -1,268 +1,211 @@
 return {
   crosshair_hud = {
-    en = "CrosshairHUD",
-    ["zh-cn"] = "准星 HUD",
+    en = "Crosshair HUD"
   },
   crosshair_hud_description = {
-    en = "Adds customizable Toughness, Health, Coherency, Ammo, Reload, and/or Ability indicators near the crosshair.",
-    ["zh-cn"] = "在准星附近添加可以自定义的韧性、生命值、连携、弹药、装弹和技能指示器。",
+    en = "Adds customizable Toughness, Health, Coherency, Ammo, Reload, and/or Ability indicators near the crosshair."
   },
 
   x_offset = {
-    en = "X Offset",
-    ["zh-cn"] = "X 轴偏移",
+    en = "X Offset"
   },
   x_offset_description = {
-    en = "Adjusts horizontal position.\nNegative values move the display to the left; positive values to the right.",
-    ["zh-cn"] = "调整水平位置。\n负值表示向左移动，正值表示向右移动。",
+    en = "Adjusts horizontal position.\nNegative values move the display to the left; positive values to the right."
   },
 
   y_offset = {
-    en = "Y Offset",
-    ["zh-cn"] = "Y 轴偏移",
+    en = "Y Offset"
   },
   y_offset_description = {
-    en = "Adjusts vertical position.\nNegative values move the display up; positive values down.",
-    ["zh-cn"] = "调整垂直位置。\n负值表示向上移动，正值表示向下移动。",
+    en = "Adjusts vertical position.\nNegative values move the display up; positive values down."
   },
 
   health_display_type = {
-    en = "Display Type",
-    ["zh-cn"] = "显示类型",
+    en = "Display Type"
   },
   toughness_display_type = {
-    en = "Display Type",
-    ["zh-cn"] = "显示类型",
+    en = "Display Type"
   },
   display_type_value = {
-    en = "Value",
-    ["zh-cn"] = "数值",
+    en = "Value"
   },
   display_type_percent = {
-    en = "Percent",
-    ["zh-cn"] = "百分比",
+    en = "Percent"
   },
 
   options_health = {
-    en = "Health Settings",
-    ["zh-cn"] = "生命值设置",
+    en = "Health Settings"
   },
   health_always_show = {
-    en = "Always Show Health",
-    ["zh-cn"] = "总是显示生命值",
+    en = "Always Show Health"
   },
   health_always_show_description = {
-    en = "Always display current health, regardless of other health visibility settings.",
-    ["zh-cn"] = "总是显示当前生命值，无视其他生命值显示设置。",
+    en = "Always display current health, regardless of other health visibility settings."
   },
   health_stay_time = {
-    en = "Health Stay Time",
-    ["zh-cn"] = "生命值保持时间",
+    en = "Health Stay Time"
   },
   health_stay_time_description = {
-    en = "Amount of time, in seconds, that current health is displayed when receiving health damage.\nSet to 0 to disable.",
-    ["zh-cn"] = "受到生命值伤害时，显示生命值的秒数。\n设置为 0 禁用。",
+    en = "Amount of time, in seconds, that current health is displayed when receiving health damage.\nSet to 0 to disable."
   },
   health_hide_at_full = {
-    en = "Hide at Full Health",
-    ["zh-cn"] = "满生命值时隐藏",
+    en = "Hide at Full Health"
   },
   health_hide_at_full_description = {
-    en = "Hides the display when health is at 100%.",
-    ["zh-cn"] = "生命值为 100% 时不显示。",
+    en = "Hides the display when health is at 100%."
   },
 
   options_toughness = {
-    en = "Toughness Settings",
-    ["zh-cn"] = "韧性设置",
+    en = "Toughness Settings"
   },
   toughness_always_show = {
-    en = "Always Show Toughness",
-    ["zh-cn"] = "总是显示韧性",
+    en = "Always Show Toughness"
   },
   toughness_always_show_description = {
-    en = "Always display current toughness, regardless of other toughness visibility settings.",
-    ["zh-cn"] = "总是显示当前韧性，无视其他韧性显示设置。",
+    en = "Always display current toughness, regardless of other toughness visibility settings."
   },
   toughness_stay_time = {
-    en = "Toughness Stay Time",
-    ["zh-cn"] = "韧性保持时间",
+    en = "Toughness Stay Time"
   },
   toughness_stay_time_description = {
-    en = "Amount of time, in seconds, that current toughness is displayed when receiving toughness damage.\nSet to 0 to disable.",
-    ["zh-cn"] = "受到韧性伤害时，显示韧性的秒数。\n设置为 0 禁用。",
+    en = "Amount of time, in seconds, that current toughness is displayed when receiving toughness damage.\nSet to 0 to disable."
   },
   toughness_hide_at_full = {
-    en = "Hide at Full Toughness",
-    ["zh-cn"] = "满韧性时隐藏",
+    en = "Hide at Full Toughness"
   },
   toughness_hide_at_full_description = {
-    en = "Hides the display when toughness is at 100%.",
-    ["zh-cn"] = "韧性为 100% 时不显示。",
+    en = "Hides the display when toughness is at 100%."
   },
 
   options_coherency = {
-    en = "Coherency Settings",
-    ["zh-cn"] = "连携设置",
+    en = "Coherency Settings"
   },
   coherency_type = {
-    en = "Coherency Indicator",
-    ["zh-cn"] = "连携指示器",
+    en = "Coherency Indicator"
   },
   coherency_type_description = {
     en = "Sets the indicator type for each teammate in coherency:"
         .. "\n{#color(255,180,0)}Simple{#reset()}: Plus (+) symbol"
         .. "\n{#color(255,180,0)}Archetype{#reset()}: Archetype (subclass) symbol"
         .. "\n{#color(255,180,0)}Aura{#reset()}: Icon representing the buff provided"
-        .. "\n{#color(255,180,0)}Off{#reset()}: No coherency display",
-    ["zh-cn"] = "设置队友连携指示器的类型："
-        .. "\n{#color(255,180,0)}简单{#reset()}：显示为加号（+）"
-        .. "\n{#color(255,180,0)}原型{#reset()}：显示为职业符号"
-        .. "\n{#color(255,180,0)}光环{#reset()}：显示为状态效果图标"
-        .. "\n{#color(255,180,0)}关闭{#reset()}：不显示连携",
+        .. "\n{#color(255,180,0)}Off{#reset()}: No coherency display"
   },
   coherency_type_simple = {
-    en = "Simple",
-    ["zh-cn"] = "简单",
+    en = "Simple"
   },
   coherency_type_simple_description = {
-    en = "Plus (+) symbol",
-    ["zh-cn"] = "显示为加号（+）",
+    en = "Plus (+) symbol"
   },
   coherency_type_archetype = {
-    en = "Archetype",
-    ["zh-cn"] = "原型",
+    en = "Archetype"
   },
   coherency_type_archetype_description = {
-    en = "Archetype (subclass) symbol",
-    ["zh-cn"] = "显示为职业符号",
+    en = "Archetype (subclass) symbol"
   },
   coherency_type_aura = {
-    en = "Aura",
-    ["zh-cn"] = "光环",
+    en = "Aura"
   },
   coherency_type_aura_description = {
-    en = "Icon representing the buff provided",
-    ["zh-cn"] = "显示为状态效果图标",
+    en = "Icon representing the buff provided"
+  },
+  coherency_type_archetype = {
+    en = "Archetype"
   },
   coherency_type_off = {
-    en = "Off",
-    ["zh-cn"] = "关闭",
-  },
-  coherency_type_off_description = {
-    en = "No coherency display",
-    ["zh-cn"] = "不显示连携",
+    en = "Off"
   },
   coherency_colors = {
-    en = "Indicator Colors",
-    ["zh-cn"] = "连携颜色",
+    en = "Indicator Colors"
   },
   coherency_colors_teammate = {
-    en = "Teammate Color",
-    ["zh-cn"] = "队友颜色",
+    en = "Teammate Color"
   },
   coherency_colors_health = {
-    en = "Teammate Health",
-    ["zh-cn"] = "队友生命值",
+    en = "Teammate Health"
   },
   coherency_colors_toughness = {
-    en = "Teammate Toughness",
-    ["zh-cn"] = "队友韧性",
+    en = "Teammate Toughness"
   },
   coherency_colors_static = {
-    en = "Static Color",
-    ["zh-cn"] = "静态颜色",
+    en = "Static Color"
   },
 
   options_ability_cooldown = {
-    en = "Ability Settings",
-    ["zh-cn"] = "技能设置",
+    en = "Ability Settings"
   },
   display_ability_cooldown = {
-    en = "Display Ability Indicator",
-    ["zh-cn"] = "显示技能指示器",
+    en = "Display Ability Indicator"
   },
   ability_cooldown_threshold = {
-    en = "Cooldown Timer Threshold",
-    ["zh-cn"] = "冷却时间阈值",
+    en = "Cooldown Timer Threshold"
   },
   ability_cooldown_threshold_description = {
     en = "Amount of time remaining, in seconds, on ability cooldown before the timer will display."
-        .. "\nSet to 0 to disable.",
-    ["zh-cn"] = "技能冷却时间达到此秒数，才显示计时器。\n设置为 0 禁用。",
+        .. "\nSet to 0 to disable."
   },
 
   options_ammo = {
-    en = "Ammo Settings",
-    ["zh-cn"] = "弹药设置",
+    en = "Ammo Settings"
   },
   display_ammo_indicator = {
-    en = "Display Ammo Indicator",
-    ["zh-cn"] = "显示弹药指示器",
+    en = "Display Ammo Indicator"
   },
   show_ammo_icon = {
-    en = "Show Icon",
-    ["zh-cn"] = "显示图标",
+    en = "Show Icon"
+  },
+
+  options_grenade = {
+    en = "Grenade / Warp Charge Settings"
+  },
+  display_grenade_indicator = {
+    en = "Display Indicator"
   },
 
   options_reload = {
-    en = "Reload Settings",
-    ["zh-cn"] = "装弹设置",
+    en = "Reload Settings"
   },
   display_reload_indicator = {
-    en = "Display Reload Indicator",
-    ["zh-cn"] = "显示装弹指示器",
+    en = "Display Reload Indicator"
   },
   only_during_reload = {
-    en = "Only During Reload",
-    ["zh-cn"] = "仅在装弹时显示",
+    en = "Only During Reload"
   },
   only_during_reload_description = {
     en = "Only show the indicator while actively reloading."
-        .. "\nDisabling this can help when customizing position.",
-    ["zh-cn"] = "仅在装弹状态下显示。\n自定义位置时可以禁用此选项。",
+        .. "\nDisabling this can help when customizing position."
   },
 
   custom_threshold_full = {
-    en = "Full Threshold Color",
-    ["zh-cn"] = "满阈值颜色",
+    en = "Full Threshold Color"
   },
   custom_threshold_high = {
-    en = "High Threshold Color",
-    ["zh-cn"] = "高阈值颜色",
+    en = "High Threshold Color"
   },
   custom_threshold_low = {
-    en = "Low Threshold Color",
-    ["zh-cn"] = "低阈值颜色",
+    en = "Low Threshold Color"
   },
   custom_threshold_empty = {
-    en = "Empty Threshold Color",
-    ["zh-cn"] = "空阈值颜色",
+    en = "Empty Threshold Color"
   },
 
   red = {
-    en = "Red",
-    ["zh-cn"] = "红色",
+    en = "Red"
   },
   green = {
-    en = "Green",
-    ["zh-cn"] = "绿色",
+    en = "Green"
   },
   blue = {
-    en = "Blue",
-    ["zh-cn"] = "蓝色",
+    en = "Blue"
   },
 
   options_global = {
-    en = "Miscellaneous",
-    ["zh-cn"] = "杂项",
+    en = "Miscellaneous"
   },
   enable_shadows = {
-    en = "Enable Shadows",
-    ["zh-cn"] = "启用阴影",
+    en = "Enable Shadows"
   },
   enable_shadows_description = {
-    en = "Toggles text and icon shadows.",
-    ["zh-cn"] = "开关文本和图标的阴影。",
+    en = "Toggles text and icon shadows."
   },
+
 }

@@ -14,6 +14,8 @@ local reload_x_offset = mod:get("reload_x_offset")
 local reload_y_offset = mod:get("reload_y_offset")
 local ammo_x_offset = mod:get("ammo_x_offset")
 local ammo_y_offset = mod:get("ammo_y_offset")
+local grenade_x_offset = mod:get("grenade_x_offset")
+local grenade_y_offset = mod:get("grenade_y_offset")
 
 local UIWorkspaceSettings = mod:original_require("scripts/settings/ui/ui_workspace_settings")
 local UIWidget = mod:original_require("scripts/managers/ui/ui_widget")
@@ -73,6 +75,17 @@ local scenegraph_definition = {
     position = {
       global_x_offset + ammo_x_offset,
       global_y_offset + ammo_y_offset,
+      55
+    }
+  },
+  grenade_indicator = {
+    parent = "screen",
+    vertical_alignment = "center",
+    horizontal_alignment = "center",
+    size = { 60, 25 },
+    position = {
+      global_x_offset + grenade_x_offset,
+      global_y_offset + grenade_y_offset,
       55
     }
   },
@@ -153,7 +166,7 @@ local widget_definitions = {
     },
     {
       pass_type = "texture",
-      value = "content/ui/materials/icons/buffs/hud/buff_container",
+      value = "content/ui/materials/icons/buffs/hud/buff_container_with_background",
       style_id = "player_1",
       style = {
         horizontal_alignment = "left",
@@ -169,7 +182,7 @@ local widget_definitions = {
     },
     {
       pass_type = "texture",
-      value = "content/ui/materials/icons/buffs/hud/buff_container",
+      value = "content/ui/materials/icons/buffs/hud/buff_container_with_background",
       style_id = "player_2",
       style = {
         horizontal_alignment = "center",
@@ -185,7 +198,7 @@ local widget_definitions = {
     },
     {
       pass_type = "texture",
-      value = "content/ui/materials/icons/buffs/hud/buff_container",
+      value = "content/ui/materials/icons/buffs/hud/buff_container_with_background",
       style_id = "player_3",
       style = {
         horizontal_alignment = "right",
@@ -210,7 +223,7 @@ local widget_definitions = {
         font_size = 24,
         text_horizontal_alignment = "center",
         text_vertical_alignment = "center",
-        
+
         font_type = "machine_medium",
         text_color = UIHudSettings.color_tint_6,
         offset = { -14, 2, 2 }
@@ -226,7 +239,7 @@ local widget_definitions = {
         font_size = 24,
         text_horizontal_alignment = "center",
         text_vertical_alignment = "center",
-        
+
         font_type = "machine_medium",
         text_color = UIHudSettings.color_tint_0,
         offset = { -12, 4, 1 }
@@ -389,7 +402,7 @@ local widget_definitions = {
         font_size = 24,
         text_horizontal_alignment = "center",
         text_vertical_alignment = "center",
-        
+
         font_type = "machine_medium",
         text_color = UIHudSettings.color_tint_0,
         offset = { 28, 4, 1 }
@@ -409,7 +422,7 @@ local widget_definitions = {
         font_size = 24,
         text_vertical_alignment = "top",
         text_horizontal_alignment = "center",
-        
+
         font_type = "machine_medium",
         text_color = UIHudSettings.color_tint_main_2,
         offset = {
@@ -449,7 +462,7 @@ local widget_definitions = {
         font_size = 24,
         text_vertical_alignment = "top",
         text_horizontal_alignment = "center",
-        
+
         font_type = "machine_medium",
         text_color = UIHudSettings.color_tint_main_2,
         offset = {
@@ -468,7 +481,7 @@ local widget_definitions = {
         font_size = 24,
         text_vertical_alignment = "top",
         text_horizontal_alignment = "center",
-        
+
         font_type = "machine_medium",
         text_color = UIHudSettings.color_tint_0,
         offset = {
@@ -490,7 +503,7 @@ local widget_definitions = {
         font_size = 24,
         text_vertical_alignment = "top",
         text_horizontal_alignment = "center",
-        
+
         font_type = "machine_medium",
         text_color = UIHudSettings.color_tint_main_2,
         offset = {
@@ -509,7 +522,7 @@ local widget_definitions = {
         font_size = 24,
         text_vertical_alignment = "top",
         text_horizontal_alignment = "center",
-        
+
         font_type = "machine_medium",
         text_color = UIHudSettings.color_tint_0,
         offset = {
@@ -531,7 +544,7 @@ local widget_definitions = {
         font_size = 16,
         text_vertical_alignment = "top",
         text_horizontal_alignment = "center",
-        
+
         font_type = "machine_medium",
         text_color = UIHudSettings.color_tint_main_2,
         offset = { 30, 2, 2 }
@@ -547,7 +560,7 @@ local widget_definitions = {
         font_size = 16,
         text_vertical_alignment = "top",
         text_horizontal_alignment = "center",
-        
+
         font_type = "machine_medium",
         text_color = UIHudSettings.color_tint_0,
         offset = { 32, 4, 1 }
@@ -567,7 +580,7 @@ local widget_definitions = {
         font_size = 24,
         text_vertical_alignment = "top",
         text_horizontal_alignment = "center",
-        
+
         font_type = "machine_medium",
         text_color = UIHudSettings.color_tint_main_2,
         offset = {
@@ -586,7 +599,7 @@ local widget_definitions = {
         font_size = 24,
         text_vertical_alignment = "top",
         text_horizontal_alignment = "center",
-        
+
         font_type = "machine_medium",
         text_color = UIHudSettings.color_tint_0,
         offset = {
@@ -608,7 +621,7 @@ local widget_definitions = {
         font_size = 24,
         text_vertical_alignment = "top",
         text_horizontal_alignment = "center",
-        
+
         font_type = "machine_medium",
         text_color = UIHudSettings.color_tint_main_2,
         offset = {
@@ -627,7 +640,7 @@ local widget_definitions = {
         font_size = 24,
         text_vertical_alignment = "top",
         text_horizontal_alignment = "center",
-        
+
         font_type = "machine_medium",
         text_color = UIHudSettings.color_tint_0,
         offset = {
@@ -649,7 +662,7 @@ local widget_definitions = {
         font_size = 24,
         text_vertical_alignment = "top",
         text_horizontal_alignment = "center",
-        
+
         font_type = "machine_medium",
         text_color = UIHudSettings.color_tint_main_2,
         offset = {
@@ -668,7 +681,7 @@ local widget_definitions = {
         font_size = 24,
         text_vertical_alignment = "top",
         text_horizontal_alignment = "center",
-        
+
         font_type = "machine_medium",
         text_color = UIHudSettings.color_tint_0,
         offset = {
@@ -690,7 +703,7 @@ local widget_definitions = {
         font_size = 16,
         text_vertical_alignment = "top",
         text_horizontal_alignment = "center",
-        
+
         font_type = "machine_medium",
         text_color = UIHudSettings.color_tint_main_2,
         offset = { 30, 2, 2 }
@@ -706,7 +719,7 @@ local widget_definitions = {
         font_size = 16,
         text_vertical_alignment = "top",
         text_horizontal_alignment = "center",
-        
+
         font_type = "machine_medium",
         text_color = UIHudSettings.color_tint_0,
         offset = {
@@ -918,6 +931,66 @@ local widget_definitions = {
       end
     }
   }, "ammo_indicator"),
+  grenade_indicator = UIWidget.create_definition({
+    {
+      pass_type = "texture",
+      value = "content/ui/materials/hud/icons/party_throwable",
+      style_id = "grenade_icon",
+      style = {
+        size = { 20, 20 },
+        vertical_alignment = "center",
+        horizontal_alignment = "center",
+        color = UIHudSettings.color_tint_main_1,
+        offset = { 0, 0, 1 }
+      }
+    },
+    {
+      pass_type = "texture",
+      value = "content/ui/materials/hud/icons/party_throwable",
+      style_id = "grenade_icon_shadow",
+      style = {
+        size = { 20, 20 },
+        vertical_alignment = "center",
+        horizontal_alignment = "center",
+        color = UIHudSettings.color_tint_0,
+        offset = { 2, 2, 0 }
+      },
+      visibility_function = function(content, style)
+        return mod:get("enable_shadows")
+      end
+    },
+    {
+      pass_type = "text",
+      value = "0",
+      value_id = "grenade_count",
+      style_id = "grenade_count",
+      style = {
+        font_size = 20,
+        font_type = "machine_medium",
+        text_vertical_alignment = "center",
+        text_horizontal_alignment = "right",
+        text_color = UIHudSettings.color_tint_1,
+        offset = { 0, 0, 2 }
+      }
+    },
+    {
+      pass_type = "text",
+      value = "0",
+      value_id = "grenade_count",
+      style_id = "grenade_count_shadow",
+      style = {
+        font_size = 20,
+        font_type = "machine_medium",
+        text_vertical_alignment = "center",
+        text_horizontal_alignment = "right",
+        text_color = UIHudSettings.color_tint_0,
+        offset = { 2, 2, 1 }
+      },
+      visibility_function = function(content, style)
+        return mod:get("enable_shadows")
+      end
+    },
+  }, "grenade_indicator"),
   reload_indicator = UIWidget.create_definition({
     {
       pass_type = "rect",

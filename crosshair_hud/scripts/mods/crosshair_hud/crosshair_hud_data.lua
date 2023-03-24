@@ -109,6 +109,7 @@ return {
   description = mod:localize("crosshair_hud_description"),
   options = {
     widgets = {
+
       --- Global ---
       {
         setting_id = "options_global",
@@ -310,6 +311,24 @@ return {
               create_coordinate_setting("ammo", "x", 22),
               create_coordinate_setting("ammo", "y", 90),
               unpack(create_threshold_settings("ammo"))
+            }
+          }
+        }
+      },
+
+      --- Grenade/Peril ---
+      {
+        setting_id = "options_grenade",
+        type = "group",
+        sub_widgets = {
+          {
+            setting_id = "display_grenade_indicator",
+            type = "checkbox",
+            default_value = true,
+            sub_widgets = {
+              create_coordinate_setting("grenade", "x", 30),
+              create_coordinate_setting("grenade", "y", 110),
+              unpack(create_threshold_settings("grenade"))
             }
           }
         }

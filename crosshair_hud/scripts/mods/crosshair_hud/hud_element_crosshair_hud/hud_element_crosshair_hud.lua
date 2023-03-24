@@ -10,8 +10,7 @@ local ArchetypeTalents = mod:original_require("scripts/settings/ability/archetyp
 local PlayerSpecialization = mod:original_require("scripts/utilities/player_specialization/player_specialization")
 local PlayerCharacterConstants = mod:original_require("scripts/settings/player_character/player_character_constants")
 local WeaponTemplate = mod:original_require("scripts/utilities/weapon/weapon_template")
-local ReloadStates = mod:original_require("scripts/extension_systems/weapon/utilities/reload_states")
-local Ammo = mod:original_require("scripts/utilities/ammo")
+local WarpCharge = mod:original_require("scripts/utilities/warp_charge")
 
 local player_slot_colors = UISettings.player_slot_colors
 
@@ -147,7 +146,7 @@ function HudElementCrosshairHud:_update_coherency(dt, t)
   local coherency_content = coherency_widget.content
 
   local ui_hud = self._parent
-  local hud_player = ui_hud._player
+  local hud_player = ui_hud:player()
   local player_extensions = ui_hud:player_extensions()
   local coherency_extension = player_extensions.coherency
   local units_in_coherency = coherency_extension:in_coherence_units()
@@ -420,6 +419,50 @@ function HudElementCrosshairHud:_update_reload(dt, t)
   reload_bar.size[1] = reload_bar.max_height * (mod.reload_percent or 0)
 end
 
+function HudElementCrosshairHud:_update_grenade_ability(dt, t)
+  local grenade_widget = self._widgets_by_name.grenade_indicator
+  if not grenade_widget then
+    return
+  end
+
+  local content = grenade_widget.content
+  local display_grenade_indicator = mod:get("display_grenade_indicator")
+
+  content.visible = display_grenade_indicator
+
+  if not display_grenade_indicator then
+    return
+  end
+
+  local player_extensions = self._parent:player_extensions()
+  local ability_extension = player_extensions.ability
+
+  if not ability_extension then
+    return
+  end
+
+  local remaining_ability_charges = ability_extension:remaining_ability_charges("grenade_ability")
+  local max_ability_charges = ability_extension:max_ability_charges("grenade_ability")
+  local ability_charges_percent = remaining_ability_charges / max_ability_charges
+  local style = grenade_widget.style
+
+  local unit_data_extension = player_extensions.unit_data
+  local warp_charge_component = unit_data_extension and unit_data_extension:read_component("warp_charge")
+  if warp_charge_component and max_ability_charges == 1 then
+    local warp_charge = warp_charge_component.current_percentage
+    content.grenade_count = string.format(" %.0f", warp_charge * 100)
+    style.grenade_icon.visible = false
+    style.grenade_count.text_color = self:_get_text_color_for_percent_threshold((1 - warp_charge) or 0, "grenade")
+    return
+  end
+
+  content.grenade_count = remaining_ability_charges
+
+  style.grenade_icon.visible = true
+  style.grenade_icon.color = self:_get_text_color_for_percent_threshold(ability_charges_percent, "grenade")
+  style.grenade_count.text_color = self:_get_text_color_for_percent_threshold(ability_charges_percent, "grenade")
+end
+
 function HudElementCrosshairHud:_update_ammo(dt, t)
   local ammo_widget = self._widgets_by_name.ammo_indicator
   if not ammo_widget then
@@ -477,10 +520,9 @@ function HudElementCrosshairHud:_update_ammo(dt, t)
   local reserve_style = style.reserve_ammo
   reserve_style.text_color = self:_get_text_color_for_percent_threshold(reserve_ammo_percent, "ammo")
 
-  if not mod:get("show_ammo_icon") then
-    icon_style.visible = false
-    style.ammo_icon_shadow.visible = false
-  end
+  local show_ammo_icon = mod:get("show_ammo_icon")
+  icon_style.visible = show_ammo_icon
+  style.ammo_icon_shadow.visible = show_ammo_icon
 end
 
 function HudElementCrosshairHud:update(dt, t, ui_renderer, render_settings, input_service)
@@ -491,6 +533,7 @@ function HudElementCrosshairHud:update(dt, t, ui_renderer, render_settings, inpu
   self:_update_health(dt, t)
   self:_update_ability(dt, t)
   self:_update_ammo(dt, t)
+  self:_update_grenade_ability(dt, t)
   self:_update_reload(dt, t)
 end
 
