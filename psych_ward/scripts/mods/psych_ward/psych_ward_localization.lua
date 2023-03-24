@@ -2,7 +2,8 @@ local mod = get_mod("psych_ward")
 
 mod:add_global_localize_strings({
   loc_toggle_view_buttons = {
-    en = "Vendors"
+    en = "Vendors",
+    ["zh-cn"] = "大厅功能",
   }
 })
 
@@ -20,15 +21,19 @@ return {
     ["zh-cn"] = "训练场",
   },
   vendor_button= {
-    en = "Armoury"
+    en = "Armoury",
+    ["zh-cn"] = "军械交易所",
   },
   contracts_button = {
-    en = "Contracts"
+    en = "Contracts",
+    ["zh-cn"] = "每周协议",
   },
   crafting_button = {
-    en = "Crafting"
+    en = "Crafting",
+    ["zh-cn"] = "锻造",
   },
   inventory_button = {
-    en = "Inventory"
-  }
+    en = "Inventory",
+    ["zh-cn"] = "库存",
+  },
 }
