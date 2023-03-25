@@ -18,6 +18,67 @@ local _inventory_button = "inventory_button"
 local _difficulty_stepper = "difficulty_stepper"
 local _stepper_content
 
+local _view_button_names = {
+  _vendor_button,
+  _contracts_button,
+  _crafting_button,
+  _inventory_button,
+  --_psykhanium_button
+}
+
+local _button_settings = {
+  [_psykhanium_button] = {
+    view_name = "training_grounds_view",
+    scenegraph_definition = {
+      parent = "character_info",
+      vertical_alignment = "top",
+      horizontal_alignment = "center",
+      size = ButtonPassTemplates.ready_button.size,
+      position = { 0, -ButtonPassTemplates.ready_button.size[2], 0 }
+    }
+  },
+  [_vendor_button] = {
+    view_name = "credits_vendor_background_view",
+    scenegraph_definition = {
+      parent = "screen",
+      vertical_alignment = "top",
+      horizontal_alignment = "center",
+      size = ButtonPassTemplates.ready_button.size,
+      position = { 0, 0, 0 }
+    }
+  },
+  [_contracts_button] = {
+    view_name = "contracts_background_view",
+    scenegraph_definition = {
+      parent = "screen",
+      vertical_alignment = "top",
+      horizontal_alignment = "center",
+      size = ButtonPassTemplates.ready_button.size,
+      position = { ButtonPassTemplates.ready_button.size[1], 0, 0 }
+    }
+  },
+  [_crafting_button] = {
+    view_name = "crafting_view",
+    scenegraph_definition = {
+      parent = "screen",
+      vertical_alignment = "top",
+      horizontal_alignment = "center",
+      size = ButtonPassTemplates.ready_button.size,
+      position = { -ButtonPassTemplates.ready_button.size[1], 0, 0 }
+    }
+  },
+  [_inventory_button] = {
+    view_name = "inventory_background_view",
+    scenegraph_definition = {
+      parent = "screen",
+      vertical_alignment = "bottom",
+      horizontal_alignment = "center",
+      size = ButtonPassTemplates.ready_button.size,
+      position = { 0, -ButtonPassTemplates.ready_button.size[2] / 2, 0 }
+    }
+  }
+}
+
 --[[
   Character Select Psykhanium Button
 ]]--
@@ -38,17 +99,10 @@ local function _get_challenge_level()
   return challenge_level
 end
 
-local _button_names = {
-  _vendor_button,
-  _contracts_button,
-  _crafting_button,
-  _inventory_button
-}
-
 local MainMenuView = mod:original_require("scripts/ui/views/main_menu_view/main_menu_view")
 function MainMenuView:cb_on_toggle_view_buttons()
   local widgets_by_name = self._widgets_by_name
-  for _, button_name in ipairs(_button_names) do
+  for _, button_name in ipairs(_view_button_names) do
     local button_widget = widgets_by_name[button_name]
     if button_widget then
       button_widget.content.visible = not button_widget.content.visible
@@ -80,7 +134,7 @@ local function _open_view(view_name)
   end)
 end
 
-local function _setup_psykhanium_button()
+local function _setup_main_menu_view_buttons()
   local main_menu_definitions_file = "scripts/ui/views/main_menu_view/main_menu_view_definitions"
   mod:hook_require(main_menu_definitions_file, function(definitions)
 
@@ -91,35 +145,6 @@ local function _setup_psykhanium_button()
 
     table.insert(definitions.legend_inputs, legend_input)
 
-    definitions.scenegraph_definition[_vendor_button] = {
-      parent = "screen",
-      vertical_alignment = "top",
-      horizontal_alignment = "center",
-      size = ButtonPassTemplates.ready_button.size,
-      position = { 0, 0, 0 }
-    }
-    definitions.scenegraph_definition[_contracts_button] = {
-      parent = "screen",
-      vertical_alignment = "top",
-      horizontal_alignment = "center",
-      size = ButtonPassTemplates.ready_button.size,
-      position = { ButtonPassTemplates.ready_button.size[1], 0, 0 }
-    }
-    definitions.scenegraph_definition[_crafting_button] = {
-      parent = "screen",
-      vertical_alignment = "top",
-      horizontal_alignment = "center",
-      size = ButtonPassTemplates.ready_button.size,
-      position = { -ButtonPassTemplates.ready_button.size[1], 0, 0 }
-    }
-
-    definitions.scenegraph_definition[_psykhanium_button] = {
-      parent = "character_info",
-      vertical_alignment = "top",
-      horizontal_alignment = "center",
-      size = ButtonPassTemplates.ready_button.size,
-      position = { 0, -ButtonPassTemplates.ready_button.size[2], 0 }
-    }
     definitions.scenegraph_definition[_difficulty_stepper] = {
       parent = _psykhanium_button,
       vertical_alignment = "bottom",
@@ -127,27 +152,18 @@ local function _setup_psykhanium_button()
       size = { 300, 60 },
       position = { -25, -200, 10 }
     }
-    definitions.scenegraph_definition[_inventory_button] = {
-      parent = "screen",
-      vertical_alignment = "bottom",
-      horizontal_alignment = "center",
-      size = ButtonPassTemplates.ready_button.size,
-      position = { 0, -ButtonPassTemplates.ready_button.size[2] / 2, 0 }
-    }
 
-    for _, button_name in ipairs(_button_names) do
+    for button_name, button_settings in pairs(_button_settings) do
       local button = UIWidget.create_definition(ButtonPassTemplates.ready_button, button_name, {
-        text = mod:localize(button_name)
+        text = mod:localize(button_name),
+        view_name = button_settings.view_name
       })
       button.content.visible = false
       definitions.widget_definitions[button_name] = button
+      definitions.scenegraph_definition[button_name] = button_settings.scenegraph_definition
     end
 
-    definitions.widget_definitions[_psykhanium_button] = UIWidget.create_definition(ButtonPassTemplates.ready_button, _psykhanium_button, {
-      text = mod:localize("enter_psykhanium")
-    })
-
-    local definition = UIWidget.create_definition(StepperPassTemplates.difficulty_stepper, _difficulty_stepper)
+    local definition = UIWidget.create_definition(table.clone(StepperPassTemplates.difficulty_stepper), _difficulty_stepper)
     index = table.find_by_key(definition.passes, "pass_type", "texture")
     if index then
       table.remove(definition.passes, index)
@@ -231,30 +247,21 @@ local function _setup_psykhanium_button()
 
     local widgets_by_name = self._widgets_by_name
 
+    local challenge_level = _get_challenge_level()
+    _stepper_content = widgets_by_name.difficulty_stepper.content
+    _stepper_content.danger = challenge_level
+
     widgets_by_name[_psykhanium_button].content.hotspot.pressed_callback = function()
       _go_to_shooting_range = true
       self:_on_play_pressed()
     end
 
-    widgets_by_name[_vendor_button].content.hotspot.pressed_callback = function()
-      _open_view("credits_vendor_background_view")
+    for _, button_name in ipairs(_view_button_names) do
+      local content = widgets_by_name[button_name] and widgets_by_name[button_name].content
+      content.hotspot.pressed_callback = function()
+        _open_view(content.view_name)
+      end
     end
-
-    widgets_by_name[_vendor_button].content.hotspot.pressed_callback = function()
-      _open_view("inventory_background_view")
-    end
-
-    widgets_by_name[_contracts_button].content.hotspot.pressed_callback = function()
-      _open_view("contracts_background_view")
-    end
-
-    widgets_by_name[_crafting_button].content.hotspot.pressed_callback = function()
-      _open_view("crafting_view")
-    end
-
-    local challenge_level = _get_challenge_level()
-    _stepper_content = widgets_by_name.difficulty_stepper.content
-    _stepper_content.danger = challenge_level
   end)
 
 end
@@ -309,5 +316,5 @@ end
   Init
 ]]--
 
-_setup_psykhanium_button()
+_setup_main_menu_view_buttons()
 _setup_title_button()
