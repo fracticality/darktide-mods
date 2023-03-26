@@ -153,6 +153,13 @@ return {
     en = "No coherency display",
     ["zh-cn"] = "不显示连携",
   },
+  hide_coherency_buff_bar = {
+    en = "Hide Buff Icon"
+  },
+  hide_coherency_buff_bar_description = {
+    en = "Hides the coherency buff icon in the buff bar."
+        .. "\n{#color(255,180,0)}Requires reload (CTRL+SHIFT+R) or game restart{#reset()}"
+  },
   coherency_colors = {
     en = "Indicator Colors",
     ["zh-cn"] = "连携颜色",

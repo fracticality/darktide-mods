@@ -127,3 +127,10 @@ local function start(func, ...)
   return result
 end
 mod:hook("ActionReloadState", "start", start)
+
+mod:hook_require("scripts/settings/buff/player_buff_templates", function(templates)
+  local template = templates.coherency_toughness_regen
+  if template then
+    template.hide_icon_in_hud = mod:get("hide_coherency_buff_bar")
+  end
+end)

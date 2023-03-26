@@ -94,13 +94,6 @@ local HudElementCrosshairHud = class("HudElementCrosshairHud", "HudElementBase")
 function HudElementCrosshairHud:init(parent, draw_layer, start_scale)
   self._talents_by_unit = {}
 
-  --local weapon_slots = {}
-  --local weapon_slot_configuration = PlayerCharacterConstants.slot_configuration_by_type.weapon
-  --for slot_id, config in pairs(weapon_slot_configuration) do
-  --  table.insert(weapon_slots, slot_id)
-  --end
-  --self._weapon_slots = weapon_slots
-
   HudElementCrosshairHud.super.init(self, parent, draw_layer, start_scale, _definitions)
 end
 

@@ -245,6 +245,11 @@ return {
               { text = "coherency_type_off", value = options_coherency_type.off }
             },
             sub_widgets = {
+              {
+                setting_id = "hide_coherency_buff_bar",
+                type = "checkbox",
+                default_value = false
+              },
               create_coordinate_setting("coherency", "x", 0),
               create_coordinate_setting("coherency", "y", -28),
             }
