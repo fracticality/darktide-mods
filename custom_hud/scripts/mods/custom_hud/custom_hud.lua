@@ -3,21 +3,24 @@ local mod = get_mod("custom_hud")
 local hud_element_customizer_path = "custom_hud/scripts/mods/custom_hud/hud_element_customizer"
 local function ui_hud_init_hook(func, self, elements, visibility_groups, params)
     local class_name = "HudElementCustomizer"
-    if not table.find_by_key(elements, "class_name", class_name) then
-        table.insert(elements, {
-            class_name = class_name,
-            filename = hud_element_customizer_path,
-            use_hud_scale = true,
-            visibility_groups = {
-                "custom_hud"
-            }
-        })
+    local element_index = table.find_by_key(elements, "class_name", class_name)
+    if element_index then
+        table.remove(elements, element_index)
     end
 
+    table.insert(elements, {
+        class_name = class_name,
+        filename = hud_element_customizer_path,
+        use_hud_scale = true,
+        visibility_groups = {
+            "custom_hud"
+        }
+    })
+
     local visibility_group_name = "custom_hud"
-    local index = table.find_by_key(visibility_groups, "name", visibility_group_name)
-    if index then
-        table.remove(visibility_groups, index)
+    local visibility_group_index = table.find_by_key(visibility_groups, "name", visibility_group_name)
+    if visibility_group_index then
+        table.remove(visibility_groups, visibility_group_index)
     end
     table.insert(visibility_groups, 1, {
         name = visibility_group_name,
@@ -27,9 +30,9 @@ local function ui_hud_init_hook(func, self, elements, visibility_groups, params)
     })
 
     visibility_group_name = "hide_hud"
-    index = table.find_by_key(visibility_groups, "name", visibility_group_name)
-    if index then
-        table.remove(visibility_groups, index)
+    visibility_group_index = table.find_by_key(visibility_groups, "name", visibility_group_name)
+    if visibility_group_index then
+        table.remove(visibility_groups, visibility_group_index)
     end
     table.insert(visibility_groups, 2, {
         name = visibility_group_name,
@@ -136,7 +139,7 @@ local function draw_hook(func, self, ...)
 
         local opacity = tonumber(mod:get("opacity"))
         if opacity ~= nil and not self._always_full_alpha then
-            
+
             local element_render_settings = select(4, ...)
             if type(element_render_settings) == "table" then
                 element_render_settings.alpha_multiplier = opacity
