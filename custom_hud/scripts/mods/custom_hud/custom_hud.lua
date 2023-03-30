@@ -62,29 +62,8 @@ local function recreate_hud()
             ui_manager:destroy_player_hud()
             ui_manager:create_player_hud(peer_id, local_player_id, elements, visibility_groups)
         end
-
-        --mod.reset_constant_elements = true
     end
 end
-
---mod:hook("UIManager", "update", function(func, self, dt, t)
---
---    if mod.reset_constant_elements then
---        if self._ui_constant_elements then
---            self._ui_constant_elements:destroy()
---
---            self._ui_constant_elements = nil
---        end
---
---        local constant_elements = require("scripts/ui/constant_elements/constant_elements")
---        self._ui_constant_elements = UIConstantElements:new(self, constant_elements)
---
---        mod.reset_constant_elements = nil
---    end
---
---    local result = func(self, dt, t)
---    return result
---end)
 
 local function reset_hud()
     mod:set("saved_node_settings", {})
@@ -102,7 +81,7 @@ function mod.on_setting_changed(setting_id)
 end
 
 function mod.on_all_mods_loaded()
-    --recreate_hud()
+    recreate_hud()
 end
 
 function mod:toggle_hud_customization()
@@ -157,8 +136,6 @@ mod:hook(ConstantElementBase, "draw", draw_hook)
 
 mod:hook_safe(UIViewHandler, "open_view", function(self, view_name)
     mod.is_customizing = false
-    --if view_name == "dmf_options_view" or view_name == "system_view" then
-    --end
 end)
 
 mod:hook_safe(UIViewHandler, "close_view", function(self, view_name, force_close)

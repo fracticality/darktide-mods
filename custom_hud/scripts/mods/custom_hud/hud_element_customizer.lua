@@ -1,7 +1,5 @@
 local mod = get_mod("custom_hud")
 
-
-
 local UIWorkspaceSettings = mod:original_require("scripts/settings/ui/ui_workspace_settings")
 local UIWidget = mod:original_require("scripts/managers/ui/ui_widget")
 local UIRenderer = mod:original_require("scripts/managers/ui/ui_renderer")
@@ -86,10 +84,7 @@ local HudElementCustomizer = class("HudElementCustomizer", "HudElementBase")
 
 function HudElementCustomizer:init(parent, draw_layer, start_scale)
 
-    self._grid_line_positions = {
-        {},
-        {}
-    }
+    self._grid_line_positions = { {}, {} }
     self._always_full_alpha = true
     self._start_scale = start_scale
     self._num_rows = mod:get("grid_rows") or 3
@@ -222,17 +217,19 @@ function HudElementCustomizer:_setup_elements(render_settings)
         for element_name in pairs(elements) do
             repeat
 
-                local element = self:_get_element(element_name)
+                local element, scenegraph_id = self:_get_element(element_name)
                 if _excluded_element_names[element_name] or not element then
                     break
                 end
 
                 local excluded_scenegraphs = _excluded_scenegraphs_by_element[element_name] or {}
                 local ui_scenegraph = element._ui_scenegraph
+                local element_definitions = element._definitions
+                local scenegraph_definition = element_definitions and element_definitions.scenegraph_definition
                 local children_scenegraphs = element_scenegraphs[element_name]
-                local hier_scenegraph = (ui_scenegraph and ui_scenegraph.hierarchical_scenegraph) or {}
+                local hierarchical_scenegraph = (ui_scenegraph and ui_scenegraph.hierarchical_scenegraph) or {}
 
-                for j, scenegraph in ipairs(hier_scenegraph) do
+                for j, scenegraph in ipairs(hierarchical_scenegraph) do
                     local children = scenegraph.children or {}
                     for _, child in ipairs(children) do
                         repeat
@@ -254,11 +251,12 @@ function HudElementCustomizer:_setup_elements(render_settings)
                             local position = (node_settings and node_settings.position) or child.world_position
                             local size = (node_settings and node_settings.size) or child.size
 
-                            local default_settings = {
-                                size = table.clone(child.size),
-                                position = table.clone(child.position),
-                                vertical_alignment = child.vertical_alignment,
-                                horizontal_alignment = child.horizontal_alignment
+                            local scenegraph_node = scenegraph_definition and scenegraph_definition[scenegraph_id]
+                            local default_settings = (node_settings and node_settings.default_settings) or {
+                                size = (scenegraph_node and table.clone(scenegraph_node.size)) or table.clone(child.size),
+                                position = (scenegraph_node and table.clone(scenegraph_node.position)) or table.clone(child.position),
+                                vertical_alignment = (scenegraph_node and scenegraph_node.vertical_alignment) or child.vertical_alignment,
+                                horizontal_alignment = (scenegraph_node and scenegraph_node.horizontal_alignment) or child.horizontal_alignment
                             }
 
                             default_node_settings[node_name] = default_settings
@@ -271,8 +269,8 @@ function HudElementCustomizer:_setup_elements(render_settings)
                             if is_constant_element then
                                 local inverse_hud_scale = self:_get_inverse_hud_scale()
 
-                                size[1] = size[1] * inverse_hud_scale
-                                size[2] = size[2] * inverse_hud_scale
+                                size[1] = default_settings.size[1] * inverse_hud_scale
+                                size[2] = default_settings.size[2] * inverse_hud_scale
 
                                 position[1] = position[1] * inverse_hud_scale
                                 position[2] = position[2] * inverse_hud_scale
@@ -311,9 +309,6 @@ function HudElementCustomizer:_setup_elements(render_settings)
                                     pass_type = "rect",
                                     style_id = "border_rect",
                                     style = {
-                                        vertical_alignment = "center",
-                                        horizontal_alignment = "center",
-                                        --size = { size[1] + 4, size[2] + 4 },
                                         color = { 255, 0, 0, 0 },
                                         offset = { 0, 0, 1 }
                                     }
@@ -322,8 +317,6 @@ function HudElementCustomizer:_setup_elements(render_settings)
                                     pass_type = "rect",
                                     style_id = "rect",
                                     style = {
-                                        vertical_alignment = "center",
-                                        horizontal_alignment = "center",
                                         color = { 255, 255, 255, 255 },
                                         color_hidden = { 168, 30, 30, 30 },
                                         color_hidden_hovered = { 255, 60, 60, 60 },
@@ -331,7 +324,7 @@ function HudElementCustomizer:_setup_elements(render_settings)
                                         color_default = { 168, 168, 168, 168 },
                                         anim_hover_speed = 1,
                                         size = { size[1] - 4, size[2] - 4 },
-                                        offset = { 0, 0, 2 }
+                                        offset = { 2, 2, 2 }
                                     },
                                     change_function = function (content, style)
                                         local color = style.color
@@ -398,9 +391,9 @@ function HudElementCustomizer:reset_node(node_name)
         return
     end
 
-    local default_node_settings = self._default_node_settings[node_name]
+    local default_node_settings = node_settings.default_settings
     if not default_node_settings then
-        mod:echo("No default settings! Investigate.")
+        mod:warning("No default settings for node [%s]! Ask author to investigate.", node_name)
         return
     end
 
@@ -437,7 +430,8 @@ function HudElementCustomizer:_init_node_settings(node_name)
     local node_settings = {
         x = scenegraph_position[1],
         y = scenegraph_position[2],
-        size = { scenegraph_size[1], scenegraph_size[2] }
+        size = { scenegraph_size[1], scenegraph_size[2] },
+        default_settings = self._default_node_settings[node_name]
     }
     self._saved_node_settings[node_name] = node_settings
 
@@ -736,8 +730,13 @@ function HudElementCustomizer:_apply_saved_node_settings()
             local has_scenegraph_id = rawget(element._ui_scenegraph, scenegraph_id) ~= nil
 
             if has_scenegraph_id then
-                local x = node_settings.x * inverse_hud_scale
-                local y = node_settings.y * inverse_hud_scale
+                local is_constant_element = string.starts_with(element_name, "ConstantElement")
+                local x = node_settings.x
+                local y = node_settings.y
+                if is_constant_element then
+                    x = x / inverse_hud_scale
+                    y = y / inverse_hud_scale
+                end
 
                 element:set_scenegraph_position(scenegraph_id, x , y, nil, "left", "top")
                 element._is_hidden = node_settings.is_hidden
