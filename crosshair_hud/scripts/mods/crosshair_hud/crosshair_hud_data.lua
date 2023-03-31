@@ -332,8 +332,7 @@ return {
             default_value = true,
             sub_widgets = {
               create_coordinate_setting("pocketable", "x", 30),
-              create_coordinate_setting("pocketable", "y", 170),
-              unpack(create_threshold_settings("pocketable"))
+              create_coordinate_setting("pocketable", "y", 170)
             }
           }
         }

@@ -443,6 +443,7 @@ function HudElementCrosshairHud:_update_peril(dt, t)
 
   local display_peril_indicator = mod:get("display_peril_indicator")
   local content = peril_widget.content
+  local style = peril_widget.style
 
   content.visible = display_peril_indicator
 
@@ -463,13 +464,15 @@ function HudElementCrosshairHud:_update_peril(dt, t)
     content.symbol_text = ""
     content.value_text = string.format("%.0f", overheat_current_percentage * 100)
     content.visible = true
+    local text_color = self:_get_text_color_for_percent_threshold((1 - overheat_current_percentage), "peril")
+    style.value_text.text_color = text_color
+    style.symbol_text.text_color = text_color
 
     return
   end
 
   local player = self._parent:player()
   local specialization_warp_charge_template = WarpCharge.specialization_warp_charge_template(player)
-
 
   if specialization_warp_charge_template == ArchetypeWarpChargeTemplates.psyker then
     local warp_charge_component = unit_data_extension and unit_data_extension:read_component("warp_charge")
@@ -478,6 +481,9 @@ function HudElementCrosshairHud:_update_peril(dt, t)
     content.symbol_text = ""
     content.value_text = string.format("%.0f", current_percentage * 100)
     content.visible = true
+    local text_color = self:_get_text_color_for_percent_threshold((1 - current_percentage), "peril")
+    style.value_text.text_color = text_color
+    style.symbol_text.text_color = text_color
 
     return
   end
@@ -515,12 +521,6 @@ function HudElementCrosshairHud:_update_grenade_ability(dt, t)
   if warp_charge_component and max_ability_charges == 1 then
     content.visible = false
     return
-
-    --local warp_charge = warp_charge_component.current_percentage
-    --content.grenade_count = string.format(" %.0f", warp_charge * 100)
-    --style.grenade_icon.visible = false
-    --style.grenade_count.text_color = self:_get_text_color_for_percent_threshold((1 - warp_charge) or 0, "grenade")
-    --return
   end
 
   content.grenade_count = remaining_ability_charges
