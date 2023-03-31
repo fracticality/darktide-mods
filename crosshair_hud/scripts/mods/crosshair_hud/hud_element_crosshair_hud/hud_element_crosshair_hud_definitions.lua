@@ -16,6 +16,10 @@ local ammo_x_offset = mod:get("ammo_x_offset")
 local ammo_y_offset = mod:get("ammo_y_offset")
 local grenade_x_offset = mod:get("grenade_x_offset")
 local grenade_y_offset = mod:get("grenade_y_offset")
+local pocketable_x_offset = mod:get("pocketable_x_offset")
+local pocketable_y_offset = mod:get("pocketable_y_offset")
+local peril_x_offset = mod:get("peril_x_offset")
+local peril_y_offset = mod:get("peril_y_offset")
 
 local UIWorkspaceSettings = mod:original_require("scripts/settings/ui/ui_workspace_settings")
 local UIWidget = mod:original_require("scripts/managers/ui/ui_widget")
@@ -82,10 +86,32 @@ local scenegraph_definition = {
     parent = "screen",
     vertical_alignment = "center",
     horizontal_alignment = "center",
-    size = { 60, 25 },
+    size = { 40, 20 },
     position = {
       global_x_offset + grenade_x_offset,
       global_y_offset + grenade_y_offset,
+      55
+    }
+  },
+  pocketable_indicator = {
+    parent = "screen",
+    vertical_alignment = "center",
+    horizontal_alignment = "center",
+    size = { 20, 20 },
+    position = {
+      global_x_offset + pocketable_x_offset,
+      global_y_offset + pocketable_y_offset,
+      55
+    }
+  },
+  peril_indicator = {
+    parent = "screen",
+    vertical_alignment = "center",
+    horizontal_alignment = "center",
+    size = { 40, 20 },
+    position = {
+      global_x_offset + peril_x_offset,
+      global_y_offset + peril_y_offset,
       55
     }
   },
@@ -764,9 +790,9 @@ local widget_definitions = {
         color = UIHudSettings.color_tint_0,
         offset = { 0, 0, 1 }
       },
-      --visibility_function = function(content, style)
-      --  return mod:get("enable_shadows")
-      --end
+      visibility_function = function(content, style)
+        return mod:get("enable_shadows")
+      end
     },
     {
       pass_type = "text",
@@ -931,32 +957,124 @@ local widget_definitions = {
       end
     }
   }, "ammo_indicator"),
+  pocketable_indicator = UIWidget.create_definition({
+    {
+      pass_type = "texture",
+      value_id = "pocketable_icon",
+      style_id = "pocketable_icon",
+      style = {
+        size = { 20, 20 },
+        vertical_alignment = "center",
+        horizontal_alignment = "center",
+        color = UIHudSettings.color_tint_main_1,
+        offset = { 0, 0, 1 },
+      },
+      visibility_function = function(content, style)
+        return content.pocketable_icon
+      end
+    },
+    {
+      pass_type = "texture",
+      value_id = "pocketable_icon",
+      style_id = "pocketable_icon_shadow",
+      style = {
+        size = { 20, 20 },
+        vertical_alignment = "center",
+        horizontal_alignment = "center",
+        color = UIHudSettings.color_tint_0,
+        offset = { 2, 2, 0 },
+      },
+      visibility_function = function(content, style)
+        return content.pocketable_icon and mod:get("enable_shadows")
+      end
+    },
+  }, "pocketable_indicator"),
+  peril_indicator = UIWidget.create_definition({
+    {
+      pass_type = "text",
+      value = "",
+      value_id = "symbol_text",
+      style_id = "symbol_text",
+      style = {
+        font_size = 20,
+        font_type = "machine_medium",
+        text_vertical_alignment = "center",
+        text_horizontal_alignment = "left",
+        text_color = UIHudSettings.color_tint_1,
+        offset = { 0, 0, 1 }
+      }
+    },
+    {
+      pass_type = "text",
+      value = "",
+      value_id = "symbol_text",
+      style_id = "symbol_text_shadow",
+      style = {
+        font_size = 20,
+        font_type = "machine_medium",
+        text_vertical_alignment = "center",
+        text_horizontal_alignment = "left",
+        text_color = UIHudSettings.color_tint_0,
+        offset = { 2, 2, 0 }
+      }
+    },
+    {
+      pass_type = "text",
+      value = "",
+      value_id = "value_text",
+      style_id = "value_text",
+      style = {
+        font_size = 20,
+        font_type = "machine_medium",
+        text_vertical_alignment = "center",
+        text_horizontal_alignment = "right",
+        text_color = UIHudSettings.color_tint_1,
+        offset = { 0, 0, 1 }
+      }
+    },
+    {
+      pass_type = "text",
+      value = "",
+      value_id = "value_text",
+      style_id = "value_text_shadow",
+      style = {
+        font_size = 20,
+        font_type = "machine_medium",
+        text_vertical_alignment = "center",
+        text_horizontal_alignment = "right",
+        text_color = UIHudSettings.color_tint_0,
+        offset = { 2, 2, 0 }
+      }
+    }
+  }, "peril_indicator"),
   grenade_indicator = UIWidget.create_definition({
     {
       pass_type = "texture",
+      value_id = "grenade_icon",
       value = "content/ui/materials/hud/icons/party_throwable",
       style_id = "grenade_icon",
       style = {
         size = { 20, 20 },
         vertical_alignment = "center",
-        horizontal_alignment = "center",
+        horizontal_alignment = "left",
         color = UIHudSettings.color_tint_main_1,
         offset = { 0, 0, 1 }
       }
     },
     {
       pass_type = "texture",
+      value_id = "grenade_icon",
       value = "content/ui/materials/hud/icons/party_throwable",
       style_id = "grenade_icon_shadow",
       style = {
         size = { 20, 20 },
         vertical_alignment = "center",
-        horizontal_alignment = "center",
+        horizontal_alignment = "left",
         color = UIHudSettings.color_tint_0,
         offset = { 2, 2, 0 }
       },
       visibility_function = function(content, style)
-        return mod:get("enable_shadows")
+        return style.visible and mod:get("enable_shadows")
       end
     },
     {

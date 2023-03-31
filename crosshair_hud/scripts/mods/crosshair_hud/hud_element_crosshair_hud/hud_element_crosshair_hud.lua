@@ -11,6 +11,7 @@ local PlayerSpecialization = mod:original_require("scripts/utilities/player_spec
 local PlayerCharacterConstants = mod:original_require("scripts/settings/player_character/player_character_constants")
 local WeaponTemplate = mod:original_require("scripts/utilities/weapon/weapon_template")
 local WarpCharge = mod:original_require("scripts/utilities/warp_charge")
+local ArchetypeWarpChargeTemplates = mod:original_require("scripts/settings/warp_charge/archetype_warp_charge_templates")
 
 local player_slot_colors = UISettings.player_slot_colors
 
@@ -382,15 +383,12 @@ function HudElementCrosshairHud:_update_reload(dt, t)
 
   local player_extensions = self._parent:player_extensions()
   local unit_data_extension = player_extensions and player_extensions.unit_data
-  local inventory_component = unit_data_extension and unit_data_extension:read_component("slot_secondary")
   local weapon_action_component = unit_data_extension and unit_data_extension:read_component("weapon_action")
   local weapon_template = weapon_action_component and WeaponTemplate.weapon_template(weapon_action_component.template_name)
   local reload_template = weapon_template and weapon_template.reload_template
   local current_action_name = weapon_action_component and weapon_action_component.current_action_name
   local current_action_settings = weapon_template and weapon_template.actions[current_action_name]
   local is_reload_action = current_action_settings and _reload_actions[current_action_settings.kind]
-
-  --mod.reload_percent = 0
 
   if reload_template then
     local time_scale = weapon_action_component.time_scale
@@ -410,7 +408,79 @@ function HudElementCrosshairHud:_update_reload(dt, t)
   local reload_bar = reload_style.reload_bar
   reload_widget.content.reload_time = mod.reload_time and string.format("%.2f", mod.reload_time) or ""
   reload_bar.size[1] = reload_bar.max_height * (mod.reload_percent or 0)
-  --mod:echo(mod.reload_percent)
+end
+
+function HudElementCrosshairHud:_update_pocketable(dt, t)
+
+  local pocketable_widget = self._widgets_by_name.pocketable_indicator
+  if not pocketable_widget then
+    return
+  end
+
+  local content = pocketable_widget.content
+  local display_pocketable_indicator = mod:get("display_pocketable_indicator")
+
+  content.visible = display_pocketable_indicator
+
+  if not display_pocketable_indicator then
+    return
+  end
+
+  local player_extensions = self._parent:player_extensions()
+  local unit_data_extension = player_extensions.unit_data
+  local visual_loadout_extension = player_extensions.visual_loadout
+  local inventory_component = unit_data_extension:read_component("inventory")
+  local pocketable_name = inventory_component.slot_pocketable
+  local weapon_template = pocketable_name and visual_loadout_extension:weapon_template_from_slot("slot_pocketable")
+  content.pocketable_icon = weapon_template and weapon_template.hud_icon_small
+end
+
+function HudElementCrosshairHud:_update_peril(dt, t)
+  local peril_widget = self._widgets_by_name.peril_indicator
+  if not peril_widget then
+    return
+  end
+
+  local display_peril_indicator = mod:get("display_peril_indicator")
+  local content = peril_widget.content
+
+  content.visible = display_peril_indicator
+
+  if not display_peril_indicator then
+    return
+  end
+
+  content.visible = false
+
+  local player_extensions = self._parent:player_extensions()
+  local unit_data_extension = player_extensions.unit_data
+  local weapon_extension = player_extensions.weapon
+  local weapon_template = weapon_extension:weapon_template()
+  if weapon_template and weapon_template.uses_overheat then
+    local weapon_component = unit_data_extension:read_component("slot_secondary")
+    local overheat_current_percentage = weapon_component and weapon_component.overheat_current_percentage or 0
+
+    content.symbol_text = ""
+    content.value_text = string.format("%.0f", overheat_current_percentage * 100)
+    content.visible = true
+
+    return
+  end
+
+  local player = self._parent:player()
+  local specialization_warp_charge_template = WarpCharge.specialization_warp_charge_template(player)
+
+
+  if specialization_warp_charge_template == ArchetypeWarpChargeTemplates.psyker then
+    local warp_charge_component = unit_data_extension and unit_data_extension:read_component("warp_charge")
+    local current_percentage = warp_charge_component and warp_charge_component.current_percentage or 0
+
+    content.symbol_text = ""
+    content.value_text = string.format("%.0f", current_percentage * 100)
+    content.visible = true
+
+    return
+  end
 end
 
 function HudElementCrosshairHud:_update_grenade_ability(dt, t)
@@ -443,11 +513,14 @@ function HudElementCrosshairHud:_update_grenade_ability(dt, t)
   local unit_data_extension = player_extensions.unit_data
   local warp_charge_component = unit_data_extension and unit_data_extension:read_component("warp_charge")
   if warp_charge_component and max_ability_charges == 1 then
-    local warp_charge = warp_charge_component.current_percentage
-    content.grenade_count = string.format(" %.0f", warp_charge * 100)
-    style.grenade_icon.visible = false
-    style.grenade_count.text_color = self:_get_text_color_for_percent_threshold((1 - warp_charge) or 0, "grenade")
+    content.visible = false
     return
+
+    --local warp_charge = warp_charge_component.current_percentage
+    --content.grenade_count = string.format(" %.0f", warp_charge * 100)
+    --style.grenade_icon.visible = false
+    --style.grenade_count.text_color = self:_get_text_color_for_percent_threshold((1 - warp_charge) or 0, "grenade")
+    --return
   end
 
   content.grenade_count = remaining_ability_charges
@@ -528,6 +601,8 @@ function HudElementCrosshairHud:update(dt, t, ui_renderer, render_settings, inpu
   self:_update_ability(dt, t)
   self:_update_ammo(dt, t)
   self:_update_grenade_ability(dt, t)
+  self:_update_pocketable(dt, t)
+  self:_update_peril(dt, t)
   self:_update_reload(dt, t)
 end
 

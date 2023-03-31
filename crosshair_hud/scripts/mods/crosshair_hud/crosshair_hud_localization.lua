@@ -212,8 +212,22 @@ return {
     ["zh-cn"] = "显示图标",
   },
 
+  options_pocketable = {
+    en = "Pocketable Settings"
+  },
+  display_pocketable_indicator = {
+    en = "Display Indicator"
+  },
+
+  options_peril = {
+    en = "Peril / Overheat Settings"
+  },
+  display_peril_indicator = {
+    en = "Display Indicator"
+  },
+
   options_grenade = {
-    en = "Grenade / Peril Settings",
+    en = "Grenade Settings",
     ["zh-cn"] = "手雷 / 危机值设置",
   },
   display_grenade_indicator = {

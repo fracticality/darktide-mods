@@ -321,7 +321,43 @@ return {
         }
       },
 
-      --- Grenade/Peril ---
+      --- Pocketable ---
+      {
+        setting_id = "options_pocketable",
+        type = "group",
+        sub_widgets = {
+          {
+            setting_id = "display_pocketable_indicator",
+            type = "checkbox",
+            default_value = true,
+            sub_widgets = {
+              create_coordinate_setting("pocketable", "x", 30),
+              create_coordinate_setting("pocketable", "y", 170),
+              unpack(create_threshold_settings("pocketable"))
+            }
+          }
+        }
+      },
+
+      --- Peril ---
+      {
+        setting_id = "options_peril",
+        type = "group",
+        sub_widgets = {
+          {
+            setting_id = "display_peril_indicator",
+            type = "checkbox",
+            default_value = true,
+            sub_widgets = {
+              create_coordinate_setting("peril", "x", 30),
+              create_coordinate_setting("peril", "y", 135),
+              unpack(create_threshold_settings("peril"))
+            }
+          }
+        }
+      },
+
+      --- Grenade ---
       {
         setting_id = "options_grenade",
         type = "group",
