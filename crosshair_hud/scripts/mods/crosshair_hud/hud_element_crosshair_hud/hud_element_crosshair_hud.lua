@@ -149,6 +149,9 @@ function HudElementCrosshairHud:_update_coherency(dt, t)
 
   local i = 1
   for unit in pairs(units_in_coherency) do
+    if i > 3 then
+      break
+    end
     local player = Managers.player:player_by_unit(unit)
 
     repeat
