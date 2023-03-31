@@ -295,4 +295,7 @@ return {
     en = "Toggles text and icon shadows.",
     ["zh-cn"] = "开关文本和图标的阴影。",
   },
+  scale = {
+    en = "Scale"
+  }
 }

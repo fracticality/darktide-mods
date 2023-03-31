@@ -98,6 +98,20 @@ local function create_threshold_settings(setting_id)
   return settings
 end
 
+local function create_scale_setting(setting_id)
+  local scale_id = string.format("%s_scale", setting_id)
+
+  return {
+    setting_id = scale_id,
+    title = "scale",
+    type = "numeric",
+    range = { 1, 3 },
+    default_value = 1,
+    decimals_number = 1,
+    step_size_value = 0.25
+  }
+end
+
 local options_display_type = table.enum("percent", "value")
 mod.options_display_type = options_display_type
 
@@ -115,6 +129,7 @@ return {
         setting_id = "options_global",
         type = "group",
         sub_widgets = {
+          create_scale_setting("global"),
           create_coordinate_setting("global", "x", 0),
           create_coordinate_setting("global", "y", 70),
           {
@@ -130,6 +145,7 @@ return {
         setting_id = "options_health",
         type = "group",
         sub_widgets = {
+          create_scale_setting("health"),
           create_coordinate_setting("health", "x", 0),
           create_coordinate_setting("health", "y", 24),
           {
@@ -182,6 +198,7 @@ return {
         setting_id = "options_toughness",
         type = "group",
         sub_widgets = {
+          create_scale_setting("toughness"),
           create_coordinate_setting("toughness", "x", 0),
           create_coordinate_setting("toughness", "y", 0),
           {
@@ -250,6 +267,7 @@ return {
                 type = "checkbox",
                 default_value = false
               },
+              create_scale_setting("coherency"),
               create_coordinate_setting("coherency", "x", 0),
               create_coordinate_setting("coherency", "y", -28),
             }
@@ -291,6 +309,7 @@ return {
                 decimals_number = 0,
                 step_size_value = 1
               },
+              create_scale_setting("ability"),
               create_coordinate_setting("ability", "x", 0),
               create_coordinate_setting("ability", "y", 50),
               unpack(create_threshold_settings("ability"))
@@ -314,6 +333,7 @@ return {
                 type = "checkbox",
                 default_value = true
               },
+              create_scale_setting("ammo"),
               create_coordinate_setting("ammo", "x", 22),
               create_coordinate_setting("ammo", "y", 90),
               unpack(create_threshold_settings("ammo"))
@@ -332,6 +352,7 @@ return {
             type = "checkbox",
             default_value = true,
             sub_widgets = {
+              create_scale_setting("pocketable"),
               create_coordinate_setting("pocketable", "x", 30),
               create_coordinate_setting("pocketable", "y", 170)
             }
@@ -349,6 +370,7 @@ return {
             type = "checkbox",
             default_value = true,
             sub_widgets = {
+              create_scale_setting("peril"),
               create_coordinate_setting("peril", "x", 30),
               create_coordinate_setting("peril", "y", 135),
               unpack(create_threshold_settings("peril"))
@@ -367,6 +389,7 @@ return {
             type = "checkbox",
             default_value = true,
             sub_widgets = {
+              create_scale_setting("grenade"),
               create_coordinate_setting("grenade", "x", 30),
               create_coordinate_setting("grenade", "y", 110),
               unpack(create_threshold_settings("grenade"))
@@ -390,6 +413,7 @@ return {
                 type = "checkbox",
                 default_value = true
               },
+              create_scale_setting("reload"),
               create_coordinate_setting("reload", "x", -14),
               create_coordinate_setting("reload", "y", 94),
               unpack(create_threshold_settings("reload"))
