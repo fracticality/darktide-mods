@@ -292,7 +292,8 @@ return {
                 step_size_value = 1
               },
               create_coordinate_setting("ability", "x", 0),
-              create_coordinate_setting("ability", "y", 50)
+              create_coordinate_setting("ability", "y", 50),
+              unpack(create_threshold_settings("ability"))
             }
           },
         }

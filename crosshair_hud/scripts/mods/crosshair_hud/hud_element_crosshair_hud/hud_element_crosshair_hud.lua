@@ -351,7 +351,8 @@ function HudElementCrosshairHud:_update_ability(dt, t)
   local symbol = self:_get_cooldown_symbol_for_percent_threshold(cooldown_percent, remaining_ability_charges)
   local content = ability_widget.content
   local style = ability_widget.style
-  local color = (missing_ability_charges == 0 and { 255, 255, 150, 0 }) or (remaining_ability_charges == 0 and UIHudSettings.color_tint_alert_2) or UIHudSettings.color_tint_1
+  --local color = (missing_ability_charges == 0 and { 255, 255, 150, 0 }) or (remaining_ability_charges == 0 and UIHudSettings.color_tint_alert_2) or UIHudSettings.color_tint_1
+  local color = self:_get_text_color_for_percent_threshold(cooldown_percent, "ability")
 
   --- Full: { 255, 255, 150, 0 }
 
@@ -364,7 +365,7 @@ function HudElementCrosshairHud:_update_ability(dt, t)
   content.cooldown_text = string.format(":%s", cooldown_text)
 
   style.symbol.color = color
-  style.charge_count.text_color = (remaining_ability_charges == 0 and UIHudSettings.color_tint_alert_2) or (missing_ability_charges == 0 and { 255, 255, 150, 0 }) or UIHudSettings.color_tint_1
+  style.charge_count.text_color = color
 end
 
 local _reload_actions = {
