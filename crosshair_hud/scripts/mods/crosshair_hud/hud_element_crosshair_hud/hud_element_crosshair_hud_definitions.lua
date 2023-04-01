@@ -35,6 +35,17 @@ local UIWorkspaceSettings = mod:original_require("scripts/settings/ui/ui_workspa
 local UIWidget = mod:original_require("scripts/managers/ui/ui_widget")
 local UIHudSettings = mod:original_require("scripts/settings/ui/ui_hud_settings")
 
+local function _shadows_enabled(setting_id)
+  local enable_shadows_id = string.format("enable_shadows_%s", setting_id)
+  local enable_shadows_setting = mod:get(enable_shadows_id)
+
+  if enable_shadows_setting == "global" then
+    return mod:get("enable_shadows")
+  end
+
+  return enable_shadows_setting == "on"
+end
+
 local scenegraph_definition = {
   screen = UIWorkspaceSettings.screen,
   toughness_indicator = {
@@ -118,7 +129,7 @@ local scenegraph_definition = {
     parent = "screen",
     vertical_alignment = "center",
     horizontal_alignment = "center",
-    size = { 40 * peril_scale, 20 * peril_scale },
+    size = { 48 * peril_scale, 20 * peril_scale },
     position = {
       global_x_offset + peril_x_offset,
       global_y_offset + peril_y_offset,
@@ -281,7 +292,7 @@ local widget_definitions = {
         offset = { -12 * coherency_scale, 4 * coherency_scale, 1 }
       },
       visibility_function = function(content, style)
-        return style.parent[style.text_style_id].visible and mod:get("enable_shadows")
+        return style.parent[style.text_style_id].visible and _shadows_enabled("coherency")
       end
     },
     {
@@ -313,7 +324,7 @@ local widget_definitions = {
         offset = { 2 * coherency_scale, 4 * coherency_scale, 1 }
       },
       visibility_function = function(content, style)
-        return style.parent[style.text_style_id].visible and mod:get("enable_shadows")
+        return style.parent[style.text_style_id].visible and _shadows_enabled("coherency")
       end
     },
     {
@@ -345,7 +356,7 @@ local widget_definitions = {
         offset = { 16 * coherency_scale, 4 * coherency_scale, 1 }
       },
       visibility_function = function(content, style)
-        return style.parent[style.text_style_id].visible and mod:get("enable_shadows")
+        return style.parent[style.text_style_id].visible and _shadows_enabled("coherency")
       end
     },
   }, "coherency_indicator"),
@@ -379,7 +390,7 @@ local widget_definitions = {
         offset = { -24 * coherency_scale, 4 * coherency_scale, 1 }
       },
       visibility_function = function(content, style)
-        return style.parent[style.text_style_id].visible and mod:get("enable_shadows")
+        return style.parent[style.text_style_id].visible and _shadows_enabled("coherency")
       end
     },
     {
@@ -411,7 +422,7 @@ local widget_definitions = {
         offset = { 2 * coherency_scale, 4 * coherency_scale, 1 }
       },
       visibility_function = function(content, style)
-        return style.parent[style.text_style_id].visible and mod:get("enable_shadows")
+        return style.parent[style.text_style_id].visible and _shadows_enabled("coherency")
       end
     },
     {
@@ -444,7 +455,7 @@ local widget_definitions = {
         offset = { 28 * coherency_scale, 4 * coherency_scale, 1 }
       },
       visibility_function = function(content, style)
-        return style.parent[style.text_style_id].visible and mod:get("enable_shadows")
+        return style.parent[style.text_style_id].visible and _shadows_enabled("coherency")
       end
     },
   }, "coherency_indicator"),
@@ -486,7 +497,7 @@ local widget_definitions = {
         }
       },
       visibility_function = function(content, style)
-        return mod:get("enable_shadows")
+        return _shadows_enabled("toughness")
       end
     },
     {
@@ -527,7 +538,7 @@ local widget_definitions = {
         }
       },
       visibility_function = function(content, style)
-        return mod:get("enable_shadows")
+        return _shadows_enabled("toughness")
       end
     },
     {
@@ -568,7 +579,7 @@ local widget_definitions = {
         }
       },
       visibility_function = function(content, style)
-        return mod:get("enable_shadows")
+        return _shadows_enabled("toughness")
       end
     },
     {
@@ -602,7 +613,7 @@ local widget_definitions = {
         offset = { 32 * toughness_scale, 4 * toughness_scale, 1 }
       },
       visibility_function = function(content, style)
-        return style.parent[style.text_style_id].visible and mod:get("enable_shadows")
+        return style.parent[style.text_style_id].visible and _shadows_enabled("toughness")
       end
     }
   }, "toughness_indicator"),
@@ -645,7 +656,7 @@ local widget_definitions = {
         }
       },
       visibility_function = function(content, style)
-        return mod:get("enable_shadows")
+        return _shadows_enabled("health")
       end
     },
     {
@@ -686,7 +697,7 @@ local widget_definitions = {
         }
       },
       visibility_function = function(content, style)
-        return mod:get("enable_shadows")
+        return _shadows_enabled("health")
       end
     },
     {
@@ -727,7 +738,7 @@ local widget_definitions = {
         }
       },
       visibility_function = function(content, style)
-        return mod:get("enable_shadows")
+        return _shadows_enabled("health")
       end
     },
     {
@@ -765,7 +776,7 @@ local widget_definitions = {
         }
       },
       visibility_function = function(content, style)
-        return style.parent[style.text_style_id].visible and mod:get("enable_shadows")
+        return style.parent[style.text_style_id].visible and _shadows_enabled("health")
       end
     },
   }, "health_indicator"),
@@ -800,6 +811,9 @@ local widget_definitions = {
         color = UIHudSettings.color_tint_0,
         offset = { 0, 0, 1 }
       },
+      visibility_function = function(content, style)
+        return _shadows_enabled("ability")
+      end
     },
     {
       pass_type = "text",
@@ -829,7 +843,7 @@ local widget_definitions = {
         offset = { -3 * ability_scale, 6 * ability_scale, 1 }
       },
       visibility_function = function(content, style)
-        return mod:get("enable_shadows")
+        return _shadows_enabled("ability")
       end
     },
     {
@@ -869,7 +883,7 @@ local widget_definitions = {
         offset = { -3 * ability_scale, 6 * ability_scale, 1 }
       },
       visibility_function = function(content, style)
-        return style.parent[style.text_style_id].visible and mod:get("enable_shadows")
+        return style.parent[style.text_style_id].visible and _shadows_enabled("ability")
       end
     }
   }, "ability_indicator"),
@@ -898,7 +912,7 @@ local widget_definitions = {
         offset = { 2 * ammo_scale, 2 * ammo_scale, 0}
       },
       visibility_function = function(content, style)
-        return mod:get("enable_shadows")
+        return _shadows_enabled("ammo")
       end
     },
     {
@@ -929,7 +943,7 @@ local widget_definitions = {
         offset = { 3 * ammo_scale, 2 * ammo_scale, 1 }
       },
       visibility_function = function(content, style)
-        return mod:get("enable_shadows")
+        return _shadows_enabled("ammo")
       end
     },
     {
@@ -960,7 +974,7 @@ local widget_definitions = {
         offset = { 2 * ammo_scale, 2 * ammo_scale, 1 }
       },
       visibility_function = function(content, style)
-        return mod:get("enable_shadows")
+        return _shadows_enabled("ammo")
       end
     }
   }, "ammo_indicator"),
@@ -992,7 +1006,7 @@ local widget_definitions = {
         offset = { 2 * pocketable_scale, 2 * pocketable_scale, 0 },
       },
       visibility_function = function(content, style)
-        return content.pocketable_icon and mod:get("enable_shadows")
+        return content.pocketable_icon and _shadows_enabled("grenade")
       end
     },
   }, "pocketable_indicator"),
@@ -1023,7 +1037,10 @@ local widget_definitions = {
         text_horizontal_alignment = "left",
         text_color = UIHudSettings.color_tint_0,
         offset = { 2 * peril_scale, 2 * peril_scale, 0 }
-      }
+      },
+      visibility_function = function(content, style)
+        return _shadows_enabled("peril")
+      end
     },
     {
       pass_type = "text",
@@ -1036,7 +1053,7 @@ local widget_definitions = {
         text_vertical_alignment = "center",
         text_horizontal_alignment = "right",
         text_color = UIHudSettings.color_tint_1,
-        offset = { 0, 0, 1 }
+        offset = { 0, 0, 1 },
       }
     },
     {
@@ -1051,7 +1068,10 @@ local widget_definitions = {
         text_horizontal_alignment = "right",
         text_color = UIHudSettings.color_tint_0,
         offset = { 2 * peril_scale, 2 * peril_scale, 0 }
-      }
+      },
+      visibility_function = function(content, style)
+        return _shadows_enabled("peril")
+      end
     }
   }, "peril_indicator"),
   grenade_indicator = UIWidget.create_definition({
@@ -1081,7 +1101,7 @@ local widget_definitions = {
         offset = { 2 * grenade_scale, 2 * grenade_scale, 0 }
       },
       visibility_function = function(content, style)
-        return style.visible and mod:get("enable_shadows")
+        return _shadows_enabled("grenade")
       end
     },
     {
@@ -1112,7 +1132,7 @@ local widget_definitions = {
         offset = { 2 * grenade_scale, 2 * grenade_scale, 1 }
       },
       visibility_function = function(content, style)
-        return mod:get("enable_shadows")
+        return _shadows_enabled("grenade")
       end
     },
   }, "grenade_indicator"),
@@ -1188,7 +1208,7 @@ local widget_definitions = {
         offset = { 2 * reload_scale, 2 * reload_scale, 1 }
       },
       visibility_function = function(content, style)
-        local enable_shadows = mod:get("enable_shadows")
+        local enable_shadows = _shadows_enabled("reload")
         local only_during_reload = mod:get("only_during_reload")
         local has_reload_time = mod.reload_time and mod.reload_time > 0
 

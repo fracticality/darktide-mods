@@ -112,6 +112,22 @@ local function create_scale_setting(setting_id)
   }
 end
 
+local function create_shadow_setting(setting_id)
+  local shadow_id = string.format("enable_shadows_%s", setting_id)
+
+  return {
+    setting_id = shadow_id,
+    title = "enable_shadows",
+    type = "dropdown",
+    default_value = "global",
+    options = {
+      { text = "on", value = "on" },
+      { text = "off", value = "off" },
+      { text = "global", value = "global" }
+    }
+  }
+end
+
 local options_display_type = table.enum("percent", "value")
 mod.options_display_type = options_display_type
 
@@ -145,6 +161,7 @@ return {
         setting_id = "options_health",
         type = "group",
         sub_widgets = {
+          create_shadow_setting("health"),
           create_scale_setting("health"),
           create_coordinate_setting("health", "x", 0),
           create_coordinate_setting("health", "y", 24),
@@ -198,6 +215,7 @@ return {
         setting_id = "options_toughness",
         type = "group",
         sub_widgets = {
+          create_shadow_setting("toughness"),
           create_scale_setting("toughness"),
           create_coordinate_setting("toughness", "x", 0),
           create_coordinate_setting("toughness", "y", 0),
@@ -267,6 +285,7 @@ return {
                 type = "checkbox",
                 default_value = false
               },
+              create_shadow_setting("coherency"),
               create_scale_setting("coherency"),
               create_coordinate_setting("coherency", "x", 0),
               create_coordinate_setting("coherency", "y", -28),
@@ -309,6 +328,7 @@ return {
                 decimals_number = 0,
                 step_size_value = 1
               },
+              create_shadow_setting("ability"),
               create_scale_setting("ability"),
               create_coordinate_setting("ability", "x", 0),
               create_coordinate_setting("ability", "y", 50),
@@ -333,6 +353,7 @@ return {
                 type = "checkbox",
                 default_value = true
               },
+              create_shadow_setting("ammo"),
               create_scale_setting("ammo"),
               create_coordinate_setting("ammo", "x", 22),
               create_coordinate_setting("ammo", "y", 90),
@@ -352,6 +373,7 @@ return {
             type = "checkbox",
             default_value = true,
             sub_widgets = {
+              create_shadow_setting("pocketable"),
               create_scale_setting("pocketable"),
               create_coordinate_setting("pocketable", "x", 30),
               create_coordinate_setting("pocketable", "y", 170)
@@ -370,6 +392,7 @@ return {
             type = "checkbox",
             default_value = true,
             sub_widgets = {
+              create_shadow_setting("peril"),
               create_scale_setting("peril"),
               create_coordinate_setting("peril", "x", 30),
               create_coordinate_setting("peril", "y", 135),
@@ -389,6 +412,7 @@ return {
             type = "checkbox",
             default_value = true,
             sub_widgets = {
+              create_shadow_setting("grenade"),
               create_scale_setting("grenade"),
               create_coordinate_setting("grenade", "x", 30),
               create_coordinate_setting("grenade", "y", 110),
@@ -413,6 +437,7 @@ return {
                 type = "checkbox",
                 default_value = true
               },
+              create_shadow_setting("reload"),
               create_scale_setting("reload"),
               create_coordinate_setting("reload", "x", -14),
               create_coordinate_setting("reload", "y", 94),

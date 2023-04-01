@@ -460,7 +460,7 @@ function HudElementCrosshairHud:_update_peril(dt, t)
   local player_extensions = self._parent:player_extensions()
   local unit_data_extension = player_extensions.unit_data
   local weapon_extension = player_extensions.weapon
-  local weapon_template = weapon_extension:weapon_template()
+  local weapon_template = weapon_extension and weapon_extension:weapon_template()
   if weapon_template and weapon_template.uses_overheat then
     local weapon_component = unit_data_extension:read_component("slot_secondary")
     local overheat_current_percentage = weapon_component and weapon_component.overheat_current_percentage or 0
