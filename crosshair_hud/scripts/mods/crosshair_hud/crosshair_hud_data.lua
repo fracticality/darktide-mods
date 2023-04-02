@@ -67,7 +67,7 @@ local function create_color_setting(setting_id, color_name)
   }
 end
 
-local _thresholds = { "full", "high", "low", "empty" }
+local _thresholds = { "full", "high", "low", "critical" }
 local function create_threshold_settings(setting_id)
   local custom_setting_id = "custom_threshold_" .. setting_id
 

@@ -633,13 +633,13 @@ end
 --TODO: Move to _data.lua file and attach to mod object (for custom thresholds)
 local _threshold_settings = {
   {
-    threshold = "empty",
+    threshold = "critical",
     default_color = UIHudSettings.color_tint_alert_2,
     default_color_by_setting = {
       ammo = UIHudSettings.color_tint_ammo_high
     },
     validation_function = function(percent)
-      return percent == 0
+      return percent <= 0.15
     end
   },
   {
@@ -647,7 +647,7 @@ local _threshold_settings = {
     default_color = UIHudSettings.color_tint_ammo_medium,
     default_color_by_setting = {},
     validation_function = function(percent)
-      return percent < 0.5
+      return percent <= 0.5
     end
   },
   {

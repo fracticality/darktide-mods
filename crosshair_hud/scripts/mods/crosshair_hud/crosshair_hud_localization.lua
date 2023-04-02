@@ -154,11 +154,14 @@ return {
     ["zh-cn"] = "不显示连携",
   },
   hide_coherency_buff_bar = {
-    en = "Hide Buff Icon"
+    en = "Hide Buff Icon",
+    ["zh-cn"] = "隐藏状态图标",
   },
   hide_coherency_buff_bar_description = {
     en = "Hides the coherency buff icon in the buff bar."
-        .. "\n{#color(255,180,0)}Requires reload (CTRL+SHIFT+R) or game restart{#reset()}"
+        .. "\n{#color(255,180,0)}Requires reload (CTRL+SHIFT+R) or game restart{#reset()}",
+    ["zh-cn"] = "在状态效果栏隐藏连携图标。"
+        .. "\n{#color(255,180,0)}需要重新加载（Ctrl+Shift+R）或重启游戏{#reset()}",
   },
   coherency_colors = {
     en = "Indicator Colors",
@@ -213,22 +216,26 @@ return {
   },
 
   options_pocketable = {
-    en = "Pocketable Settings"
+    en = "Pocketable Settings",
+    ["zh-cn"] = "携带品设置",
   },
   display_pocketable_indicator = {
-    en = "Display Indicator"
+    en = "Display Indicator",
+    ["zh-cn"] = "显示指示器",
   },
 
   options_peril = {
-    en = "Peril / Overheat Settings"
+    en = "Peril / Overheat Settings",
+    ["zh-cn"] = "危机 / 热量设置",
   },
   display_peril_indicator = {
-    en = "Display Indicator"
+    en = "Display Indicator",
+    ["zh-cn"] = "显示指示器",
   },
 
   options_grenade = {
     en = "Grenade Settings",
-    ["zh-cn"] = "手雷 / 危机值设置",
+    ["zh-cn"] = "手雷设置",
   },
   display_grenade_indicator = {
     en = "Display Indicator",
@@ -265,8 +272,8 @@ return {
     en = "Low Threshold Color",
     ["zh-cn"] = "低阈值颜色",
   },
-  custom_threshold_empty = {
-    en = "Empty Threshold Color",
+  custom_threshold_critical = {
+    en = "Critical Threshold Color",
     ["zh-cn"] = "空阈值颜色",
   },
 
@@ -296,16 +303,20 @@ return {
     ["zh-cn"] = "开关文本和图标的阴影。",
   },
   on = {
-    en = "On"
+    en = "On",
+    ["zh-cn"] = "开",
   },
   off = {
-    en = "Off"
+    en = "Off",
+    ["zh-cn"] = "关",
   },
   global = {
-    en = "Global"
+    en = "Global",
+    ["zh-cn"] = "全局",
   },
 
   scale = {
-    en = "Scale"
+    en = "Scale",
+    ["zh-cn"] = "缩放",
   }
 }
