@@ -10,6 +10,7 @@ local ArchetypeTalents = mod:original_require("scripts/settings/ability/archetyp
 local PlayerSpecialization = mod:original_require("scripts/utilities/player_specialization/player_specialization")
 local PlayerCharacterConstants = mod:original_require("scripts/settings/player_character/player_character_constants")
 local WeaponTemplate = mod:original_require("scripts/utilities/weapon/weapon_template")
+local ReloadStates = mod:original_require("scripts/extension_systems/weapon/utilities/reload_states")
 local WarpCharge = mod:original_require("scripts/utilities/warp_charge")
 local ArchetypeWarpChargeTemplates = mod:original_require("scripts/settings/warp_charge/archetype_warp_charge_templates")
 
@@ -399,6 +400,13 @@ function HudElementCrosshairHud:_update_reload(dt, t)
     local total_time = is_reload_action and current_action_settings.total_time or 0
     local scaled_time = total_time / time_scale
     local time_in_action = mod.time_in_action or scaled_time
+
+    local inventory_component = unit_data_extension:read_component("slot_secondary")
+    local started_reload = ReloadStates.started_reload(reload_template, inventory_component)
+    if started_reload then
+      local reload_state_time = ReloadStates.get_total_time(reload_template, inventory_component)
+      scaled_time = (reload_state_time and reload_state_time / time_scale) or scaled_time
+    end
 
     mod.reload_percent = math.min(1, time_in_action / scaled_time)
     mod.reload_time = math.max(0, scaled_time - time_in_action)
