@@ -18,13 +18,14 @@ local grenade_offset = {
   mod:get("grenade_y_offset")
 }
 
-local template = {
-  name = "grenade_indicator"
+local feature_name = "grenade_indicator"
+local feature = {
+  name = feature_name
 }
 
-template.scenegraph_definition = {
+feature.scenegraph_definition = {
   screen = UIWorkspaceSettings.screen,
-  [template.name] = {
+  [feature_name] = {
     parent = "screen",
     vertical_alignment = "center",
     horizontal_alignment = "center",
@@ -37,9 +38,9 @@ template.scenegraph_definition = {
   }
 }
 
-function template.create_widget_definitions()
+function feature.create_widget_definitions()
   return {
-    [template.name] = UIWidget.create_definition({
+    [feature_name] = UIWidget.create_definition({
       {
         pass_type = "texture",
         value_id = "grenade_icon",
@@ -100,11 +101,11 @@ function template.create_widget_definitions()
           return _shadows_enabled("grenade")
         end
       },
-    }, template.name)
+    }, feature_name)
   }
 end
 
-function template.update(parent)
+function feature.update(parent)
   local grenade_widget = parent._widgets_by_name.grenade_indicator
   if not grenade_widget then
     return
@@ -145,4 +146,4 @@ function template.update(parent)
   style.grenade_count.text_color = mod_utils.get_text_color_for_percent_threshold(ability_charges_percent, "grenade")
 end
 
-return template
+return feature

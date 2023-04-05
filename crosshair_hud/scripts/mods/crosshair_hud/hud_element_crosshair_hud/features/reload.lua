@@ -21,13 +21,14 @@ local reload_offset = {
   mod:get("reload_y_offset")
 }
 
-local template = {
-  name = "reload_indicator"
+local feature_name = "reload_indicator"
+local feature = {
+  name = feature_name
 }
 
-template.scenegraph_definition = {
+feature.scenegraph_definition = {
   screen = UIWorkspaceSettings.screen,
-  [template.name] = {
+  [feature_name] = {
     parent = "screen",
     vertical_alignment = "center",
     horizontal_alignment = "center",
@@ -40,9 +41,9 @@ template.scenegraph_definition = {
   }
 }
 
-function template.create_widget_definitions()
+function feature.create_widget_definitions()
   return {
-    [template.name] = UIWidget.create_definition({
+    [feature_name] = UIWidget.create_definition({
       {
         pass_type = "rect",
         style_id = "reload_bar",
@@ -121,7 +122,7 @@ function template.create_widget_definitions()
           return enable_shadows and (only_during_reload and has_reload_time) or not only_during_reload
         end
       }
-    }, template.name)
+    }, feature_name)
   }
 end
 
@@ -129,7 +130,7 @@ local _reload_actions = {
   reload_state = true,
   reload_shotgun = true
 }
-function template.update(parent)
+function feature.update(parent)
   local reload_widget = parent._widgets_by_name.reload_indicator
   if not reload_widget then
     return
@@ -178,4 +179,4 @@ function template.update(parent)
   reload_bar.size[1] = reload_bar.max_height * (mod.reload_percent or 0)
 end
 
-return template
+return feature

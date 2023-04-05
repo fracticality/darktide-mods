@@ -18,13 +18,14 @@ local pocketable_offset = {
   mod:get("pocketable_y_offset")
 }
 
-local template = {
-  name = "pocketable_indicator"
+local feature_name = "pocketable_indicator"
+local feature = {
+  name = feature_name
 }
 
-template.scenegraph_definition = {
+feature.scenegraph_definition = {
   screen = UIWorkspaceSettings.screen,
-  [template.name] = {
+  [feature_name] = {
     parent = "screen",
     vertical_alignment = "center",
     horizontal_alignment = "center",
@@ -37,9 +38,9 @@ template.scenegraph_definition = {
   },
 }
 
-function template.create_widget_definitions()
+function feature.create_widget_definitions()
   return {
-    [template.name] = UIWidget.create_definition({
+    [feature_name] = UIWidget.create_definition({
       {
         pass_type = "texture",
         value_id = "pocketable_icon",
@@ -74,8 +75,8 @@ function template.create_widget_definitions()
   }
 end
 
-function template.update(parent)
-  local pocketable_widget = parent._widgets_by_name[template.name]
+function feature.update(parent)
+  local pocketable_widget = parent._widgets_by_name[feature_name]
   if not pocketable_widget then
     return
   end
@@ -98,4 +99,4 @@ function template.update(parent)
   content.pocketable_icon = weapon_template and weapon_template.hud_icon_small
 end
 
-return template
+return feature

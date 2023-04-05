@@ -18,13 +18,14 @@ local ability_offset = {
   mod:get("ability_y_offset")
 }
 
-local template = {
-  name = "ability_indicator"
+local feature_name = "ability_indicator"
+local feature = {
+  name = feature_name
 }
 
-template.scenegraph_definition = {
+feature.scenegraph_definition = {
   screen = UIWorkspaceSettings.screen,
-  [template.name] = {
+  [feature_name] = {
     parent = "screen",
     vertical_alignment = "center",
     horizontal_alignment = "center",
@@ -40,9 +41,9 @@ template.scenegraph_definition = {
   }
 }
 
-function template.create_widget_definitions()
+function feature.create_widget_definitions()
   return {
-    [template.name] = UIWidget.create_definition({
+    [feature_name] = UIWidget.create_definition({
       {
         pass_type = "rotated_texture",
         value_id = "symbol",
@@ -148,7 +149,7 @@ function template.create_widget_definitions()
           return style.parent[style.text_style_id].visible and _shadows_enabled("ability")
         end
       }
-    }, template.name)
+    }, feature_name)
   }
 end
 
@@ -172,7 +173,7 @@ local function _get_cooldown_symbol_for_percent_threshold(percent, remaining_abi
   return "content/ui/materials/icons/perks/perk_level_01"
 end
 
-function template.update(parent)
+function feature.update(parent)
   local ability_widget = parent._widgets_by_name.ability_indicator
 
   if not mod:get("display_ability_cooldown") then
@@ -213,4 +214,4 @@ function template.update(parent)
   style.charge_count.text_color = color
 end
 
-return template
+return feature

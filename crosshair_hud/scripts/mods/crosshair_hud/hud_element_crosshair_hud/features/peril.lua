@@ -21,13 +21,14 @@ local peril_offset = {
   mod:get("peril_y_offset")
 }
 
-local template = {
-  name = "peril_indicator"
+local feature_name = "peril_indicator"
+local feature = {
+  name = feature_name
 }
 
-template.scenegraph_definition = {
+feature.scenegraph_definition = {
   screen = UIWorkspaceSettings.screen,
-  [template.name] = {
+  [feature_name] = {
     parent = "screen",
     vertical_alignment = "center",
     horizontal_alignment = "center",
@@ -40,9 +41,9 @@ template.scenegraph_definition = {
   }
 }
 
-function template.create_widget_definitions()
+function feature.create_widget_definitions()
   return {
-    [template.name] = UIWidget.create_definition({
+    [feature_name] = UIWidget.create_definition({
       {
         pass_type = "text",
         value = "",
@@ -105,11 +106,11 @@ function template.create_widget_definitions()
           return _shadows_enabled("peril")
         end
       }
-    }, template.name)
+    }, feature_name)
   }
 end
 
-function template.update(parent)
+function feature.update(parent)
   local peril_widget = parent._widgets_by_name.peril_indicator
   if not peril_widget then
     return
@@ -163,4 +164,4 @@ function template.update(parent)
   end
 end
 
-return template
+return feature
