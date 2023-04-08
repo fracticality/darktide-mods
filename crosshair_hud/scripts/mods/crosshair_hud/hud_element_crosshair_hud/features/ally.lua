@@ -10,6 +10,8 @@ local UISettings = mod:original_require("scripts/settings/ui/ui_settings")
 local player_slot_colors = UISettings.player_slot_colors
 
 local PlayerCompositions = mod:original_require("scripts/utilities/players/player_compositions")
+local WarpCharge = mod:original_require("scripts/utilities/warp_charge")
+local ArchetypeWarpChargeTemplates = mod:original_require("scripts/settings/warp_charge/archetype_warp_charge_templates")
 
 local global_scale = mod:get("global_scale")
 local ally_scale = mod:get("ally_scale") * global_scale
@@ -90,6 +92,52 @@ function feature.create_widget_definitions()
         }
       },
       {
+        pass_type = "texture_uv",
+        value = "content/ui/materials/hud/crosshairs/charge_up_mask",
+        style_id = "permanent_gauge_mask",
+        style = {
+          vertical_alignment = "center",
+          horizontal_alignment = "left",
+          uvs = {
+            { 1, 0 },
+            { 0, 1 }
+          },
+          color = UIHudSettings.color_tint_8,
+          size = { 24 * ally_scale, 56 * ally_scale },
+          offset = { 0, 0, 2 }
+        }
+      },
+      --{
+      --  pass_type = "texture_uv",
+      --  value = "content/ui/materials/hud/crosshairs/charge_up_mask",
+      --  style_id = "corruption_gauge_mask",
+      --  style = {
+      --    vertical_alignment = "center",
+      --    horizontal_alignment = "left",
+      --    uvs = {
+      --      { 1, 0 },
+      --      { 0, 1 }
+      --    },
+      --    color = UIHudSettings.color_tint_9,
+      --    size = { 24 * ally_scale, 56 * ally_scale },
+      --    offset = { 0, 0, 3 }
+      --  }
+      --},
+      {
+        pass_type = "text",
+        value = "",
+        value_id = "health_text",
+        style_id = "health_text",
+        style = {
+          font_size = 16 * ally_scale,
+          font_type = "machine_medium",
+          text_vertical_alignment = "top",
+          text_horizontal_alignment = "right",
+          text_color = UIHudSettings.color_tint_main_2,
+          offset = { -66 * ally_scale, 0, 3 }
+        }
+      },
+      {
         pass_type = "texture",
         value = "content/ui/materials/hud/crosshairs/charge_up",
         style_id = "toughness_gauge",
@@ -118,6 +166,20 @@ function feature.create_widget_definitions()
         }
       },
       {
+        pass_type = "text",
+        value = "",
+        value_id = "toughness_text",
+        style_id = "toughness_text",
+        style = {
+          font_size = 16 * ally_scale,
+          font_type = "machine_medium",
+          text_vertical_alignment = "top",
+          text_horizontal_alignment = "left",
+          text_color = UIHudSettings.color_tint_6,
+          offset = { 66 * ally_scale, 0, 3 }
+        }
+      },
+      {
         pass_type = "texture",
         value_id = "grenade_icon",
         value = "content/ui/materials/hud/icons/party_throwable",
@@ -142,6 +204,37 @@ function feature.create_widget_definitions()
           text_horizontal_alignment = "right",
           text_color = UIHudSettings.color_tint_main_1,
           offset = { -100 * ally_scale, -1 * ally_scale, 3 }
+        },
+        visibility_function = function(content, style)
+          return style.parent.grenade_icon.visible
+        end
+      },
+      {
+        pass_type = "text",
+        value = "",
+        value_id = "symbol_text",
+        style_id = "symbol_text",
+        style = {
+          font_size = 20 * ally_scale,
+          font_type = "machine_medium",
+          text_vertical_alignment = "center",
+          text_horizontal_alignment = "right",
+          text_color = UIHudSettings.color_tint_main_1,
+          offset = { -78 * ally_scale, -5 * ally_scale, 3 }
+        }
+      },
+      {
+        pass_type = "text",
+        value = "",
+        value_id = "peril_text",
+        style_id = "peril_text",
+        style = {
+          font_size = 18 * ally_scale,
+          font_type = "machine_medium",
+          text_vertical_alignment = "center",
+          text_horizontal_alignment = "right",
+          text_color = UIHudSettings.color_tint_main_1,
+          offset = { -98 * ally_scale, -3 * ally_scale, 3 }
         }
       },
       {
@@ -168,7 +261,10 @@ function feature.create_widget_definitions()
           text_horizontal_alignment = "left",
           text_color = UIHudSettings.color_tint_main_1,
           offset = { 78 * ally_scale, 0, 2 }
-        }
+        },
+        visibility_function = function(content, style)
+          return style.parent.ammo_icon.visible
+        end
       },
       {
         pass_type = "text",
@@ -182,7 +278,10 @@ function feature.create_widget_definitions()
           text_horizontal_alignment = "left",
           text_color = UIHudSettings.color_tint_main_1,
           offset = { 98 * ally_scale, 0, 2 }
-        }
+        },
+        visibility_function = function(content, style)
+          return style.parent.ammo_icon.visible
+        end
       },
       {
         pass_type = "text",
@@ -261,17 +360,26 @@ local function update_health(parent, dt, t, widget, player)
 
   local health_percent = health_extension:current_health_percent()
   local permanent_damage_percent = health_extension:permanent_damage_taken_percent()
-  local color = (health_percent == (permanent_damage_percent) and UIHudSettings.color_tint_8) or UIHudSettings.color_tint_main_2
 
   local mask_height_max = 56
-  local mask_height = mask_height_max * health_percent
-  local mask_height_offset = mask_height_max * (1 - health_percent) * 0.5
+  local health_mask_height = mask_height_max * health_percent
+  local health_mask_height_offset = mask_height_max * (1 - health_percent) * 0.5
 
-  local style = widget.style.health_gauge_mask
-  style.color = color
-  style.uvs[1][2] = 1 - health_percent
-  style.size[2] = mask_height
-  style.offset[2] = mask_height_offset
+  local content = widget.content
+  content.health_text = string.format("%.0f", health_percent * 100)
+
+  local health_gauge_style = widget.style.health_gauge_mask
+  health_gauge_style.uvs[1][2] = 1 - health_percent
+  health_gauge_style.size[2] = health_mask_height
+  health_gauge_style.offset[2] = health_mask_height_offset
+
+  local permanent_mask_height = mask_height_max * permanent_damage_percent
+  local permanent_mask_height_offset = mask_height_max * (1 - permanent_damage_percent) * 0.5
+
+  local permanent_gauge_style = widget.style.permanent_gauge_mask
+  permanent_gauge_style.uvs[2][2] = permanent_damage_percent
+  permanent_gauge_style.size[2] = permanent_mask_height
+  permanent_gauge_style.offset[2] = -permanent_mask_height_offset
 end
 
 local function update_toughness(parent, dt, t, widget, player)
@@ -285,10 +393,64 @@ local function update_toughness(parent, dt, t, widget, player)
   local mask_height = mask_height_max * toughness_percent
   local mask_height_offset = mask_height_max * (1 - toughness_percent) * 0.5
 
+  local content = widget.content
+  content.toughness_text = math.ceil(toughness_percent * 100)
+
   local style = widget.style.toughness_gauge_mask
   style.uvs[1][2] = toughness_percent
   style.size[2] = mask_height
   style.offset[2] = mask_height_offset
+end
+
+local function update_peril(parent, dt, t, widget, player)
+  local display_peril_indicator = mod:get("display_peril_indicator")
+  local content = widget.content
+  local style = widget.style
+
+  content.visible = false
+
+  if not display_peril_indicator then
+    return
+  end
+
+  local unit_data_extension = ScriptUnit.has_extension(player.player_unit, "unit_data_system")
+  local weapon_extension = ScriptUnit.has_extension(player.player_unit, "weapon_system")
+
+  if not (unit_data_extension and weapon_extension) then
+    return
+  end
+
+  local weapon_template = weapon_extension:weapon_template()
+  if feature._weapon_template or (weapon_template and weapon_template.uses_overheat) then
+    feature._weapon_template = weapon_template
+    local weapon_component = unit_data_extension:read_component("slot_secondary")
+    local overheat_current_percentage = weapon_component and weapon_component.overheat_current_percentage or 0
+
+    content.symbol_text = ""
+    content.peril_text = string.format("%.0f", overheat_current_percentage * 100)
+    content.visible = true
+    local text_color = mod_utils.get_text_color_for_percent_threshold((1 - overheat_current_percentage), "peril")
+    style.peril_text.text_color = text_color
+    style.symbol_text.text_color = text_color
+
+    return
+  end
+
+  local specialization_warp_charge_template = WarpCharge.specialization_warp_charge_template(player)
+
+  if specialization_warp_charge_template == ArchetypeWarpChargeTemplates.psyker then
+    local warp_charge_component = unit_data_extension and unit_data_extension:read_component("warp_charge")
+    local current_percentage = warp_charge_component and warp_charge_component.current_percentage or 0
+
+    content.symbol_text = ""
+    content.peril_text = string.format("%.0f", current_percentage * 100)
+    content.visible = true
+    local text_color = mod_utils.get_text_color_for_percent_threshold((1 - current_percentage), "peril")
+    style.peril_text.text_color = text_color
+    style.symbol_text.text_color = text_color
+
+    return
+  end
 end
 
 local function update_grenade(parent, dt, t, widget, player)
@@ -457,6 +619,7 @@ function feature.update(parent, dt, t)
         update_health(parent, dt, t, ally_widget, player)
         update_toughness(parent, dt, t, ally_widget, player)
         update_grenade(parent, dt, t, ally_widget, player)
+        update_peril(parent, dt, t, ally_widget, player)
         update_ammo(parent, dt, t, ally_widget, player)
         update_pocketable(parent, dt, t, ally_widget, player)
       else
