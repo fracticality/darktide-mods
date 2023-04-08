@@ -127,6 +127,7 @@ local function start(func, ...)
   return result
 end
 mod:hook("ActionReloadState", "start", start)
+mod:hook("ActionReloadShotgun", "start", start)
 
 mod:hook_require("scripts/settings/buff/player_buff_templates", function(templates)
   local template = templates.coherency_toughness_regen
@@ -196,17 +197,15 @@ local _threshold_settings = {
   },
   {
     threshold = "high",
-    default_color = { 255, 255, 255, 50 },
-    default_color_by_setting = {
-      ammo = UIHudSettings.color_tint_ammo_low
-    },
+    default_color = UIHudSettings.color_tint_ammo_low,
+    default_color_by_setting = {},
     validation_function = function(percent)
       return percent < 1
     end
   },
   {
     threshold = "full",
-    default_color = UIHudSettings.color_tint_1,
+    default_color = UIHudSettings.color_tint_main_1,
     default_color_by_setting = {
       health = UIHudSettings.color_tint_main_2,
       toughness = UIHudSettings.color_tint_6

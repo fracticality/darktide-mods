@@ -41,5 +41,6 @@ _create_feature_entry("ammo")
 _create_feature_entry("health")
 _create_feature_entry("toughness")
 _create_feature_entry("coherency")
+_create_feature_entry("ally")
 
 return _features

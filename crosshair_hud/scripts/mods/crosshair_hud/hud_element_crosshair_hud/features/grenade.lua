@@ -141,9 +141,10 @@ function feature.update(parent)
 
   content.grenade_count = remaining_ability_charges
 
+  local color = mod_utils.get_text_color_for_percent_threshold(ability_charges_percent, "grenade")
   style.grenade_icon.visible = true
-  style.grenade_icon.color = mod_utils.get_text_color_for_percent_threshold(ability_charges_percent, "grenade")
-  style.grenade_count.text_color = mod_utils.get_text_color_for_percent_threshold(ability_charges_percent, "grenade")
+  style.grenade_icon.color = color
+  style.grenade_count.text_color = color
 end
 
 return feature

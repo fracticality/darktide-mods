@@ -151,22 +151,28 @@ function feature.update(parent)
   local current_action_name = weapon_action_component and weapon_action_component.current_action_name
   local current_action_settings = weapon_template and weapon_template.actions[current_action_name]
   local is_reload_action = current_action_settings and _reload_actions[current_action_settings.kind]
+  local reload_settings = current_action_settings and current_action_settings.reload_settings
 
-  if reload_template then
+  if reload_template or reload_settings then
     local time_scale = weapon_action_component.time_scale
     local total_time = is_reload_action and current_action_settings.total_time or 0
     local scaled_time = total_time / time_scale
     local time_in_action = mod.time_in_action or scaled_time
 
-    local inventory_component = unit_data_extension:read_component("slot_secondary")
-    local started_reload = inventory_component and ReloadStates.started_reload(reload_template, inventory_component)
-    if started_reload then
-      local reload_state_time = ReloadStates.get_total_time(reload_template, inventory_component)
-      scaled_time = (reload_state_time and reload_state_time / time_scale) or scaled_time
+    if reload_template then
+      local inventory_component = unit_data_extension:read_component("slot_secondary")
+      local started_reload = inventory_component and ReloadStates.reload_state(reload_template, inventory_component) and ReloadStates.started_reload(reload_template, inventory_component)
+      if started_reload then
+        local reload_state_time = ReloadStates.get_total_time(reload_template, inventory_component)
+        scaled_time = (reload_state_time and reload_state_time / time_scale) or scaled_time
+      end
+    elseif reload_settings then
+      scaled_time = reload_settings.refill_at_time / time_scale
     end
 
     mod.reload_percent = math.min(1, time_in_action / scaled_time)
     mod.reload_time = math.max(0, scaled_time - time_in_action)
+  elseif reload_settings then
 
   elseif mod:get("only_during_reload") then
     reload_widget.content.visible = false

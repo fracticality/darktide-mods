@@ -31,7 +31,7 @@ end
 function HudElementCrosshairHud:update(dt, t, ui_renderer, render_settings, input_service)
   HudElementCrosshairHud.super.update(self, dt, t, ui_renderer, render_settings, input_service)
 
-  for template_name, feature in pairs(self._features_by_name) do
+  for feature_name, feature in pairs(self._features_by_name) do
     feature.update(self, dt, t)
   end
 
