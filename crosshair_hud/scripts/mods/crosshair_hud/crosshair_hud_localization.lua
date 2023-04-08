@@ -290,6 +290,13 @@ return {
     ["zh-cn"] = "蓝色",
   },
 
+  options_ally = {
+    en = "Ally Settings"
+  },
+  display_ally_indicator = {
+    en = "Display Ally Indicators"
+  },
+
   options_global = {
     en = "Miscellaneous",
     ["zh-cn"] = "杂项",

@@ -447,6 +447,24 @@ return {
         }
       },
 
+      --- Ally ---
+      {
+        setting_id = "options_ally",
+        type = "group",
+        sub_widgets = {
+          {
+            setting_id = "display_ally_indicator",
+            type = "checkbox",
+            default_value = true,
+            sub_widgets = {
+              create_scale_setting("ally"),
+              create_coordinate_setting("ally", "x", -30),
+              create_coordinate_setting("ally", "y", 140)
+            }
+          }
+        }
+      }
+
     }
   }
 }
