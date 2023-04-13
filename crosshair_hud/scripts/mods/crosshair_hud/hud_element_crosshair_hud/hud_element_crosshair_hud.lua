@@ -15,13 +15,15 @@ function HudElementCrosshairHud:init(parent, draw_layer, start_scale)
   for feature_name, feature in pairs(features) do
     local definitions = feature.create_widget_definitions()
 
-    table.merge_recursive(scenegraph_definition, feature.scenegraph_definition)
+    if definitions then
+      table.merge_recursive(scenegraph_definition, feature.scenegraph_definition)
 
-    for widget_name, widget_definition in pairs(definitions) do
-      widget_definitions[widget_name] = widget_definition
+      for widget_name, widget_definition in pairs(definitions) do
+        widget_definitions[widget_name] = widget_definition
+      end
+
+      features_by_name[feature_name] = feature
     end
-
-    features_by_name[feature_name] = feature
   end
   self._features_by_name = features_by_name
 
@@ -31,7 +33,7 @@ end
 function HudElementCrosshairHud:update(dt, t, ui_renderer, render_settings, input_service)
   HudElementCrosshairHud.super.update(self, dt, t, ui_renderer, render_settings, input_service)
 
-  for feature_name, feature in pairs(self._features_by_name) do
+  for template_name, feature in pairs(self._features_by_name) do
     feature.update(self, dt, t)
   end
 

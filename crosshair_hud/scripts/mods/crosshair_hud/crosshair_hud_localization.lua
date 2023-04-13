@@ -294,6 +294,15 @@ return {
     en = "Ally Settings",
     ["zh-cn"] = "队友设置",
   },
+  options_ally_1 = {
+    en = "Ally 1"
+  },
+  options_ally_2 = {
+    en = "Ally 2"
+  },
+  options_ally_3 = {
+    en = "Ally 3"
+  },
   display_ally_indicator = {
     en = "Display Ally Indicators",
     ["zh-cn"] = "显示队友指示器",
