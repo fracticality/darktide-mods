@@ -21,8 +21,18 @@ local global_offset = {
   mod:get("global_y_offset")
 }
 local ally_offset = {
-  mod:get("ally_x_offset"),
-  mod:get("ally_y_offset")
+  {
+    mod:get("ally_1_x_offset"),
+    mod:get("ally_1_y_offset")
+  },
+  {
+    mod:get("ally_2_x_offset"),
+    mod:get("ally_2_y_offset")
+  },
+  {
+    mod:get("ally_3_x_offset"),
+    mod:get("ally_3_y_offset")
+  }
 }
 
 local feature_name = "ally_indicator"
@@ -36,14 +46,15 @@ feature.scenegraph_definition = {
 
 for i = 1, 3 do
   local scenegraph_id = string.format("%s_%s", feature_name, i)
+  local scenegraph_offset = ally_offset[i]
   feature.scenegraph_definition[scenegraph_id] = {
     parent = "screen",
     vertical_alignment = "center",
     horizontal_alignment = "center",
-    size = { 72 * ally_scale, 70 * ally_scale },
+    size = { 72 * ally_scale, 72 * ally_scale },
     position = {
-      global_offset[1] + ally_offset[1] + ((i - 1) * 72),
-      global_offset[2] + ally_offset[2],
+      global_offset[1] + scenegraph_offset[1],
+      global_offset[2] + scenegraph_offset[2],
       55
     }
   }
@@ -134,7 +145,7 @@ function feature.create_widget_definitions()
           text_vertical_alignment = "top",
           text_horizontal_alignment = "right",
           text_color = UIHudSettings.color_tint_main_2,
-          offset = { -66 * ally_scale, 0, 3 }
+          offset = { -64 * ally_scale, 0, 3 }
         }
       },
       {
@@ -176,7 +187,7 @@ function feature.create_widget_definitions()
           text_vertical_alignment = "top",
           text_horizontal_alignment = "left",
           text_color = UIHudSettings.color_tint_6,
-          offset = { 66 * ally_scale, 0, 3 }
+          offset = { 64 * ally_scale, 0, 3 }
         }
       },
       {
@@ -189,7 +200,7 @@ function feature.create_widget_definitions()
           vertical_alignment = "bottom",
           horizontal_alignment = "left",
           color = UIHudSettings.color_tint_main_1,
-          offset = { -25 * ally_scale, -5 * ally_scale, 1 }
+          offset = { -20 * ally_scale, -5 * ally_scale, 1 }
         }
       },
       {
@@ -198,12 +209,12 @@ function feature.create_widget_definitions()
         value_id = "grenade_count",
         style_id = "grenade_count",
         style = {
-          font_size = 20 * ally_scale,
+          font_size = 18 * ally_scale,
           font_type = "machine_medium",
           text_vertical_alignment = "bottom",
           text_horizontal_alignment = "right",
           text_color = UIHudSettings.color_tint_main_1,
-          offset = { -100 * ally_scale, -1 * ally_scale, 3 }
+          offset = { -94 * ally_scale, -2 * ally_scale, 3 }
         },
         visibility_function = function(content, style)
           return style.parent.grenade_icon.visible
@@ -255,7 +266,7 @@ function feature.create_widget_definitions()
         value_id = "current_ammo",
         style_id = "current_ammo",
         style = {
-          font_size = 18 * ally_scale,
+          font_size = 20 * ally_scale,
           font_type = "machine_medium",
           text_vertical_alignment = "center",
           text_horizontal_alignment = "left",
@@ -272,7 +283,7 @@ function feature.create_widget_definitions()
         value_id = "max_ammo",
         style_id = "max_ammo",
         style = {
-          font_size = 20 * ally_scale,
+          font_size = 18 * ally_scale,
           font_type = "machine_medium",
           text_vertical_alignment = "bottom",
           text_horizontal_alignment = "left",
@@ -403,36 +414,15 @@ local function update_toughness(parent, dt, t, widget, player)
 end
 
 local function update_peril(parent, dt, t, widget, player)
-  local display_peril_indicator = mod:get("display_peril_indicator")
   local content = widget.content
   local style = widget.style
 
   content.visible = false
 
-  if not display_peril_indicator then
-    return
-  end
-
   local unit_data_extension = ScriptUnit.has_extension(player.player_unit, "unit_data_system")
   local weapon_extension = ScriptUnit.has_extension(player.player_unit, "weapon_system")
 
-  if not (unit_data_extension and weapon_extension) then
-    return
-  end
-
-  local weapon_template = weapon_extension:weapon_template()
-  if feature._weapon_template or (weapon_template and weapon_template.uses_overheat) then
-    feature._weapon_template = weapon_template
-    local weapon_component = unit_data_extension:read_component("slot_secondary")
-    local overheat_current_percentage = weapon_component and weapon_component.overheat_current_percentage or 0
-
-    content.symbol_text = ""
-    content.peril_text = string.format("%.0f", overheat_current_percentage * 100)
-    content.visible = true
-    local text_color = mod_utils.get_text_color_for_percent_threshold((1 - overheat_current_percentage), "peril")
-    style.peril_text.text_color = text_color
-    style.symbol_text.text_color = text_color
-
+  if not (unit_data_extension or weapon_extension) then
     return
   end
 
@@ -446,6 +436,22 @@ local function update_peril(parent, dt, t, widget, player)
     content.peril_text = string.format("%.0f", current_percentage * 100)
     content.visible = true
     local text_color = mod_utils.get_text_color_for_percent_threshold((1 - current_percentage), "peril")
+    style.peril_text.text_color = text_color
+    style.symbol_text.text_color = text_color
+
+    return
+  end
+
+  local weapon_template = weapon_extension and weapon_extension:weapon_template()
+  if (weapon_template and weapon_template.uses_overheat) then
+    feature._weapon_template = weapon_template
+    local weapon_component = unit_data_extension and unit_data_extension:read_component("slot_secondary")
+    local overheat_current_percentage = weapon_component and weapon_component.overheat_current_percentage or 0
+
+    content.symbol_text = ""
+    content.peril_text = string.format("%.0f", overheat_current_percentage * 100)
+    content.visible = true
+    local text_color = mod_utils.get_text_color_for_percent_threshold((1 - overheat_current_percentage), "peril")
     style.peril_text.text_color = text_color
     style.symbol_text.text_color = text_color
 
@@ -521,8 +527,7 @@ local function update_ammo(parent, dt, t, widget, player)
   local color = mod_utils.get_text_color_for_percent_threshold(current_ammo_percent, "ammo")
 
   icon_style.color = color
-  style.current_ammo.color = color
-
+  style.current_ammo.text_color = color
 
   local show_ammo_icon = mod:get("show_ammo_icon")
   icon_style.visible = show_ammo_icon
@@ -551,6 +556,8 @@ local function update_status(parent, dt, t, widget, player)
 
   widget.content.status_icon = (not is_alive and UIHudSettings.player_status_icons.dead) or (is_disabled and UIHudSettings.player_status_icons[character_state_name])
   widget.style.status_icon.color = (is_disabled and UIHudSettings.player_status_colors[character_state_name]) or (not is_alive and UIHudSettings.player_status_colors.dead)
+
+  widget.content.mask_red = not is_alive
 
 end
 

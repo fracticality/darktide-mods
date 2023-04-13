@@ -1,4 +1,13 @@
 local mod = get_mod("crosshair_hud")
+local validations = mod:io_dofile("crosshair_hud/scripts/mods/crosshair_hud/settings/validations")
+
+local options_display_type = table.enum("percent", "value")
+mod.options_display_type = options_display_type
+
+local options_coherency_type = table.enum("simple", "archetype", "aura", "off")
+mod.options_coherency_type = options_coherency_type
+
+validations.run()
 
 --TODO: Test converting multiple widgets to one widget that updates dynamic value
 --TODO: Recreate these local funcs to reproduce:
@@ -128,12 +137,6 @@ local function create_shadow_setting(setting_id)
   }
 end
 
-local options_display_type = table.enum("percent", "value")
-mod.options_display_type = options_display_type
-
-local options_coherency_type = table.enum("simple", "archetype", "aura", "off")
-mod.options_coherency_type = options_coherency_type
-
 return {
   name = mod:localize("crosshair_hud"),
   description = mod:localize("crosshair_hud_description"),
@@ -147,7 +150,7 @@ return {
         sub_widgets = {
           create_scale_setting("global"),
           create_coordinate_setting("global", "x", 0),
-          create_coordinate_setting("global", "y", 70),
+          create_coordinate_setting("global", "y", 0),
           {
             setting_id = "enable_shadows",
             type = "checkbox",
@@ -163,8 +166,8 @@ return {
         sub_widgets = {
           create_shadow_setting("health"),
           create_scale_setting("health"),
-          create_coordinate_setting("health", "x", 0),
-          create_coordinate_setting("health", "y", 24),
+          create_coordinate_setting("health", "x", -100),
+          create_coordinate_setting("health", "y", 170),
           {
             setting_id = "health_display_type",
             type = "dropdown",
@@ -217,8 +220,8 @@ return {
         sub_widgets = {
           create_shadow_setting("toughness"),
           create_scale_setting("toughness"),
-          create_coordinate_setting("toughness", "x", 0),
-          create_coordinate_setting("toughness", "y", 0),
+          create_coordinate_setting("toughness", "x", 100),
+          create_coordinate_setting("toughness", "y", 170),
           {
             setting_id = "toughness_display_type",
             type = "dropdown",
@@ -288,7 +291,7 @@ return {
               create_shadow_setting("coherency"),
               create_scale_setting("coherency"),
               create_coordinate_setting("coherency", "x", 0),
-              create_coordinate_setting("coherency", "y", -28),
+              create_coordinate_setting("coherency", "y", 250),
             }
           },
           {
@@ -331,7 +334,7 @@ return {
               create_shadow_setting("ability"),
               create_scale_setting("ability"),
               create_coordinate_setting("ability", "x", 0),
-              create_coordinate_setting("ability", "y", 50),
+              create_coordinate_setting("ability", "y", 115),
               unpack(create_threshold_settings("ability"))
             }
           },
@@ -355,8 +358,8 @@ return {
               },
               create_shadow_setting("ammo"),
               create_scale_setting("ammo"),
-              create_coordinate_setting("ammo", "x", 22),
-              create_coordinate_setting("ammo", "y", 90),
+              create_coordinate_setting("ammo", "x", 100),
+              create_coordinate_setting("ammo", "y", 250),
               unpack(create_threshold_settings("ammo"))
             }
           }
@@ -375,8 +378,8 @@ return {
             sub_widgets = {
               create_shadow_setting("pocketable"),
               create_scale_setting("pocketable"),
-              create_coordinate_setting("pocketable", "x", 30),
-              create_coordinate_setting("pocketable", "y", 170)
+              create_coordinate_setting("pocketable", "x", 0),
+              create_coordinate_setting("pocketable", "y", 220)
             }
           }
         }
@@ -394,8 +397,8 @@ return {
             sub_widgets = {
               create_shadow_setting("peril"),
               create_scale_setting("peril"),
-              create_coordinate_setting("peril", "x", 30),
-              create_coordinate_setting("peril", "y", 135),
+              create_coordinate_setting("peril", "x", 0),
+              create_coordinate_setting("peril", "y", 45),
               unpack(create_threshold_settings("peril"))
             }
           }
@@ -414,8 +417,8 @@ return {
             sub_widgets = {
               create_shadow_setting("grenade"),
               create_scale_setting("grenade"),
-              create_coordinate_setting("grenade", "x", 30),
-              create_coordinate_setting("grenade", "y", 110),
+              create_coordinate_setting("grenade", "x", -100),
+              create_coordinate_setting("grenade", "y", 315),
               unpack(create_threshold_settings("grenade"))
             }
           }
@@ -439,8 +442,8 @@ return {
               },
               create_shadow_setting("reload"),
               create_scale_setting("reload"),
-              create_coordinate_setting("reload", "x", -14),
-              create_coordinate_setting("reload", "y", 94),
+              create_coordinate_setting("reload", "x", 0),
+              create_coordinate_setting("reload", "y", 60),
               unpack(create_threshold_settings("reload"))
             }
           }
@@ -458,8 +461,30 @@ return {
             default_value = true,
             sub_widgets = {
               create_scale_setting("ally"),
-              create_coordinate_setting("ally", "x", -30),
-              create_coordinate_setting("ally", "y", 140)
+              {
+                setting_id = "options_ally_1",
+                type = "group",
+                sub_widgets = {
+                  create_coordinate_setting("ally_1", "x", -200),
+                  create_coordinate_setting("ally_1", "y", 345)
+                }
+              },
+              {
+                setting_id = "options_ally_2",
+                type = "group",
+                sub_widgets = {
+                  create_coordinate_setting("ally_2", "x", 0),
+                  create_coordinate_setting("ally_2", "y", 445)
+                }
+              },
+              {
+                setting_id = "options_ally_3",
+                type = "group",
+                sub_widgets = {
+                  create_coordinate_setting("ally_3", "x", 200),
+                  create_coordinate_setting("ally_3", "y", 345)
+                }
+              }
             }
           }
         }
