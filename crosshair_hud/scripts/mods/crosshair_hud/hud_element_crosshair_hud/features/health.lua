@@ -420,7 +420,7 @@ function feature.update(parent, dt, t)
     local text_color = mod_utils.get_text_color_for_percent_threshold(health_percent, "health") or UIHudSettings.color_tint_main_2
 
     local permanent_number_to_display = (health_display_type == mod.options_display_type.percent and ((1 - permanent_damage_taken_percent) * 100)) or (max_health - permanent_damage_taken)
-    local permanent_texts = mod_utils.convert_number_to_display_texts(math.floor(permanent_number_to_display), 3, nil, false, true)
+    local permanent_texts = mod_utils.convert_number_to_display_texts(math.ceil(permanent_number_to_display), 3, nil, false, true)
     local texts = mod_utils.convert_number_to_display_texts(math.ceil(number_to_display), 3, nil, false, true)
     for i = 1, 3 do
       local key = string.format("text_%s", i)

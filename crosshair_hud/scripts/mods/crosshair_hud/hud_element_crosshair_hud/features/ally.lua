@@ -612,9 +612,9 @@ local function update_players(parent, dt, t)
 
     repeat
       local hud_player = parent._parent:player()
-      --if hud_player == player then
-      --  break
-      --end
+      if hud_player == player then
+        break
+      end
 
       feature._players[i] = player
 
