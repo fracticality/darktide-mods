@@ -147,9 +147,8 @@ local function _shadows_enabled(setting_id)
   return enable_shadows_setting == "on"
 end
 
-local _temp_ammo_display_texts = {}
 local function _convert_number_to_display_texts(amount, max_character, zero_numeral_color, color_zero_values, ignore_coloring)
-  table.clear(_temp_ammo_display_texts)
+  local _temp_ammo_display_texts = {}
 
   max_character = math.min(max_character + 1, 3)
   local length = string.len(amount)
