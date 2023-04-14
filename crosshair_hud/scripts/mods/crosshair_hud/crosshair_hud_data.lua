@@ -4,7 +4,12 @@ local validations = mod:io_dofile("crosshair_hud/scripts/mods/crosshair_hud/sett
 local options_display_type = table.enum("percent", "value")
 mod.options_display_type = options_display_type
 
-local options_coherency_type = table.enum("simple", "archetype", "aura", "off")
+local options_coherency_type = {
+  simple = "simple",
+  archetype = "archetype",
+  aura = "aura",
+  off = "off"
+}
 mod.options_coherency_type = options_coherency_type
 
 validations.run()

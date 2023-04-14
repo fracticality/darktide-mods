@@ -5,8 +5,8 @@ local validations = {
     validation_name = "invalid_coherency_type",
     validation_func = function(data)
       local coherency_type = mod:get("coherency_type")
-      if not mod.options_coherency_type[coherency_type] then
-        mod:notify("Coherency Type [%s] no longer exists; select a new one in the mod options menu.", coherency_type)
+      if coherency_type and not mod.options_coherency_type[coherency_type] then
+        mod:notify("Invalid Coherency Type [%s]; select a new one in the mod options menu.", coherency_type)
         mod:set("coherency_type", "off")
       end
     end
