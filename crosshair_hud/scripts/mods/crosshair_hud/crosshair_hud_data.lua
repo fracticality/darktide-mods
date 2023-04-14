@@ -183,6 +183,15 @@ return {
             }
           },
           {
+            setting_id = "permanent_health_position",
+            type = "dropdown",
+            default_value = "top",
+            options = {
+              { text = "permanent_position_top", value = "top" },
+              { text = "permanent_position_bottom", value = "bottom" }
+            }
+          },
+          {
             setting_id = "health_always_show",
             type = "checkbox",
             default_value = true,

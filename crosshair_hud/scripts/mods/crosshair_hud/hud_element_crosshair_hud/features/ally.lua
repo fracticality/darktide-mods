@@ -312,6 +312,22 @@ function feature.create_widget_definitions()
       },
       {
         pass_type = "text",
+        value = "0",
+        value_id = "wounds_count",
+        style_id = "wounds_count",
+        style = {
+          font_size = 20,
+          font_type = "machine_medium",
+          vertical_alignment = "center",
+          horizontal_alignment = "center",
+          text_vertical_alignment = "center",
+          text_horizontal_alignment = "center",
+          text_color = UIHudSettings.color_tint_main_1,
+          offset = { 0, 24, 2 }
+        }
+      },
+      {
+        pass_type = "text",
         value = "",
         value_id = "ally_name",
         style_id = "ally_name",
@@ -371,13 +387,18 @@ local function update_health(parent, dt, t, widget, player)
 
   local health_percent = health_extension:current_health_percent()
   local permanent_damage_percent = health_extension:permanent_damage_taken_percent()
+  local num_wounds = health_extension:num_wounds()
 
   local mask_height_max = 56
   local health_mask_height = mask_height_max * health_percent
   local health_mask_height_offset = mask_height_max * (1 - health_percent) * 0.5
 
   local content = widget.content
-  content.health_text = string.format("%.0f", health_percent * 100)
+  content.health_text = math.ceil(health_percent * 100)
+  content.wounds_count = num_wounds
+
+  local wounds_count_style = widget.style.wounds_count
+  wounds_count_style.text_color = num_wounds == 1 and UIHudSettings.color_tint_alert_2 or UIHudSettings.color_tint_main_1
 
   local health_gauge_style = widget.style.health_gauge_mask
   health_gauge_style.uvs[1][2] = 1 - health_percent
@@ -449,7 +470,7 @@ local function update_peril(parent, dt, t, widget, player)
     local overheat_current_percentage = weapon_component and weapon_component.overheat_current_percentage or 0
 
     content.symbol_text = ""
-    content.peril_text = string.format("%.0f", overheat_current_percentage * 100)
+    content.peril_text = math.ceil(overheat_current_percentage * 100)
     content.visible = true
     local text_color = mod_utils.get_text_color_for_percent_threshold((1 - overheat_current_percentage), "peril")
     style.peril_text.text_color = text_color
@@ -591,9 +612,9 @@ local function update_players(parent, dt, t)
 
     repeat
       local hud_player = parent._parent:player()
-      if hud_player == player then
-        break
-      end
+      --if hud_player == player then
+      --  break
+      --end
 
       feature._players[i] = player
 
