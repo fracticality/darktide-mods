@@ -343,5 +343,9 @@ return {
   scale = {
     en = "Scale",
     ["zh-cn"] = "缩放",
+  },
+
+  display_gauge = {
+    en = "Display Gauge"
   }
 }

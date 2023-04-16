@@ -174,6 +174,12 @@ return {
           create_coordinate_setting("health", "x", -100),
           create_coordinate_setting("health", "y", 170),
           {
+            setting_id = "display_health_gauge",
+            title = "display_gauge",
+            type = "checkbox",
+            default_value = true
+          },
+          {
             setting_id = "health_display_type",
             type = "dropdown",
             default_value = options_display_type.value,
@@ -236,6 +242,12 @@ return {
           create_scale_setting("toughness"),
           create_coordinate_setting("toughness", "x", 100),
           create_coordinate_setting("toughness", "y", 170),
+          {
+            setting_id = "display_toughness_gauge",
+            title = "display_gauge",
+            type = "checkbox",
+            default_value = true
+          },
           {
             setting_id = "toughness_display_type",
             type = "dropdown",

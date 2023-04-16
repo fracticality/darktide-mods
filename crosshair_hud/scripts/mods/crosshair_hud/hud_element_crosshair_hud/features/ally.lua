@@ -65,63 +65,16 @@ function feature.create_widget_definitions()
   local hud_settings = game_mode_manager:hud_settings()
   feature._player_composition_name = hud_settings.player_composition
   feature._players = {}
+  feature._wounds_widgets_by_player = {}
 
   local widget_definitions = {}
   for i = 1, 3 do
     local widget_id = string.format("%s_%s", feature_name, i)
     widget_definitions[widget_id] = UIWidget.create_definition({
-      {
-        pass_type = "texture_uv",
-        value = "content/ui/materials/hud/crosshairs/charge_up",
-        style_id = "health_gauge",
-        style = {
-          vertical_alignment = "center",
-          horizontal_alignment = "left",
-          uvs = {
-            { 1, 0 },
-            { 0, 1 }
-          },
-          color = UIHudSettings.color_tint_main_1,
-          size = { 24 * ally_scale, 56 * ally_scale },
-          offset = { 0, 0, 1 }
-        }
-      },
-      {
-        pass_type = "texture_uv",
-        value = "content/ui/materials/hud/crosshairs/charge_up_mask",
-        style_id = "health_gauge_mask",
-        style = {
-          vertical_alignment = "center",
-          horizontal_alignment = "left",
-          uvs = {
-            { 1, 0 },
-            { 0, 1 }
-          },
-          color = UIHudSettings.color_tint_main_2,
-          size = { 24 * ally_scale, 56 * ally_scale },
-          offset = { 0, 0, 2 }
-        }
-      },
-      {
-        pass_type = "texture_uv",
-        value = "content/ui/materials/hud/crosshairs/charge_up_mask",
-        style_id = "permanent_gauge_mask",
-        style = {
-          vertical_alignment = "center",
-          horizontal_alignment = "left",
-          uvs = {
-            { 1, 0 },
-            { 0, 1 }
-          },
-          color = UIHudSettings.color_tint_8,
-          size = { 24 * ally_scale, 56 * ally_scale },
-          offset = { 0, 0, 2 }
-        }
-      },
       --{
       --  pass_type = "texture_uv",
-      --  value = "content/ui/materials/hud/crosshairs/charge_up_mask",
-      --  style_id = "corruption_gauge_mask",
+      --  value = "content/ui/materials/hud/crosshairs/charge_up",
+      --  style_id = "health_gauge",
       --  style = {
       --    vertical_alignment = "center",
       --    horizontal_alignment = "left",
@@ -129,9 +82,41 @@ function feature.create_widget_definitions()
       --      { 1, 0 },
       --      { 0, 1 }
       --    },
-      --    color = UIHudSettings.color_tint_9,
+      --    color = UIHudSettings.color_tint_main_1,
       --    size = { 24 * ally_scale, 56 * ally_scale },
-      --    offset = { 0, 0, 3 }
+      --    offset = { 0, 0, 1 }
+      --  }
+      --},
+      --{
+      --  pass_type = "texture_uv",
+      --  value = "content/ui/materials/hud/crosshairs/charge_up_mask",
+      --  style_id = "health_gauge_mask",
+      --  style = {
+      --    vertical_alignment = "center",
+      --    horizontal_alignment = "left",
+      --    uvs = {
+      --      { 1, 0 },
+      --      { 0, 1 }
+      --    },
+      --    color = UIHudSettings.color_tint_main_2,
+      --    size = { 24 * ally_scale, 56 * ally_scale },
+      --    offset = { 0, 0, 2 }
+      --  }
+      --},
+      --{
+      --  pass_type = "texture_uv",
+      --  value = "content/ui/materials/hud/crosshairs/charge_up_mask",
+      --  style_id = "permanent_gauge_mask",
+      --  style = {
+      --    vertical_alignment = "center",
+      --    horizontal_alignment = "left",
+      --    uvs = {
+      --      { 1, 0 },
+      --      { 0, 1 }
+      --    },
+      --    color = UIHudSettings.color_tint_8,
+      --    size = { 24 * ally_scale, 56 * ally_scale },
+      --    offset = { 0, 0, 2 }
       --  }
       --},
       {
@@ -379,6 +364,62 @@ function feature.create_widget_definitions()
   return widget_definitions
 end
 
+local function create_segment_definition(widget_id)
+  return UIWidget.create_definition({
+    {
+      pass_type = "texture_uv",
+      value = "content/ui/materials/hud/crosshairs/charge_up",
+      style_id = "background",
+      style = {
+        vertical_alignment = "center",
+        horizontal_alignment = "left",
+        uvs = {
+          { 1, 0 },
+          { 0, 1 }
+        },
+        color = UIHudSettings.color_tint_main_1,
+        size = { 24 * ally_scale, 56 * ally_scale },
+        offset = { 0, 0, 1 }
+      }
+    },
+    {
+      pass_type = "texture_uv",
+      value = "content/ui/materials/hud/crosshairs/charge_up_mask",
+      style_id = "health",
+      style = {
+        vertical_alignment = "center",
+        horizontal_alignment = "left",
+        uvs = {
+          { 1, 0 },
+          { 0, 1 }
+        },
+        color = UIHudSettings.color_tint_main_2,
+        size = { 24 * ally_scale, 56 * ally_scale },
+        offset = { 0, 0, 2 }
+      }
+    },
+    {
+      pass_type = "texture_uv",
+      value = "content/ui/materials/hud/crosshairs/charge_up_mask",
+      style_id = "permanent_damage",
+      style = {
+        vertical_alignment = "center",
+        horizontal_alignment = "left",
+        uvs = {
+          { 1, 0 },
+          { 0, 1 }
+        },
+        color = UIHudSettings.color_tint_8,
+        size = { 24 * ally_scale, 56 * ally_scale },
+        offset = { 0, 0, 2 }
+      },
+      visibility_function = function(content, style)
+        return content.permanent_damage and content.permanent_damage > 0
+      end
+    }
+  }, widget_id)
+end
+
 local function update_health(parent, dt, t, widget, player)
   local health_extension = ScriptUnit.has_extension(player.player_unit, "health_system")
   if not health_extension then
@@ -387,11 +428,8 @@ local function update_health(parent, dt, t, widget, player)
 
   local health_percent = health_extension:current_health_percent()
   local permanent_damage_percent = health_extension:permanent_damage_taken_percent()
+  local max_wounds = health_extension:max_wounds()
   local num_wounds = health_extension:num_wounds()
-
-  local mask_height_max = 56
-  local health_mask_height = mask_height_max * health_percent
-  local health_mask_height_offset = mask_height_max * (1 - health_percent) * 0.5
 
   local content = widget.content
   content.health_text = math.ceil(health_percent * 100)
@@ -400,18 +438,77 @@ local function update_health(parent, dt, t, widget, player)
   local wounds_count_style = widget.style.wounds_count
   wounds_count_style.text_color = num_wounds == 1 and UIHudSettings.color_tint_alert_2 or UIHudSettings.color_tint_main_1
 
-  local health_gauge_style = widget.style.health_gauge_mask
-  health_gauge_style.uvs[1][2] = 1 - health_percent
-  health_gauge_style.size[2] = health_mask_height
-  health_gauge_style.offset[2] = health_mask_height_offset
+  if not feature._wounds_widgets_by_player[player] then
+    local wounds_widgets = {}
+    for i = max_wounds, 1, -1 do
+      local widget_name = string.format("%s_segment_%s", widget.name, i)
+      local wounds_widget = parent:_create_widget(widget_name, create_segment_definition(widget.name))
+      table.insert(parent._widgets, wounds_widget)
+      table.insert(wounds_widgets, wounds_widget)
+    end
 
-  local permanent_mask_height = mask_height_max * permanent_damage_percent
-  local permanent_mask_height_offset = mask_height_max * (1 - permanent_damage_percent) * 0.5
+    feature._wounds_widgets_by_player[player] = wounds_widgets
+  end
 
-  local permanent_gauge_style = widget.style.permanent_gauge_mask
-  permanent_gauge_style.uvs[2][2] = permanent_damage_percent
-  permanent_gauge_style.size[2] = permanent_mask_height
-  permanent_gauge_style.offset[2] = -permanent_mask_height_offset
+  local step_fraction = 1 / max_wounds
+  local spacing = 2 * ally_scale
+  local bar_height = 56 * ally_scale
+  local segment_height = (bar_height - (max_wounds - 1) * spacing) / max_wounds
+  local y_offset = -(segment_height + spacing) / 2
+
+  local wounds_widgets = feature._wounds_widgets_by_player[player]
+  for i = 1, max_wounds do
+    local wounds_widget = wounds_widgets[i]
+    local health_fraction
+    if health_percent then
+      local end_value = i * step_fraction
+      local start_value = end_value - step_fraction
+      health_fraction = math.clamp01((health_percent - start_value) / step_fraction)
+    end
+
+    local permanent_fraction
+    if permanent_damage_percent then
+      local end_value = (max_wounds + 1 - i) * step_fraction
+      local start_value = end_value - step_fraction
+      permanent_fraction = math.clamp01((math.floor(permanent_damage_percent * 100) / 100 - start_value) / step_fraction)
+    end
+
+    local widget_style = wounds_widget.style
+    widget_style.health.size[2] = health_fraction * segment_height
+    widget_style.health.uvs[1][2] = (step_fraction * i) - ((1 - health_fraction) / max_wounds)
+    widget_style.health.uvs[2][2] = (i - 1) * step_fraction
+    widget_style.health.offset[2] = segment_height * (1 - health_fraction) * 0.5
+
+    wounds_widget.content.permanent_damage = permanent_damage_percent
+    widget_style.permanent_damage.size[2] = permanent_fraction * segment_height
+    widget_style.permanent_damage.uvs[1][2] = (step_fraction * i)
+    widget_style.permanent_damage.uvs[2][2] = (step_fraction * i) - permanent_fraction / max_wounds
+    widget_style.permanent_damage.offset[2] = -(segment_height * (1 - permanent_fraction) * 0.5)
+
+    widget_style.background.size[2] = segment_height
+    widget_style.background.uvs[1][2] = (step_fraction * i)
+    widget_style.background.uvs[2][2] = (i - 1) * step_fraction
+
+    wounds_widget.offset[2] = y_offset + bar_height / 2
+    y_offset = y_offset - (segment_height + spacing)
+  end
+
+  --local mask_height_max = 56
+  --local health_mask_height = mask_height_max * health_percent
+  --local health_mask_height_offset = mask_height_max * (1 - health_percent) * 0.5
+  --
+  --local health_gauge_style = widget.style.health_gauge_mask
+  --health_gauge_style.uvs[1][2] = 1 - health_percent
+  --health_gauge_style.size[2] = health_mask_height
+  --health_gauge_style.offset[2] = health_mask_height_offset
+  --
+  --local permanent_mask_height = mask_height_max * permanent_damage_percent
+  --local permanent_mask_height_offset = mask_height_max * (1 - permanent_damage_percent) * 0.5
+  --
+  --local permanent_gauge_style = widget.style.permanent_gauge_mask
+  --permanent_gauge_style.uvs[2][2] = permanent_damage_percent
+  --permanent_gauge_style.size[2] = permanent_mask_height
+  --permanent_gauge_style.offset[2] = -permanent_mask_height_offset
 end
 
 local function update_toughness(parent, dt, t, widget, player)

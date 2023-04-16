@@ -42,6 +42,40 @@ function feature.create_widget_definitions()
   return {
     [feature_name] = UIWidget.create_definition({
       {
+        pass_type = "texture",
+        value = "content/ui/materials/hud/crosshairs/charge_up",
+        style_id = "background",
+        style = {
+          vertical_alignment = "center",
+          horizontal_alignment = "right",
+          color = UIHudSettings.color_tint_main_1,
+          size = { 24 * toughness_scale, 56 * toughness_scale },
+          offset = { 30 * toughness_scale, 0, 1 }
+        },
+        visibility_function = function(content, style)
+          return mod:get("display_toughness_gauge")
+        end
+      },
+      {
+        pass_type = "texture_uv",
+        value = "content/ui/materials/hud/crosshairs/charge_up_mask",
+        style_id = "toughness",
+        style = {
+          vertical_alignment = "center",
+          horizontal_alignment = "right",
+          uvs = {
+            { 0, 1 },
+            { 1, 0 }
+          },
+          color = UIHudSettings.color_tint_6,
+          size = { 24 * toughness_scale, 56 * toughness_scale },
+          offset = { 30 * toughness_scale, 0, 2 }
+        },
+        visibility_function = function(content, style)
+          return mod:get("display_toughness_gauge")
+        end
+      },
+      {
         pass_type = "text",
         style_id = "text_1",
         value_id = "text_1",
@@ -233,6 +267,11 @@ function feature.update(parent, dt, t)
     end
     toughness_widget.style.text_symbol.visible = toughness_display_type == mod.options_display_type.percent
     toughness_widget.style.text_symbol.text_color = text_color
+
+    toughness_widget.style.toughness.uvs[1][2] = toughness_percent
+    toughness_widget.style.toughness.size[2] = 56 * toughness_percent
+    toughness_widget.style.toughness.offset[2] = 56 * (1 - toughness_percent) * 0.5
+
     toughness_widget.dirty = true
   end
 

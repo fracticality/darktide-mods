@@ -19,8 +19,8 @@ local health_offset = {
 }
 
 local permanent_health_offsets = {
-  top = { 0, -20 / health_scale, 2 },
-  bottom = { 0, 24 / health_scale, 2 },
+  top = { 0, -20 * health_scale, 2 },
+  bottom = { 0, 24 * health_scale, 2 },
 }
 
 local permanent_health_position = mod:get("permanent_health_position")
@@ -43,6 +43,13 @@ feature.scenegraph_definition = {
       global_offset[2] + health_offset[2],
       55
     }
+  },
+  segment = {
+    parent = feature_name,
+    vertical_alignment = "center",
+    horizontal_alignment = "left",
+    size = { 24 * health_scale, 56 * health_scale },
+    position = { -30 * health_scale, 28 * health_scale, 0 }
   }
 }
 
@@ -53,7 +60,7 @@ function feature.create_widget_definitions()
         pass_type = "text",
         style_id = "wounds_count",
         value_id = "wounds_count",
-        value = "0",
+        value = "",
         style = {
           font_size = 18 * health_scale,
           text_vertical_alignment = "top",
@@ -61,11 +68,14 @@ function feature.create_widget_definitions()
           font_type = "machine_medium",
           text_color = UIHudSettings.color_tint_main_1,
           offset = {
-            -28 * health_scale,
-            12 * health_scale,
+            -35 * health_scale,
+            5 * health_scale,
             2
           }
         },
+        visibility_function = function(content, style)
+          return not mod:get("display_health_gauge")
+        end
       },
       {
         pass_type = "text",
@@ -252,10 +262,10 @@ function feature.create_widget_definitions()
         value_id = "text_1",
         value = "0",
         style = {
+          text_style_id = "text_1",
           font_size = 24 * health_scale,
           text_vertical_alignment = "top",
           text_horizontal_alignment = "center",
-
           font_type = "machine_medium",
           text_color = UIHudSettings.color_tint_0,
           offset = {
@@ -265,7 +275,7 @@ function feature.create_widget_definitions()
           }
         },
         visibility_function = function(content, style)
-          return _shadows_enabled("health")
+          return style.parent[style.text_style_id].visible and _shadows_enabled("health")
         end
       },
       {
@@ -293,10 +303,10 @@ function feature.create_widget_definitions()
         value_id = "text_2",
         value = "0",
         style = {
+          text_style_id = "text_2",
           font_size = 24 * health_scale,
           text_vertical_alignment = "top",
           text_horizontal_alignment = "center",
-
           font_type = "machine_medium",
           text_color = UIHudSettings.color_tint_0,
           offset = {
@@ -306,7 +316,7 @@ function feature.create_widget_definitions()
           }
         },
         visibility_function = function(content, style)
-          return _shadows_enabled("health")
+          return style.parent[style.text_style_id].visible and _shadows_enabled("health")
         end
       },
       {
@@ -334,10 +344,10 @@ function feature.create_widget_definitions()
         value_id = "text_3",
         value = "0",
         style = {
+          text_style_id = "text_3",
           font_size = 24 * health_scale,
           text_vertical_alignment = "top",
           text_horizontal_alignment = "center",
-
           font_type = "machine_medium",
           text_color = UIHudSettings.color_tint_0,
           offset = {
@@ -347,7 +357,7 @@ function feature.create_widget_definitions()
           }
         },
         visibility_function = function(content, style)
-          return _shadows_enabled("health")
+          return style.parent[style.text_style_id].visible and _shadows_enabled("health")
         end
       },
       {
@@ -392,6 +402,139 @@ function feature.create_widget_definitions()
   }
 end
 
+feature.segment_definition = UIWidget.create_definition({
+  {
+    pass_type = "texture_uv",
+    value = "content/ui/materials/hud/crosshairs/charge_up",
+    style_id = "background",
+    style = {
+      vertical_alignment = "center",
+      horizontal_alignment = "left",
+      uvs = {
+        { 1, 0 },
+        { 0, 1 }
+      },
+      color = UIHudSettings.color_tint_main_1,
+      size = { 24 * health_scale, 56 * health_scale },
+      offset = { -30 * health_scale, 0, 1 }
+    },
+    visibility_function = function(content, style)
+      return mod:get("display_health_gauge")
+    end
+  },
+  {
+    pass_type = "texture_uv",
+    value = "content/ui/materials/hud/crosshairs/charge_up_mask",
+    style_id = "health",
+    style = {
+      vertical_alignment = "center",
+      horizontal_alignment = "left",
+      uvs = {
+        { 1, 0 },
+        { 0, 1 }
+      },
+      color = UIHudSettings.color_tint_main_2,
+      size = { 24 * health_scale, 56 * health_scale },
+      offset = { -30 * health_scale, 0, 2 }
+    },
+    visibility_function = function(content, style)
+      return mod:get("display_health_gauge")
+    end
+  },
+  {
+    pass_type = "texture_uv",
+    value = "content/ui/materials/hud/crosshairs/charge_up_mask",
+    style_id = "permanent_damage",
+    style = {
+      vertical_alignment = "center",
+      horizontal_alignment = "left",
+      uvs = {
+        { 1, 0 },
+        { 0, 1 }
+      },
+      color = UIHudSettings.color_tint_8,
+      size = { 24 * health_scale, 56 * health_scale },
+      offset = { -30 * health_scale, 0, 2 }
+    },
+    visibility_function = function(content, style)
+      return mod:get("display_health_gauge") and content.permanent_damage and content.permanent_damage > 0
+    end
+  }
+}, feature_name)
+
+local function update_gauge(parent, dt, t)
+  local visible = mod:get("display_health_gauge")
+  for i, segment_widget in ipairs(feature._health_segment_widgets or {}) do
+    segment_widget.content.visible = visible
+  end
+
+  if not visible then
+    return
+  end
+
+  local player_extensions = parent._parent:player_extensions()
+  local health_extension = player_extensions.health
+  local health_percent = health_extension:current_health_percent()
+  local permanent_damage_taken_percent = health_extension:permanent_damage_taken_percent()
+  local max_wounds = health_extension:max_wounds()
+
+  local spacing = 2 * health_scale
+  local bar_height = 56 * health_scale
+  local segment_height = (bar_height - (max_wounds - 1) * spacing) / max_wounds
+  local y_offset = -(segment_height + spacing) / 2
+
+  if not feature._health_segment_widgets then
+
+    local health_segment_widgets = {}
+    for i = max_wounds, 1, -1 do
+      local widget_name = string.format("segment_%s", i)
+      local widget = parent:_create_widget(widget_name, feature.segment_definition)
+      table.insert(parent._widgets, widget)
+      table.insert(health_segment_widgets, widget)
+    end
+
+    feature._health_segment_widgets = health_segment_widgets
+  end
+
+  local step_fraction = 1 / max_wounds
+  for i = 1, max_wounds, 1 do
+    local widget = feature._health_segment_widgets[i]
+
+    local health_fraction
+    if health_percent then
+      local end_value = i * step_fraction
+      local start_value = end_value - step_fraction
+      health_fraction = math.clamp((health_percent - start_value) / step_fraction, 0, 1)
+    end
+
+    local corruption_fraction
+    if permanent_damage_taken_percent then
+      local end_value = (max_wounds + 1 - i) * step_fraction
+      local start_value = end_value - step_fraction
+      corruption_fraction = math.clamp((math.floor(permanent_damage_taken_percent * 100) / 100 - start_value) / step_fraction, 0, 1)
+    end
+
+    local widget_style = widget.style
+    widget_style.health.size[2] = health_fraction * segment_height
+    widget_style.health.uvs[1][2] = (step_fraction * i) - ((1 - health_fraction) / max_wounds)
+    widget_style.health.uvs[2][2] = (i - 1) * step_fraction
+    widget_style.health.offset[2] = segment_height * (1 - health_fraction) * 0.5
+
+    widget.content.permanent_damage = permanent_damage_taken_percent
+    widget_style.permanent_damage.size[2] = corruption_fraction * segment_height
+    widget_style.permanent_damage.uvs[1][2] = (step_fraction * i)
+    widget_style.permanent_damage.uvs[2][2] = (step_fraction * i) - corruption_fraction / max_wounds
+    widget_style.permanent_damage.offset[2] = -(segment_height * (1 - corruption_fraction) * 0.5)
+
+    widget_style.background.size[2] = segment_height
+    widget_style.background.uvs[1][2] = (step_fraction * i)
+    widget_style.background.uvs[2][2] = (i - 1) * step_fraction
+
+    widget.offset[2] = y_offset + bar_height / 2
+    y_offset = y_offset - (segment_height + spacing)
+  end
+end
+
 function feature.update(parent, dt, t)
   local player_extensions = parent._parent:player_extensions()
   local health_widget = parent._widgets_by_name.health_indicator
@@ -401,7 +544,6 @@ function feature.update(parent, dt, t)
   local max_health = health_extension:max_health()
   local permanent_damage_taken = health_extension:permanent_damage_taken()
   local permanent_damage_taken_percent = health_extension:permanent_damage_taken_percent()
-  local num_wounds = health_extension:num_wounds()
 
   if health_percent == 1 and mod:get("health_hide_at_full") then
     health_widget.content.visible = false
@@ -416,28 +558,35 @@ function feature.update(parent, dt, t)
     health_widget.content.visible = true
 
     local health_display_type = mod:get("health_display_type")
+    local is_display_type_number = health_display_type == mod.options_display_type.percent or health_display_type == mod.options_display_type.value
+
     local number_to_display = (health_display_type == mod.options_display_type.percent and (health_percent * 100)) or current_health
     local text_color = mod_utils.get_text_color_for_percent_threshold(health_percent, "health") or UIHudSettings.color_tint_main_2
 
     local permanent_number_to_display = (health_display_type == mod.options_display_type.percent and ((1 - permanent_damage_taken_percent) * 100)) or (max_health - permanent_damage_taken)
-    local permanent_texts = mod_utils.convert_number_to_display_texts(math.ceil(permanent_number_to_display), 3, nil, false, true)
+    local permanent_texts = mod_utils.convert_number_to_display_texts(math.floor(permanent_number_to_display), 3, nil, false, true)
     local texts = mod_utils.convert_number_to_display_texts(math.ceil(number_to_display), 3, nil, false, true)
     for i = 1, 3 do
       local key = string.format("text_%s", i)
       local permanent_key = string.format("permanent_%s", key)
       health_widget.content[key] = texts[i] or ""
       health_widget.style[key].text_color = text_color
+      health_widget.style[key].visible = is_display_type_number
 
       health_widget.content[permanent_key] = permanent_texts[i] or ""
-      health_widget.style[permanent_key].visible = permanent_damage_taken > 0
+      health_widget.style[permanent_key].visible = is_display_type_number and permanent_damage_taken > 0
     end
 
-    health_widget.content.wounds_count = num_wounds
-    health_widget.style.wounds_count.text_color = (num_wounds == 1 and UIHudSettings.color_tint_alert_2) or UIHudSettings.color_tint_main_1
     health_widget.style.text_symbol.visible = health_display_type == mod.options_display_type.percent
     health_widget.style.text_symbol.text_color = text_color
     health_widget.style.permanent_text_symbol.visible = health_display_type == mod.options_display_type.percent and permanent_damage_taken > 0
-    health_widget.dirty = true
+
+    local num_wounds = health_extension:num_wounds()
+
+    health_widget.content.wounds_count = num_wounds
+    health_widget.style.wounds_count.text_color = (num_wounds == 1 and UIHudSettings.color_tint_alert_2) or UIHudSettings.color_tint_main_1
+
+    update_gauge(parent, dt, t)
   end
 
   if not health_always_show and parent.health_visible_timer then
