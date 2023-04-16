@@ -499,6 +499,12 @@ local function update_gauge(parent, dt, t)
   local step_fraction = 1 / max_wounds
   for i = 1, max_wounds, 1 do
     local widget = feature._health_segment_widgets[i]
+    if not widget then
+      local widget_name = string.format("segment_%s", i)
+      widget = parent:_create_widget(widget_name, feature.segment_definition)
+      table.insert(parent._widgets, widget)
+      feature._health_segment_widgets[i] = widget
+    end
 
     local health_fraction
     if health_percent then
