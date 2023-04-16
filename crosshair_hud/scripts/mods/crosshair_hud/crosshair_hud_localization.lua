@@ -48,13 +48,16 @@ return {
     ["zh-cn"] = "生命值设置",
   },
   permanent_health_position = {
-    en = "Permanent Health Position"
+    en = "Permanent Health Position",
+    ["zh-cn"] = "生命上限位置",
   },
   permanent_position_top = {
-    en = "Top"
+    en = "Top",
+    ["zh-cn"] = "顶部",
   },
   permanent_position_bottom = {
-    en = "Bottom"
+    en = "Bottom",
+    ["zh-cn"] = "底部",
   },
   health_always_show = {
     en = "Always Show Health",
@@ -300,19 +303,24 @@ return {
   },
 
   options_ally = {
-    en = "Ally Settings"
+    en = "Ally Settings",
+    ["zh-cn"] = "队友设置",
   },
   options_ally_1 = {
-    en = "Ally 1"
+    en = "Ally 1",
+    ["zh-cn"] = "队友 1",
   },
   options_ally_2 = {
-    en = "Ally 2"
+    en = "Ally 2",
+    ["zh-cn"] = "队友 2",
   },
   options_ally_3 = {
-    en = "Ally 3"
+    en = "Ally 3",
+    ["zh-cn"] = "队友 3",
   },
   display_ally_indicator = {
-    en = "Display Ally Indicators"
+    en = "Display Ally Indicators",
+    ["zh-cn"] = "显示队友指示器",
   },
 
   options_global = {
