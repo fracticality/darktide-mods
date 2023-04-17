@@ -653,6 +653,10 @@ end
 
 local function update_status(parent, dt, t, widget, player)
   local profile = player:profile()
+  if not profile then
+    return
+  end
+
   local string_symbol = profile.archetype.string_symbol
   local player_name = player:name()
   local is_alive = Unit.alive(player.player_unit)
