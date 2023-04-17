@@ -28,8 +28,8 @@ validations.run()
 --mod.OPTIONS = {}
 --mod:io_dofile(. . .)
 
-local width = (RESOLUTION_LOOKUP.width and RESOLUTION_LOOKUP.width > 0 and RESOLUTION_LOOKUP.width) or 1920
-local height = (RESOLUTION_LOOKUP.height and RESOLUTION_LOOKUP.height > 0 and RESOLUTION_LOOKUP.height) or 1080
+local width = 1920
+local height = 1080
 local range_x = width / 2
 local range_y = height / 2
 local _coordinates_settings = {
@@ -177,7 +177,11 @@ return {
             setting_id = "display_health_gauge",
             title = "display_gauge",
             type = "checkbox",
-            default_value = true
+            default_value = true,
+            sub_widgets = {
+              create_coordinate_setting("health_gauge", "x", -30),
+              create_coordinate_setting("health_gauge", "y", 70)
+            }
           },
           {
             setting_id = "health_display_type",
@@ -246,7 +250,11 @@ return {
             setting_id = "display_toughness_gauge",
             title = "display_gauge",
             type = "checkbox",
-            default_value = true
+            default_value = true,
+            sub_widgets = {
+              create_coordinate_setting("toughness_gauge", "x", 130),
+              create_coordinate_setting("toughness_gauge", "y", 170)
+            }
           },
           {
             setting_id = "toughness_display_type",

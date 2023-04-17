@@ -17,6 +17,10 @@ local toughness_offset = {
   mod:get("toughness_x_offset"),
   mod:get("toughness_y_offset")
 }
+local toughness_gauge_offset = {
+  mod:get("toughness_gauge_x_offset"),
+  mod:get("toughness_gauge_y_offset")
+}
 
 local feature_name = "toughness_indicator"
 local feature = {
@@ -50,7 +54,7 @@ function feature.create_widget_definitions()
           horizontal_alignment = "right",
           color = UIHudSettings.color_tint_main_1,
           size = { 24 * toughness_scale, 56 * toughness_scale },
-          offset = { 30 * toughness_scale, 0, 1 }
+          offset = { toughness_gauge_offset[1], toughness_gauge_offset[2], 1 }
         },
         visibility_function = function(content, style)
           return mod:get("display_toughness_gauge")
@@ -69,7 +73,7 @@ function feature.create_widget_definitions()
           },
           color = UIHudSettings.color_tint_6,
           size = { 24 * toughness_scale, 56 * toughness_scale },
-          offset = { 30 * toughness_scale, 0, 2 }
+          offset = { toughness_gauge_offset[1], toughness_gauge_offset[2], 2 }
         },
         visibility_function = function(content, style)
           return mod:get("display_toughness_gauge")
@@ -250,7 +254,7 @@ function feature.update(parent, dt, t)
   local toughness_always_show = mod:get("toughness_always_show")
   if toughness_always_show or current_toughness ~= parent.current_toughness then
     parent.current_toughness = current_toughness
-    parent.toughness_visible_timer = mod:get("health_stay_time") or 1.5
+    parent.toughness_visible_timer = mod:get("toughness_stay_time") or 1.5
 
     toughness_widget.content.visible = true
 

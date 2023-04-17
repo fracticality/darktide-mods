@@ -17,6 +17,10 @@ local health_offset = {
   mod:get("health_x_offset"),
   mod:get("health_y_offset")
 }
+local health_gauge_offset = {
+  mod:get("health_gauge_x_offset"),
+  mod:get("health_gauge_y_offset")
+}
 
 local permanent_health_offsets = {
   top = { 0, -20 * health_scale, 2 },
@@ -43,13 +47,6 @@ feature.scenegraph_definition = {
       global_offset[2] + health_offset[2],
       55
     }
-  },
-  segment = {
-    parent = feature_name,
-    vertical_alignment = "center",
-    horizontal_alignment = "left",
-    size = { 24 * health_scale, 56 * health_scale },
-    position = { -30 * health_scale, 28 * health_scale, 0 }
   }
 }
 
@@ -416,7 +413,7 @@ feature.segment_definition = UIWidget.create_definition({
       },
       color = UIHudSettings.color_tint_main_1,
       size = { 24 * health_scale, 56 * health_scale },
-      offset = { -30 * health_scale, 0, 1 }
+      offset = { health_gauge_offset[1], 0, 1 }
     },
     visibility_function = function(content, style)
       return mod:get("display_health_gauge")
@@ -435,7 +432,7 @@ feature.segment_definition = UIWidget.create_definition({
       },
       color = UIHudSettings.color_tint_main_2,
       size = { 24 * health_scale, 56 * health_scale },
-      offset = { -30 * health_scale, 0, 2 }
+      offset = { health_gauge_offset[1], 0, 2 }
     },
     visibility_function = function(content, style)
       return mod:get("display_health_gauge")
@@ -454,7 +451,7 @@ feature.segment_definition = UIWidget.create_definition({
       },
       color = UIHudSettings.color_tint_8,
       size = { 24 * health_scale, 56 * health_scale },
-      offset = { -30 * health_scale, 0, 2 }
+      offset = { health_gauge_offset[1], 0, 2 }
     },
     visibility_function = function(content, style)
       return mod:get("display_health_gauge") and content.permanent_damage and content.permanent_damage > 0
@@ -481,7 +478,7 @@ local function update_gauge(parent, dt, t)
   local spacing = 2 * health_scale
   local bar_height = 56 * health_scale
   local segment_height = (bar_height - (max_wounds - 1) * spacing) / max_wounds
-  local y_offset = -(segment_height + spacing) / 2
+  local y_offset = health_gauge_offset[2]
 
   if not feature._health_segment_widgets then
 
@@ -536,7 +533,7 @@ local function update_gauge(parent, dt, t)
     widget_style.background.uvs[1][2] = (step_fraction * i)
     widget_style.background.uvs[2][2] = (i - 1) * step_fraction
 
-    widget.offset[2] = y_offset + bar_height / 2
+    widget.offset[2] = y_offset
     y_offset = y_offset - (segment_height + spacing)
   end
 end
