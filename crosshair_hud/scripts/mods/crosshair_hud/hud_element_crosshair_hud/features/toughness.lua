@@ -54,10 +54,10 @@ function feature.create_widget_definitions()
           horizontal_alignment = "right",
           color = UIHudSettings.color_tint_main_1,
           size = { 24 * toughness_scale, 56 * toughness_scale },
-          offset = { toughness_gauge_offset[1], toughness_gauge_offset[2], 1 }
+          offset = { toughness_gauge_offset[1], toughness_gauge_offset[2], 3 }
         },
         visibility_function = function(content, style)
-          return mod:get("display_toughness_gauge")
+          return mod:get("display_toughness_gauge") and _shadows_enabled("toughness")
         end
       },
       {
@@ -73,7 +73,7 @@ function feature.create_widget_definitions()
           },
           color = UIHudSettings.color_tint_6,
           size = { 24 * toughness_scale, 56 * toughness_scale },
-          offset = { toughness_gauge_offset[1], toughness_gauge_offset[2], 2 }
+          offset = { toughness_gauge_offset[1], toughness_gauge_offset[2], 4 }
         },
         visibility_function = function(content, style)
           return mod:get("display_toughness_gauge")
@@ -104,6 +104,7 @@ function feature.create_widget_definitions()
         value_id = "text_1",
         value = "0",
         style = {
+          text_style_id = "text_1",
           font_size = 24 * toughness_scale,
           text_vertical_alignment = "top",
           text_horizontal_alignment = "center",
@@ -116,7 +117,7 @@ function feature.create_widget_definitions()
           }
         },
         visibility_function = function(content, style)
-          return _shadows_enabled("toughness")
+          return style.parent[style.text_style_id].visible and _shadows_enabled("toughness")
         end
       },
       {
@@ -144,10 +145,10 @@ function feature.create_widget_definitions()
         value_id = "text_2",
         value = "0",
         style = {
+          text_style_id = "text_2",
           font_size = 24 * toughness_scale,
           text_vertical_alignment = "top",
           text_horizontal_alignment = "center",
-
           font_type = "machine_medium",
           text_color = UIHudSettings.color_tint_0,
           offset = {
@@ -157,7 +158,7 @@ function feature.create_widget_definitions()
           }
         },
         visibility_function = function(content, style)
-          return _shadows_enabled("toughness")
+          return style.parent[style.text_style_id].visible and _shadows_enabled("toughness")
         end
       },
       {
@@ -185,10 +186,10 @@ function feature.create_widget_definitions()
         value_id = "text_3",
         value = "0",
         style = {
+          text_style_id = "text_3",
           font_size = 24 * toughness_scale,
           text_vertical_alignment = "top",
           text_horizontal_alignment = "center",
-
           font_type = "machine_medium",
           text_color = UIHudSettings.color_tint_0,
           offset = {
@@ -198,7 +199,7 @@ function feature.create_widget_definitions()
           }
         },
         visibility_function = function(content, style)
-          return _shadows_enabled("toughness")
+          return style.parent[style.text_style_id].visible and _shadows_enabled("toughness")
         end
       },
       {
@@ -251,12 +252,13 @@ function feature.update(parent, dt, t)
     return
   end
 
+  toughness_widget.content.visible = true
+
   local toughness_always_show = mod:get("toughness_always_show")
+
   if toughness_always_show or current_toughness ~= parent.current_toughness then
     parent.current_toughness = current_toughness
     parent.toughness_visible_timer = mod:get("toughness_stay_time") or 1.5
-
-    toughness_widget.content.visible = true
 
     local toughness_display_type = mod:get("toughness_display_type")
     local number_to_display = (toughness_display_type == mod.options_display_type.percent and (toughness_percent * 100)) or current_toughness
@@ -268,22 +270,26 @@ function feature.update(parent, dt, t)
       local key = string.format("text_%s", i)
       toughness_widget.content[key] = texts[i] or ""
       toughness_widget.style[key].text_color = text_color
+      toughness_widget.style[key].visible = true
     end
+
     toughness_widget.style.text_symbol.visible = toughness_display_type == mod.options_display_type.percent
     toughness_widget.style.text_symbol.text_color = text_color
-
-    toughness_widget.style.toughness.uvs[1][2] = toughness_percent
-    toughness_widget.style.toughness.size[2] = 56 * toughness_percent
-    toughness_widget.style.toughness.offset[2] = 56 * (1 - toughness_percent) * 0.5
-
     toughness_widget.dirty = true
   end
+
+  toughness_widget.style.toughness.uvs[1][2] = toughness_percent
+  toughness_widget.style.toughness.size[2] = 56 * toughness_percent
+  toughness_widget.style.toughness.offset[2] = (56 * (1 - toughness_percent) * 0.5) + toughness_gauge_offset[2]
 
   if not toughness_always_show and parent.toughness_visible_timer then
     parent.toughness_visible_timer = parent.toughness_visible_timer - dt
     if parent.toughness_visible_timer <= 0 then
       parent.toughness_visible_timer = nil
-      toughness_widget.content.visible = false
+      for i = 1, 3 do
+        local key = string.format("text_%s", i)
+        toughness_widget.style[key].visible = false
+      end
     end
   end
 end

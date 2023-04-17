@@ -416,7 +416,7 @@ feature.segment_definition = UIWidget.create_definition({
       offset = { health_gauge_offset[1], 0, 1 }
     },
     visibility_function = function(content, style)
-      return mod:get("display_health_gauge")
+      return mod:get("display_health_gauge") and _shadows_enabled("health")
     end
   },
   {
