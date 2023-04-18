@@ -407,7 +407,10 @@ feature.segment_definition = UIWidget.create_definition({
     style = {
       vertical_alignment = "center",
       horizontal_alignment = "left",
-      uvs = {
+      uvs = mod:get("mirror_health_gauge") and {
+        { 0, 0 },
+        { 1, 1 }
+      } or {
         { 1, 0 },
         { 0, 1 }
       },
@@ -426,7 +429,10 @@ feature.segment_definition = UIWidget.create_definition({
     style = {
       vertical_alignment = "center",
       horizontal_alignment = "left",
-      uvs = {
+      uvs = mod:get("mirror_health_gauge") and {
+        { 0, 0 },
+        { 1, 1 }
+      } or {
         { 1, 0 },
         { 0, 1 }
       },
@@ -445,7 +451,10 @@ feature.segment_definition = UIWidget.create_definition({
     style = {
       vertical_alignment = "center",
       horizontal_alignment = "left",
-      uvs = {
+      uvs = mod:get("mirror_health_gauge") and {
+        { 0, 0 },
+        { 1, 1 }
+      } or {
         { 1, 0 },
         { 0, 1 }
       },

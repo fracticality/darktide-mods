@@ -179,6 +179,12 @@ return {
             type = "checkbox",
             default_value = true,
             sub_widgets = {
+              {
+                setting_id = "mirror_health_gauge",
+                title = "mirror",
+                type = "checkbox",
+                default_value = false
+              },
               create_coordinate_setting("health_gauge", "x", -30),
               create_coordinate_setting("health_gauge", "y", 70)
             }
@@ -252,6 +258,12 @@ return {
             type = "checkbox",
             default_value = true,
             sub_widgets = {
+              {
+                setting_id = "mirror_toughness_gauge",
+                title = "mirror",
+                type = "checkbox",
+                default_value = false
+              },
               create_coordinate_setting("toughness_gauge", "x", 130),
               create_coordinate_setting("toughness_gauge", "y", 170)
             }

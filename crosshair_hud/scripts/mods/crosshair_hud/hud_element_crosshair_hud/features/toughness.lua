@@ -46,12 +46,19 @@ function feature.create_widget_definitions()
   return {
     [feature_name] = UIWidget.create_definition({
       {
-        pass_type = "texture",
+        pass_type = "texture_uv",
         value = "content/ui/materials/hud/crosshairs/charge_up",
         style_id = "background",
         style = {
           vertical_alignment = "center",
           horizontal_alignment = "right",
+          uvs = mod:get("mirror_toughness_gauge") and {
+            { 1, 1 },
+            { 0, 0 }
+          } or {
+            { 0, 0 },
+            { 1, 1 }
+          },
           color = UIHudSettings.color_tint_main_1,
           size = { 24 * toughness_scale, 56 * toughness_scale },
           offset = { toughness_gauge_offset[1], toughness_gauge_offset[2], 3 }
@@ -67,7 +74,10 @@ function feature.create_widget_definitions()
         style = {
           vertical_alignment = "center",
           horizontal_alignment = "right",
-          uvs = {
+          uvs = mod:get("mirror_toughness_gauge") and {
+            { 1, 1 },
+            { 0, 0 }
+          } or {
             { 0, 1 },
             { 1, 0 }
           },
