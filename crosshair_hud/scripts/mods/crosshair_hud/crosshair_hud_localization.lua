@@ -360,5 +360,8 @@ return {
   mirror = {
     en = "Mirrored",
     ["zh-cn"] = "镜像",
+  },
+  display_wounds_count = {
+    en = "Display Wounds Remaining"
   }
 }

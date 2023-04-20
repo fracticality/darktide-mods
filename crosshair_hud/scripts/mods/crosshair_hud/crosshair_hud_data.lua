@@ -208,6 +208,11 @@ return {
             }
           },
           {
+            setting_id = "display_wounds_count",
+            type = "checkbox",
+            default_value = true
+          },
+          {
             setting_id = "health_always_show",
             type = "checkbox",
             default_value = true,

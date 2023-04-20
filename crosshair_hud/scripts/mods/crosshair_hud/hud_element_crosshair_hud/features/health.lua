@@ -71,7 +71,7 @@ function feature.create_widget_definitions()
           }
         },
         visibility_function = function(content, style)
-          return not mod:get("display_health_gauge")
+          return mod:get("display_wounds_count") and not mod:get("display_health_gauge")
         end
       },
       {
