@@ -301,13 +301,13 @@ local function _setup_title_button()
 
   end)
 
-  mod:hook_safe(TitleView, "update", function(self, dt, t, input_service)
+  mod:hook_safe("TitleView", "update", function(self, dt, t, input_service)
     if input_service:get("hotkey_system") and not self._parent:is_loading() then
       _quit()
     end
   end)
 
-  mod:hook_safe(TitleView, "on_enter", function(self)
+  mod:hook_safe("TitleView", "on_enter", function(self)
     Managers.ui:load_view("system_view", "psych_ward")
   end)
 end
