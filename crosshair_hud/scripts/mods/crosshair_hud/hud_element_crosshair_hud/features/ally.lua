@@ -459,6 +459,10 @@ local function update_health(parent, dt, t, widget, player)
   local wounds_widgets = feature._wounds_widgets_by_player[player]
   for i = 1, max_wounds do
     local wounds_widget = wounds_widgets[i]
+    if not wounds_widget then
+      return
+    end
+
     local health_fraction
     if health_percent then
       local end_value = i * step_fraction
@@ -466,7 +470,7 @@ local function update_health(parent, dt, t, widget, player)
       health_fraction = math.clamp01((health_percent - start_value) / step_fraction)
     end
 
-    local permanent_fraction
+    local permanent_fraction = 0
     if permanent_damage_percent then
       local end_value = (max_wounds + 1 - i) * step_fraction
       local start_value = end_value - step_fraction

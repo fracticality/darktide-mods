@@ -1,5 +1,7 @@
+-- TODO: Convert rgb to closest built-in color
+
 local mod = get_mod("crosshair_hud")
-local validations = mod:io_dofile("crosshair_hud/scripts/mods/crosshair_hud/settings/validations")
+local migrations = mod:io_dofile("crosshair_hud/scripts/mods/crosshair_hud/settings/migrations")
 
 local options_display_type = table.enum("percent", "value")
 mod.options_display_type = options_display_type
@@ -12,7 +14,22 @@ local options_coherency_type = {
 }
 mod.options_coherency_type = options_coherency_type
 
-validations.run()
+migrations.run()
+
+local color_options = {}
+for i, color_name in ipairs(Color.list) do
+  table.insert(color_options, {
+    text = color_name,
+    value = color_name
+  })
+end
+table.sort(color_options, function(a, b)
+  return a.text < b.text
+end)
+
+local function get_color_options()
+  return table.clone(color_options)
+end
 
 --TODO: Test converting multiple widgets to one widget that updates dynamic value
 --TODO: Recreate these local funcs to reproduce:
@@ -94,9 +111,16 @@ local function create_threshold_settings(setting_id)
       type = "checkbox",
       default_value = false,
       sub_widgets = {
-        create_color_setting(threshold_id, "red"),
-        create_color_setting(threshold_id, "green"),
-        create_color_setting(threshold_id, "blue")
+        {
+          setting_id = threshold_id .. "_color",
+          title = "color",
+          type = "dropdown",
+          default_value = "ui_terminal",
+          options = get_color_options()
+        },
+        --create_color_setting(threshold_id, "red"),
+        --create_color_setting(threshold_id, "green"),
+        --create_color_setting(threshold_id, "blue")
         --{
         --    setting_id = threshold_id,
         --    type = "group",
@@ -199,12 +223,19 @@ return {
             }
           },
           {
-            setting_id = "permanent_health_position",
-            type = "dropdown",
-            default_value = "top",
-            options = {
-              { text = "permanent_position_top", value = "top" },
-              { text = "permanent_position_bottom", value = "bottom" }
+            setting_id = "display_permanent_health_text",
+            type = "checkbox",
+            default_value = true,
+            sub_widgets = {
+              {
+                setting_id = "permanent_health_position",
+                type = "dropdown",
+                default_value = "top",
+                options = {
+                  { text = "permanent_position_top", value = "top" },
+                  { text = "permanent_position_bottom", value = "bottom" },
+                }
+              },
             }
           },
           {
@@ -353,12 +384,16 @@ return {
               { text = "coherency_colors_teammate", value = "player_color" },
               { text = "coherency_colors_health", value = "player_health" },
               { text = "coherency_colors_toughness", value = "player_toughness" },
-              { text = "coherency_colors_static", value = "static_color", show_widgets = { 1, 2, 3 } }
+              { text = "coherency_colors_static", value = "static_color", show_widgets = { 1 } }
             },
             sub_widgets = {
-              create_color_setting("coherency_color_static", "red"),
-              create_color_setting("coherency_color_static", "green"),
-              create_color_setting("coherency_color_static", "blue")
+              {
+                setting_id = "coherency_color_static_color",
+                title = "coherency_colors_static",
+                type = "dropdown",
+                default_value = "ui_terminal",
+                options = get_color_options()
+              }
             }
           }
         }
@@ -446,6 +481,11 @@ return {
             type = "checkbox",
             default_value = true,
             sub_widgets = {
+              {
+                setting_id = "display_peril_icon",
+                type = "checkbox",
+                default_value = true,
+              },
               create_shadow_setting("peril"),
               create_scale_setting("peril"),
               create_coordinate_setting("peril", "x", 0),
@@ -466,6 +506,11 @@ return {
             type = "checkbox",
             default_value = true,
             sub_widgets = {
+              {
+                setting_id = "display_grenade_icon",
+                type = "checkbox",
+                default_value = true
+              },
               create_shadow_setting("grenade"),
               create_scale_setting("grenade"),
               create_coordinate_setting("grenade", "x", -100),

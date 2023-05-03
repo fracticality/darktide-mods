@@ -6,6 +6,7 @@ local HudElementCrosshairHud = class("HudElementCrosshairHud", "HudElementBase")
 
 function HudElementCrosshairHud:init(parent, draw_layer, start_scale)
   self._talents_by_unit = {}
+  self._parent = parent
 
   local features = _definitions.features
   local scenegraph_definition = _definitions.scenegraph_definition
@@ -13,7 +14,7 @@ function HudElementCrosshairHud:init(parent, draw_layer, start_scale)
   local features_by_name = {}
 
   for feature_name, feature in pairs(features) do
-    local definitions = feature.create_widget_definitions()
+    local definitions = feature.create_widget_definitions(self)
 
     if definitions then
       table.merge_recursive(scenegraph_definition, feature.scenegraph_definition)

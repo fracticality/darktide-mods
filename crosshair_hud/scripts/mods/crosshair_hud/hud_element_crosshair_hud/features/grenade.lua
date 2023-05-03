@@ -52,7 +52,10 @@ function feature.create_widget_definitions()
           horizontal_alignment = "left",
           color = UIHudSettings.color_tint_main_1,
           offset = { 0, 0, 1 }
-        }
+        },
+        visibility_function = function(content, style)
+          return mod:get("display_grenade_icon")
+        end
       },
       {
         pass_type = "texture",
@@ -67,7 +70,7 @@ function feature.create_widget_definitions()
           offset = { 2 * grenade_scale, 2 * grenade_scale, 0 }
         },
         visibility_function = function(content, style)
-          return _shadows_enabled("grenade")
+          return mod:get("display_grenade_icon") and _shadows_enabled("grenade")
         end
       },
       {

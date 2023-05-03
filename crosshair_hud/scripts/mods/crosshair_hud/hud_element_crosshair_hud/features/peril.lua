@@ -56,7 +56,10 @@ function feature.create_widget_definitions()
           text_horizontal_alignment = "left",
           text_color = UIHudSettings.color_tint_1,
           offset = { 0, 0, 1 }
-        }
+        },
+        visibility_function = function(content, style)
+          return mod:get("display_peril_icon")
+        end
       },
       {
         pass_type = "text",
@@ -64,6 +67,7 @@ function feature.create_widget_definitions()
         value_id = "symbol_text",
         style_id = "symbol_text_shadow",
         style = {
+          text_style_id = "symbol_text",
           font_size = 20 * peril_scale,
           font_type = "machine_medium",
           text_vertical_alignment = "center",
@@ -72,7 +76,7 @@ function feature.create_widget_definitions()
           offset = { 2 * peril_scale, 2 * peril_scale, 0 }
         },
         visibility_function = function(content, style)
-          return _shadows_enabled("peril")
+          return style.parent[style.text_style_id].visible and _shadows_enabled("peril")
         end
       },
       {

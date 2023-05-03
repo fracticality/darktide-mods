@@ -586,7 +586,7 @@ function feature.update(parent, dt, t)
       health_widget.style[key].visible = is_display_type_number
 
       health_widget.content[permanent_key] = permanent_texts[i] or ""
-      health_widget.style[permanent_key].visible = is_display_type_number and permanent_damage_taken > 0
+      health_widget.style[permanent_key].visible = mod:get("display_permanent_health_text") and is_display_type_number and permanent_damage_taken > 0
     end
 
     health_widget.style.text_symbol.visible = health_display_type == mod.options_display_type.percent

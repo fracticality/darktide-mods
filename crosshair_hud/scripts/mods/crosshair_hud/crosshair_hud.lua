@@ -227,12 +227,14 @@ local function _get_text_color_for_percent_threshold(percent, setting)
 
       local is_threshold_customized = mod:get(threshold_setting_id)
       if is_threshold_customized then
-        color = {
-          color[1],
-          mod:get(threshold_setting_id .. "_red") or default_color[2],
-          mod:get(threshold_setting_id .. "_green") or default_color[3],
-          mod:get(threshold_setting_id .. "_blue") or default_color[4]
-        }
+        local color_id = string.format("%s_color", threshold_setting_id)
+        color = Color[mod:get(color_id)](255, true)
+        --color = {
+        --  color[1],
+        --  mod:get(threshold_setting_id .. "_red") or default_color[2],
+        --  mod:get(threshold_setting_id .. "_green") or default_color[3],
+        --  mod:get(threshold_setting_id .. "_blue") or default_color[4]
+        --}
 
         break
       end
