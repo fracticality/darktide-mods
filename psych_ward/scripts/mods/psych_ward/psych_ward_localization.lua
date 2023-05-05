@@ -45,6 +45,7 @@ return {
     ru = "Инвентарь",
   },
   exit_text = {
-    en = "Press %s to quit"
+    en = "Press %s to quit",
+    ru = "Нажмите %s, чтобы выйти из игры",
   }
 }
