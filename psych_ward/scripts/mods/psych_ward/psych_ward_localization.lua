@@ -19,7 +19,7 @@ return {
     ["zh-cn"] = "启用直接进入灵能室功能，无需进入大厅。",
     ru = "Позволяет войти прямо на стрельбище в Псайканиум, минуя Хаб.",
   },
-  enter_psykhanium = {
+  psykhanium_button = {
     en = "Shooting Range",
     ["zh-cn"] = "训练场",
     ru = "Стрельбище",
@@ -44,4 +44,7 @@ return {
     ["zh-cn"] = "库存",
     ru = "Инвентарь",
   },
+  exit_text = {
+    en = "Press %s to quit"
+  }
 }
