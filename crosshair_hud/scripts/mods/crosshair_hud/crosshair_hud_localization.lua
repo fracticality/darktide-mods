@@ -377,35 +377,45 @@ local localizations = {
     ["zh-cn"] = "镜像",
   },
   display_wounds_count = {
-    en = "Display Wounds Remaining"
+    en = "Display Wounds Remaining",
+    ["zh-cn"] = "显示剩余生命格",
   },
   color = {
-    en = "Color"
+    en = "Color",
+    ["zh-cn"] = "颜色",
   },
   display_permanent_health_text = {
-    en = "Display Permanent Health Text"
+    en = "Display Permanent Health Text",
+    ["zh-cn"] = "显示生命值上限文本",
   },
   display_peril_icon = {
-    en = "Display Peril Icon"
+    en = "Display Peril Icon",
+    ["zh-cn"] = "显示危机值图标",
   },
   display_grenade_icon = {
-    en = "Display Grenade Icon"
+    en = "Display Grenade Icon",
+    ["zh-cn"] = "显示手雷图标",
   },
 
   options_archetype = {
-    en = "Archetype Indicators"
+    en = "Archetype Indicators",
+    ["zh-cn"] = "职业信息指示器",
   },
   options_archetype_psyker = {
-    en = "Psyker"
+    en = "Psyker",
+    ["zh-cn"] = "灵能者",
   },
   display_archetype_indicator_psyker = {
-    en = "Display Warp Charge Indicator"
+    en = "Display Warp Charge Indicator",
+    ["zh-cn"] = "显示亚空间充能指示器",
   },
   archetype_psyker_pip_color = {
-    en = "Pip Color"
+    en = "Pip Color",
+    ["zh-cn"] = "中心颜色",
   },
   archetype_psyker_frame_color = {
-    en = "Frame Color"
+    en = "Frame Color",
+    ["zh-cn"] = "边框颜色",
   }
 }
 
