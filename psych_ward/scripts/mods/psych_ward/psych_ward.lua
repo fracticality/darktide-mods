@@ -284,7 +284,7 @@ local function _setup_title_button()
       parent = "background_image",
       vertical_alignment = "bottom",
       horizontal_alignment = "center",
-      size = { 300, 50 },
+      size = { 450, 50 },
       position = { 0, -25, 4 }
     }
 
