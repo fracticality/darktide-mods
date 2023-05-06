@@ -321,10 +321,15 @@ local function _setup_title_button()
 
   end)
 
-  mod:hook_safe(TitleView, "update", function(self, dt, t, input_service)
+  mod:hook_safe("TitleView", "update", function(self, dt, t, input_service)
     if self._parent:is_loading() then
-      self._widgets_by_name[_exit_text].content.visible = false
-      mod:hook_disable(TitleView, "update")
+      mod:hook_disable("TitleView", "update")
+
+      local exit_widget = self._widgets_by_name[_exit_text]
+      local widget_content = exit_widget and exit_widget.content
+      if widget_content then
+        widget_content.visible = false
+      end
 
       return
     end
@@ -334,7 +339,7 @@ local function _setup_title_button()
     end
   end)
 
-  mod:hook_safe(TitleView, "_apply_title_text", function(self)
+  mod:hook_safe("TitleView", "_apply_title_text", function(self)
     local input = InputUtils.input_text_for_current_input_device("View", "close_view", true)
     local text = mod:localize("exit_text", input)
     self._widgets_by_name[_exit_text].content.text = text
