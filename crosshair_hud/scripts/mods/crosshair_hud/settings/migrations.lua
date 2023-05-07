@@ -18,9 +18,11 @@ local migrations = {
     migration_func = function(data)
       local mod_settings = Application.user_setting("mods_settings").crosshair_hud
       for setting_id, setting_value in pairs(mod_settings) do
-        local new_setting_id = string.gsub(setting_id, "empty", "critical")
-        mod:set(new_setting_id, setting_value)
-        mod:set(setting_id, nil)
+        if string.find(setting_id, "empty") then
+          local new_setting_id = string.gsub(setting_id, "empty", "critical")
+          mod:set(new_setting_id, setting_value)
+          mod:set(setting_id, nil)
+        end
       end
       
       return true
@@ -67,7 +69,6 @@ local migrations = {
         end
 
         if closest_color_name then
-          mod:notify("closest color is %s with deviation %s", closest_color_name, lowest_deviation)
           mod:set(string.format("%s_color", color_id), closest_color_name)
         end
       end
@@ -77,12 +78,15 @@ local migrations = {
   }
 }
 
+for i, migration_data in ipairs(migrations) do
+  migration_data.id = i
+end
+
 local function _run_migrations()
   local migrations_n = #migrations
   for i = 1, migrations_n do
     local migration_data = migrations[i]
     if not migration_data.is_migrated then
-      migration_data.migration_id = i
       
       local success, result = mod:pcall(function()
         return migration_data:migration_func()

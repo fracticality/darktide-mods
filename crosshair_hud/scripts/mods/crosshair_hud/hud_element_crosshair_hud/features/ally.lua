@@ -451,7 +451,7 @@ local function update_health(parent, dt, t, widget, player)
   end
 
   local step_fraction = 1 / max_wounds
-  local spacing = 2 * ally_scale
+  local spacing = 1 * ally_scale
   local bar_height = 56 * ally_scale
   local segment_height = (bar_height - (max_wounds - 1) * spacing) / max_wounds
   local y_offset = -(segment_height + spacing) / 2

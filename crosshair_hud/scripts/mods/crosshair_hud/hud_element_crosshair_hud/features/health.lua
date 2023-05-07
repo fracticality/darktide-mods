@@ -484,10 +484,10 @@ local function update_gauge(parent, dt, t)
   local permanent_damage_taken_percent = health_extension:permanent_damage_taken_percent()
   local max_wounds = health_extension:max_wounds()
 
-  local spacing = 2 * health_scale
+  local spacing = 1 * health_scale
   local bar_height = 56 * health_scale
   local segment_height = (bar_height - (max_wounds - 1) * spacing) / max_wounds
-  local y_offset = health_gauge_offset[2]
+  local y_offset = health_gauge_offset[2] + (bar_height * 0.5) - segment_height / 2
 
   if not feature._health_segment_widgets then
 

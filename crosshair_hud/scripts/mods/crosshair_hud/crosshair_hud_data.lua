@@ -210,7 +210,7 @@ return {
                 default_value = false
               },
               create_coordinate_setting("health_gauge", "x", -30),
-              create_coordinate_setting("health_gauge", "y", 70)
+              create_coordinate_setting("health_gauge", "y", 0)
             }
           },
           {
@@ -300,8 +300,8 @@ return {
                 type = "checkbox",
                 default_value = false
               },
-              create_coordinate_setting("toughness_gauge", "x", 130),
-              create_coordinate_setting("toughness_gauge", "y", 170)
+              create_coordinate_setting("toughness_gauge", "x", 30),
+              create_coordinate_setting("toughness_gauge", "y", 0)
             }
           },
           {
@@ -584,8 +584,95 @@ return {
             }
           }
         }
-      }
+      },
 
+      --- Archetype ---
+      {
+        setting_id = "options_archetype",
+        type = "group",
+        sub_widgets = {
+          {
+            setting_id = "options_archetype_psyker",
+            type = "group",
+            sub_widgets = {
+              {
+                setting_id = "display_archetype_indicator_psyker",
+                type = "checkbox",
+                default_value = true,
+                sub_widgets = {
+                  create_shadow_setting("archetype_psyker"),
+                  create_scale_setting("archetype_psyker"),
+                  create_coordinate_setting("archetype_psyker", "x", 0),
+                  create_coordinate_setting("archetype_psyker", "y", 0),
+                  {
+                    setting_id = "archetype_psyker_pip_color",
+                    type = "dropdown",
+                    default_value = "ui_terminal",
+                    options = get_color_options()
+                  },
+                  {
+                    setting_id = "archetype_psyker_frame_color",
+                    type = "dropdown",
+                    default_value = "ui_terminal",
+                    options = get_color_options()
+                  }
+                }
+              }
+            }
+          },
+          {
+            setting_id = "options_archetype_veteran",
+            type = "group",
+            sub_widgets = {
+              {
+                setting_id = "display_archetype_indicator_veteran",
+                type = "checkbox",
+                default_value = true,
+                sub_widgets = {
+                  create_shadow_setting("archetype_veteran"),
+                  create_scale_setting("archetype_veteran"),
+                  create_coordinate_setting("archetype_veteran", "x", 0),
+                  create_coordinate_setting("archetype_veteran", "y", 0),
+                }
+              }
+            }
+          },
+          {
+            setting_id = "options_archetype_zealot",
+            type = "group",
+            sub_widgets = {
+              {
+                setting_id = "display_archetype_indicator_zealot",
+                type = "checkbox",
+                default_value = true,
+                sub_widgets = {
+                  create_shadow_setting("archetype_zealot"),
+                  create_scale_setting("archetype_zealot"),
+                  create_coordinate_setting("archetype_zealot", "x", 0),
+                  create_coordinate_setting("archetype_zealot", "y", 0),
+                }
+              }
+            }
+          },
+          {
+            setting_id = "options_archetype_ogryn",
+            type = "group",
+            sub_widgets = {
+              {
+                setting_id = "display_archetype_indicator_ogryn",
+                type = "checkbox",
+                default_value = true,
+                sub_widgets = {
+                  create_shadow_setting("archetype_ogryn"),
+                  create_scale_setting("archetype_ogryn"),
+                  create_coordinate_setting("archetype_ogryn", "x", 0),
+                  create_coordinate_setting("archetype_ogryn", "y", 0),
+                }
+              }
+            }
+          }
+        }
+      },
     }
   }
 }
