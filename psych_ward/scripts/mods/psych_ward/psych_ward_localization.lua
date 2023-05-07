@@ -5,6 +5,7 @@ mod:add_global_localize_strings({
     en = "Vendors",
     ["zh-cn"] = "大厅功能",
     ru = "Торговцы",
+    ja = "ベンダー",
   }
 })
 
@@ -18,34 +19,41 @@ return {
     en = "Enables logging in straight to the Psykhanium, bypassing the Hub.",
     ["zh-cn"] = "启用直接进入灵能室功能，无需进入大厅。",
     ru = "Позволяет войти прямо на стрельбище в Псайканиум, минуя Хаб.",
+    ja = "ハブを介さず、サイカニウムへと直接入場できるようになります。",
   },
   psykhanium_button = {
     en = "Shooting Range",
     ["zh-cn"] = "训练场",
     ru = "Стрельбище",
+    ja = "演習場",
   },
   vendor_button= {
     en = "Armoury",
     ["zh-cn"] = "军械交易所",
     ru = "Оружейная",
+    ja = "武器交換",
   },
   contracts_button = {
     en = "Contracts",
     ["zh-cn"] = "每周协议",
     ru = "Контракты",
+    ja = "週間契約",
   },
   crafting_button = {
     en = "Crafting",
     ["zh-cn"] = "锻造",
     ru = "Кузница",
+    ja = "クラフト",
   },
   inventory_button = {
     en = "Inventory",
     ["zh-cn"] = "库存",
     ru = "Инвентарь",
+    ja = "インベントリ",
   },
   exit_text = {
     en = "Press %s to quit",
+    ja = "%sで終了",
     ["zh-cn"] = "按下%s以退出",
     ru = "Нажмите %s, чтобы выйти",
   }
