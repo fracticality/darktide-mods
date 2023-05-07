@@ -45,6 +45,7 @@ return {
     ru = "Инвентарь",
   },
   exit_text = {
-    en = "Press %s to quit"
+    en = "Press %s to quit",
+    ["zh-cn"] = "按下%s以退出",
   }
 }
