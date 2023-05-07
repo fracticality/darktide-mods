@@ -47,5 +47,6 @@ return {
   exit_text = {
     en = "Press %s to quit",
     ["zh-cn"] = "按下%s以退出",
+    ru = "Нажмите %s, чтобы выйти",
   }
 }
