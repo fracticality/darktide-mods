@@ -297,22 +297,6 @@ function feature.create_widget_definitions()
       },
       {
         pass_type = "text",
-        value = "0",
-        value_id = "wounds_count",
-        style_id = "wounds_count",
-        style = {
-          font_size = 20,
-          font_type = "machine_medium",
-          vertical_alignment = "center",
-          horizontal_alignment = "center",
-          text_vertical_alignment = "center",
-          text_horizontal_alignment = "center",
-          text_color = UIHudSettings.color_tint_main_1,
-          offset = { 0, 24, 2 }
-        }
-      },
-      {
-        pass_type = "text",
         value = "",
         value_id = "ally_name",
         style_id = "ally_name",
@@ -422,21 +406,13 @@ end
 
 local function update_health(parent, dt, t, widget, player)
   local health_extension = ScriptUnit.has_extension(player.player_unit, "health_system")
-  if not health_extension then
-    return
-  end
 
-  local health_percent = health_extension:current_health_percent()
-  local permanent_damage_percent = health_extension:permanent_damage_taken_percent()
-  local max_wounds = health_extension:max_wounds()
-  local num_wounds = health_extension:num_wounds()
+  local health_percent = health_extension and health_extension:current_health_percent() or 0
+  local permanent_damage_percent = health_extension and health_extension:permanent_damage_taken_percent() or 0
+  local max_wounds = health_extension and health_extension:max_wounds() or 1
 
   local content = widget.content
   content.health_text = math.ceil(health_percent * 100)
-  content.wounds_count = num_wounds
-
-  local wounds_count_style = widget.style.wounds_count
-  wounds_count_style.text_color = num_wounds == 1 and UIHudSettings.color_tint_alert_2 or UIHudSettings.color_tint_main_1
 
   if not feature._wounds_widgets_by_player[player] then
     local wounds_widgets = {}
@@ -496,23 +472,6 @@ local function update_health(parent, dt, t, widget, player)
     wounds_widget.offset[2] = y_offset + bar_height / 2
     y_offset = y_offset - (segment_height + spacing)
   end
-
-  --local mask_height_max = 56
-  --local health_mask_height = mask_height_max * health_percent
-  --local health_mask_height_offset = mask_height_max * (1 - health_percent) * 0.5
-  --
-  --local health_gauge_style = widget.style.health_gauge_mask
-  --health_gauge_style.uvs[1][2] = 1 - health_percent
-  --health_gauge_style.size[2] = health_mask_height
-  --health_gauge_style.offset[2] = health_mask_height_offset
-  --
-  --local permanent_mask_height = mask_height_max * permanent_damage_percent
-  --local permanent_mask_height_offset = mask_height_max * (1 - permanent_damage_percent) * 0.5
-  --
-  --local permanent_gauge_style = widget.style.permanent_gauge_mask
-  --permanent_gauge_style.uvs[2][2] = permanent_damage_percent
-  --permanent_gauge_style.size[2] = permanent_mask_height
-  --permanent_gauge_style.offset[2] = -permanent_mask_height_offset
 end
 
 local function update_toughness(parent, dt, t, widget, player)
@@ -655,6 +614,7 @@ local function update_ammo(parent, dt, t, widget, player)
   icon_style.visible = show_ammo_icon
 end
 
+local unit_alive = Unit.alive
 local function update_status(parent, dt, t, widget, player)
   local profile = player:profile()
   if not profile then
@@ -663,7 +623,7 @@ local function update_status(parent, dt, t, widget, player)
 
   local string_symbol = profile.archetype.string_symbol
   local player_name = player:name()
-  local is_alive = Unit.alive(player.player_unit)
+  local is_alive = unit_alive(player.player_unit)
 
   widget.content.archetype_symbol = string_symbol
   widget.content.ally_name = player_name
@@ -681,10 +641,7 @@ local function update_status(parent, dt, t, widget, player)
   widget.style.archetype_symbol.text_color = (is_disabled and UIHudSettings.player_status_colors[character_state_name]) or (not is_alive and UIHudSettings.player_status_colors.dead) or player_slot_color
 
   widget.content.status_icon = (not is_alive and UIHudSettings.player_status_icons.dead) or (is_disabled and UIHudSettings.player_status_icons[character_state_name])
-  widget.style.status_icon.color = (is_disabled and UIHudSettings.player_status_colors[character_state_name]) or (not is_alive and UIHudSettings.player_status_colors.dead)
-
-  widget.content.mask_red = not is_alive
-
+  widget.style.status_icon.color = (not is_alive and UIHudSettings.player_status_colors.dead) or (is_disabled and UIHudSettings.player_status_colors[character_state_name])
 end
 
 local function update_pocketable(parent, dt, t, widget, player)

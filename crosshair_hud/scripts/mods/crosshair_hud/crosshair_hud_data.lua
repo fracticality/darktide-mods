@@ -184,6 +184,11 @@ return {
             setting_id = "enable_shadows",
             type = "checkbox",
             default_value = true,
+          },
+          {
+            setting_id = "hide_sprint_buff",
+            type = "checkbox",
+            default_value = false
           }
         }
       },
@@ -586,93 +591,91 @@ return {
         }
       },
 
-      --- Archetype ---
+      --- Archetypes ---
       {
-        setting_id = "options_archetype",
+        setting_id = "options_archetype_psyker",
         type = "group",
         sub_widgets = {
           {
-            setting_id = "options_archetype_psyker",
-            type = "group",
+            setting_id = "display_warp_charge_indicator",
+            type = "checkbox",
+            default_value = true,
             sub_widgets = {
               {
-                setting_id = "display_archetype_indicator_psyker",
+                setting_id = "hide_warp_charges_buff",
                 type = "checkbox",
-                default_value = true,
-                sub_widgets = {
-                  create_shadow_setting("archetype_psyker"),
-                  create_scale_setting("archetype_psyker"),
-                  create_coordinate_setting("archetype_psyker", "x", 0),
-                  create_coordinate_setting("archetype_psyker", "y", 0),
-                  {
-                    setting_id = "archetype_psyker_pip_color",
-                    type = "dropdown",
-                    default_value = "ui_terminal",
-                    options = get_color_options()
-                  },
-                  {
-                    setting_id = "archetype_psyker_frame_color",
-                    type = "dropdown",
-                    default_value = "ui_terminal",
-                    options = get_color_options()
-                  }
-                }
-              }
+                default_value = false
+              },
+              create_shadow_setting("warp_charge"),
+              create_scale_setting("warp_charge"),
+              create_coordinate_setting("warp_charge", "x", 0),
+              create_coordinate_setting("warp_charge", "y", 0),
             }
           },
           {
-            setting_id = "options_archetype_veteran",
-            type = "group",
+            setting_id = "display_kinetic_flayer_indicator",
+            type = "checkbox",
+            default_value = true,
             sub_widgets = {
-              {
-                setting_id = "display_archetype_indicator_veteran",
-                type = "checkbox",
-                default_value = true,
-                sub_widgets = {
-                  create_shadow_setting("archetype_veteran"),
-                  create_scale_setting("archetype_veteran"),
-                  create_coordinate_setting("archetype_veteran", "x", 0),
-                  create_coordinate_setting("archetype_veteran", "y", 0),
-                }
-              }
-            }
-          },
-          {
-            setting_id = "options_archetype_zealot",
-            type = "group",
-            sub_widgets = {
-              {
-                setting_id = "display_archetype_indicator_zealot",
-                type = "checkbox",
-                default_value = true,
-                sub_widgets = {
-                  create_shadow_setting("archetype_zealot"),
-                  create_scale_setting("archetype_zealot"),
-                  create_coordinate_setting("archetype_zealot", "x", 0),
-                  create_coordinate_setting("archetype_zealot", "y", 0),
-                }
-              }
-            }
-          },
-          {
-            setting_id = "options_archetype_ogryn",
-            type = "group",
-            sub_widgets = {
-              {
-                setting_id = "display_archetype_indicator_ogryn",
-                type = "checkbox",
-                default_value = true,
-                sub_widgets = {
-                  create_shadow_setting("archetype_ogryn"),
-                  create_scale_setting("archetype_ogryn"),
-                  create_coordinate_setting("archetype_ogryn", "x", 0),
-                  create_coordinate_setting("archetype_ogryn", "y", 0),
-                }
-              }
+              create_shadow_setting("kinetic_flayer"),
+              create_scale_setting("kinetic_flayer"),
+              create_coordinate_setting("kinetic_flayer", "x", 0),
+              create_coordinate_setting("kinetic_flayer", "y", 0)
             }
           }
         }
       },
+      --{
+      --  setting_id = "options_archetype_veteran",
+      --  type = "group",
+      --  sub_widgets = {
+      --    {
+      --      setting_id = "display_archetype_indicator_veteran",
+      --      type = "checkbox",
+      --      default_value = true,
+      --      sub_widgets = {
+      --        create_shadow_setting("archetype_veteran"),
+      --        create_scale_setting("archetype_veteran"),
+      --        create_coordinate_setting("archetype_veteran", "x", 0),
+      --        create_coordinate_setting("archetype_veteran", "y", 0),
+      --      }
+      --    }
+      --  }
+      --},
+      --{
+      --  setting_id = "options_archetype_zealot",
+      --  type = "group",
+      --  sub_widgets = {
+      --    {
+      --      setting_id = "display_archetype_indicator_zealot",
+      --      type = "checkbox",
+      --      default_value = true,
+      --      sub_widgets = {
+      --        create_shadow_setting("archetype_zealot"),
+      --        create_scale_setting("archetype_zealot"),
+      --        create_coordinate_setting("archetype_zealot", "x", 0),
+      --        create_coordinate_setting("archetype_zealot", "y", 0),
+      --      }
+      --    }
+      --  }
+      --},
+      --{
+      --  setting_id = "options_archetype_ogryn",
+      --  type = "group",
+      --  sub_widgets = {
+      --    {
+      --      setting_id = "display_archetype_indicator_ogryn",
+      --      type = "checkbox",
+      --      default_value = true,
+      --      sub_widgets = {
+      --        create_shadow_setting("archetype_ogryn"),
+      --        create_scale_setting("archetype_ogryn"),
+      --        create_coordinate_setting("archetype_ogryn", "x", 0),
+      --        create_coordinate_setting("archetype_ogryn", "y", 0),
+      --      }
+      --    }
+      --  }
+      --}
     }
   }
 }
