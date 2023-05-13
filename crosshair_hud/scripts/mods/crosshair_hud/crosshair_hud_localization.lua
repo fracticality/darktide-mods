@@ -40,6 +40,12 @@ local localizations = {
     en = "Adjusts vertical position.\nNegative values move the display up; positive values down.",
     ["zh-cn"] = "调整垂直位置。\n负值表示向上移动，正值表示向下移动。",
   },
+  hide_sprint_buff = {
+    en = "Hide Sprint Buff Icon"
+  },
+  hide_sprint_buff_description = {
+    en = "Hides the sprint buff from the buff bar."
+  },
 
   health_display_type = {
     en = "Display Type",
@@ -396,30 +402,25 @@ local localizations = {
     en = "Display Grenade Icon",
     ["zh-cn"] = "显示手雷图标",
   },
-
-  options_archetype = {
-    en = "Archetype Indicators",
-    ["zh-cn"] = "职业信息指示器",
-  },
   options_archetype_psyker = {
-    en = "Psyker",
+    en = "Psyker Indicators",
     ["zh-cn"] = "灵能者",
   },
-  display_archetype_indicator_psyker = {
+  display_warp_charge_indicator = {
     en = "Display Warp Charge Indicator",
     ["zh-cn"] = "显示亚空间充能指示器",
   },
-  archetype_psyker_pip_color = {
-    en = "Pip Color",
-    ["zh-cn"] = "中心颜色",
+  hide_warp_charges_buff = {
+    en = "Hide Warp Charge Buff Icon"
   },
-  archetype_psyker_frame_color = {
-    en = "Frame Color",
-    ["zh-cn"] = "边框颜色",
-  }
+  hide_warp_charges_buff_description = {
+    en = "Removes the Warp Charge buff from the buff bar."
+  },
+  display_kinetic_flayer_indicator = {
+    en = "Display Kinetic Flayer Cooldown"
+  },
 }
 
-local colors = {}
 local color_names = Color.list
 for i, color_name in ipairs(color_names) do
   local color_values = Color[color_name](255, true)

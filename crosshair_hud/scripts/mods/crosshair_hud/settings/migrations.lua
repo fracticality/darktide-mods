@@ -20,7 +20,11 @@ local migrations = {
       for setting_id, setting_value in pairs(mod_settings) do
         if string.find(setting_id, "empty") then
           local new_setting_id = string.gsub(setting_id, "empty", "critical")
-          mod:set(new_setting_id, setting_value)
+
+          if mod:get(new_setting_id) == nil then
+            mod:set(new_setting_id, setting_value)
+          end
+
           mod:set(setting_id, nil)
         end
       end

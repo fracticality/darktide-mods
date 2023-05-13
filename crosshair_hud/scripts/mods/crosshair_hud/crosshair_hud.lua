@@ -129,10 +129,35 @@ end
 mod:hook("ActionReloadState", "start", start)
 mod:hook("ActionReloadShotgun", "start", start)
 
+local _setting_id_by_template_name = {
+  coherency_toughness_regen = "hide_coherency_buff_bar",
+  sprint_with_stamina_buff = "hide_sprint_buff",
+  psyker_biomancer_souls = "hide_warp_charges_buff",
+  psyker_biomancer_souls_increased_max_stacks = "hide_warp_charges_buff"
+}
 mod:hook_require("scripts/settings/buff/player_buff_templates", function(templates)
-  local template = templates.coherency_toughness_regen
-  if template then
-    template.hide_icon_in_hud = mod:get("hide_coherency_buff_bar")
+
+  for template_name, template in pairs(templates) do
+    local setting_id = _setting_id_by_template_name[template_name]
+    if setting_id then
+      template.hide_icon_in_hud = mod:get(setting_id)
+    end
+  end
+end)
+
+mod:hook_require("scripts/settings/buff/player_archetype_specialization/psyker_biomancer_buff_templates", function(templates)
+  for template_name, template in pairs(templates) do
+    local setting_id = _setting_id_by_template_name[template_name]
+    if setting_id then
+      template.hide_icon_in_hud = mod:get(setting_id)
+    end
+  end
+
+  local kinetic_flayer_template = templates.psyker_biomancer_smite_on_hit
+  if kinetic_flayer_template then
+    mod:hook_safe(kinetic_flayer_template, "update_func", function(template_data, template_context, dt, t)
+      template_data.t = t
+    end)
   end
 end)
 
@@ -229,12 +254,6 @@ local function _get_text_color_for_percent_threshold(percent, setting)
       if is_threshold_customized then
         local color_id = string.format("%s_color", threshold_setting_id)
         color = Color[mod:get(color_id)](255, true)
-        --color = {
-        --  color[1],
-        --  mod:get(threshold_setting_id .. "_red") or default_color[2],
-        --  mod:get(threshold_setting_id .. "_green") or default_color[3],
-        --  mod:get(threshold_setting_id .. "_blue") or default_color[4]
-        --}
 
         break
       end
