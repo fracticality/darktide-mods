@@ -41,10 +41,12 @@ local localizations = {
     ["zh-cn"] = "调整垂直位置。\n负值表示向上移动，正值表示向下移动。",
   },
   hide_sprint_buff = {
-    en = "Hide Sprint Buff Icon"
+    en = "Hide Sprint Buff Icon",
+    ["zh-cn"] = "隐藏疾跑效果图标",
   },
   hide_sprint_buff_description = {
-    en = "Hides the sprint buff from the buff bar."
+    en = "Hides the sprint buff from the buff bar.",
+    ["zh-cn"] = "在状态效果栏隐藏疾跑效果。",
   },
 
   health_display_type = {
@@ -411,13 +413,16 @@ local localizations = {
     ["zh-cn"] = "显示亚空间充能指示器",
   },
   hide_warp_charges_buff = {
-    en = "Hide Warp Charge Buff Icon"
+    en = "Hide Warp Charge Buff Icon",
+    ["zh-cn"] = "隐藏亚空间充能效果图标",
   },
   hide_warp_charges_buff_description = {
-    en = "Removes the Warp Charge buff from the buff bar."
+    en = "Removes the Warp Charge buff from the buff bar.",
+    ["zh-cn"] = "在状态效果栏隐藏亚空间充能效果。",
   },
   display_kinetic_flayer_indicator = {
-    en = "Display Kinetic Flayer Cooldown"
+    en = "Display Kinetic Flayer Cooldown",
+    ["zh-cn"] = "显示动能剥皮者冷却",
   },
 }
 
