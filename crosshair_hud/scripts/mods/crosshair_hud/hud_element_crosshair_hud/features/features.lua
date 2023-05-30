@@ -43,6 +43,6 @@ _create_feature_entry("toughness")
 _create_feature_entry("coherency")
 _create_feature_entry("ally")
 _create_feature_entry("warp_charge")
-_create_feature_entry("kinetic_flayer")
+--_create_feature_entry("kinetic_flayer")
 
 return _features

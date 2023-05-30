@@ -612,17 +612,17 @@ return {
               create_coordinate_setting("warp_charge", "y", 0),
             }
           },
-          {
-            setting_id = "display_kinetic_flayer_indicator",
-            type = "checkbox",
-            default_value = true,
-            sub_widgets = {
-              create_shadow_setting("kinetic_flayer"),
-              create_scale_setting("kinetic_flayer"),
-              create_coordinate_setting("kinetic_flayer", "x", 0),
-              create_coordinate_setting("kinetic_flayer", "y", 0)
-            }
-          }
+          --{
+          --  setting_id = "display_kinetic_flayer_indicator",
+          --  type = "checkbox",
+          --  default_value = true,
+          --  sub_widgets = {
+          --    create_shadow_setting("kinetic_flayer"),
+          --    create_scale_setting("kinetic_flayer"),
+          --    create_coordinate_setting("kinetic_flayer", "x", 0),
+          --    create_coordinate_setting("kinetic_flayer", "y", 0)
+          --  }
+          --}
         }
       },
       --{

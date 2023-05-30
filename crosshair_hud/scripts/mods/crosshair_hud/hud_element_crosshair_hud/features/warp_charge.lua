@@ -151,6 +151,7 @@ function feature.update(parent, dt, t)
   local max_resource = talents.psyker_2_tier_5_name_1 and 6 or 4
   local current_resource = specialization_resource_component.current_resource
   local offset_modifier = max_resource == 4 and (24 * warp_charge_scale) or 0
+  local display_warp_charge_indicator = mod:get("display_warp_charge_indicator")
 
   for i = 1, max_resource do
     local is_visible = i <= current_resource
@@ -158,15 +159,15 @@ function feature.update(parent, dt, t)
     local frame_id = string.format("frame_%s", i)
     local circle_style = widget_style[circle_id]
     local frame_style = widget_style[frame_id]
-    local offset = ((i - 1) * 24) * warp_charge_scale + offset_modifier
+    local offset = warp_charge_offset[1] + ((i - 1) * 24) * warp_charge_scale + offset_modifier
 
     circle_style.offset[1] = offset - 4 * warp_charge_scale
-    circle_style.visible = is_visible
+    circle_style.visible = display_warp_charge_indicator and is_visible
     circle_style.material_values.saturation = i < current_resource and 1 or (i == current_resource and warp_charge_duration_progress) or 0
     circle_style.color[1] = 200 * (i < current_resource and 1 or (i == current_resource and warp_charge_duration_progress) or 0) + 55
 
     frame_style.offset[1] = offset
-    frame_style.visible = true
+    frame_style.visible = display_warp_charge_indicator
   end
 
   for i = max_resource + 1, 6 do
@@ -176,7 +177,7 @@ function feature.update(parent, dt, t)
 
   widget_content.warp_charge_duration = warp_charge_duration
   widget_style.warp_charge_duration.offset[1] = (current_resource - 1) * 24 * warp_charge_scale + offset_modifier
-  widget_style.warp_charge_duration.visible = current_resource > 0
+  widget_style.warp_charge_duration.visible = display_warp_charge_indicator and current_resource > 0
 end
 
 return feature

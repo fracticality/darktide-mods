@@ -46,12 +46,6 @@ function feature.create_widget_definitions(parent)
   local archetype = profile and profile.archetype
   local archetype_name = archetype and archetype.name
 
-  local widgets_by_name = parent._widgets_by_name
-  local widget = widgets_by_name and widgets_by_name[feature_name]
-  if widget then
-    UIWidget.destroy(ui_hud:ui_renderer(), widget)
-  end
-
   if not (archetype_name and archetype_name == "psyker") or not profile.talents.psyker_2_tier_5_name_3 then
     return
   end
@@ -107,7 +101,18 @@ end
 
 function feature.update(parent, dt, t)
   local widget = parent._widgets_by_name[feature_name]
+  if not widget then
+    return
+  end
+
+  local display_kinetic_flayer_indicator = mod:get("display_kinetic_flayer_indicator")
   local widget_content = widget.content
+
+  widget_content.visible = display_kinetic_flayer_indicator
+  if not display_kinetic_flayer_indicator then
+    return
+  end
+
   local widget_style = widget.style
 
   local ui_hud = parent._parent
@@ -126,8 +131,8 @@ function feature.update(parent, dt, t)
       local template_data = buff._template_data
       if template_data then
         local next_allowed_t = template_data.next_allowed_t or 0
-        local template_data_t = template_data.t or 0
-        cooldown_remaining = math.max(next_allowed_t - template_data_t, 0)
+        local gameplay_time = Managers.time:time("gameplay") or 0
+        cooldown_remaining = math.max(next_allowed_t - gameplay_time, 0)
         kinetic_flayer_cooldown = string.format(":%02d", cooldown_remaining)
         kinetic_flayer_is_on_cooldown = cooldown_remaining > 0
         has_kinetic_flayer = true

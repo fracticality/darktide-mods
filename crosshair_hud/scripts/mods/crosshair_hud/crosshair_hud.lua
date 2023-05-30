@@ -152,13 +152,6 @@ mod:hook_require("scripts/settings/buff/player_archetype_specialization/psyker_b
       template.hide_icon_in_hud = mod:get(setting_id)
     end
   end
-
-  local kinetic_flayer_template = templates.psyker_biomancer_smite_on_hit
-  if kinetic_flayer_template then
-    mod:hook_safe(kinetic_flayer_template, "update_func", function(template_data, template_context, dt, t)
-      template_data.t = t
-    end)
-  end
 end)
 
 local function _shadows_enabled(setting_id)
