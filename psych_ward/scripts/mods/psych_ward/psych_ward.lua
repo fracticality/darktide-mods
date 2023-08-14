@@ -17,6 +17,7 @@ local _vendor_button = "vendor_button"
 local _contracts_button = "contracts_button"
 local _crafting_button = "crafting_button"
 local _inventory_button = "inventory_button"
+local _cosmetics_button = "cosmetics_button"
 local _difficulty_stepper = "difficulty_stepper"
 local _stepper_content
 
@@ -25,9 +26,12 @@ local _view_button_names = {
   _contracts_button,
   _crafting_button,
   _inventory_button,
+  _cosmetics_button
   --_psykhanium_button
 }
 
+local button_size = { 150, ButtonPassTemplates.terminal_button_small.size[2] }
+local button_offset = { 0, button_size[2] + 10, 0 }
 local _button_settings = {
   [_psykhanium_button] = {
     view_name = "training_grounds_view",
@@ -35,48 +39,58 @@ local _button_settings = {
       parent = "character_info",
       vertical_alignment = "top",
       horizontal_alignment = "center",
-      size = ButtonPassTemplates.ready_button.size,
-      position = { 0, -ButtonPassTemplates.ready_button.size[2], 0 }
+      size = ButtonPassTemplates.terminal_button_small.size,
+      position = { 0, -25, 0 }
     }
   },
   [_vendor_button] = {
     view_name = "credits_vendor_background_view",
     scenegraph_definition = {
-      parent = "screen",
-      vertical_alignment = "top",
-      horizontal_alignment = "center",
-      size = ButtonPassTemplates.ready_button.size,
-      position = { 0, 0, 0 }
+      parent = _inventory_button,
+      vertical_alignment = "bottom",
+      horizontal_alignment = "right",
+      size = button_size,
+      position = button_offset
     }
   },
   [_contracts_button] = {
     view_name = "contracts_background_view",
     scenegraph_definition = {
-      parent = "screen",
+      parent = _vendor_button,
       vertical_alignment = "top",
-      horizontal_alignment = "center",
-      size = ButtonPassTemplates.ready_button.size,
-      position = { ButtonPassTemplates.ready_button.size[1], 0, 0 }
+      horizontal_alignment = "right",
+      size = button_size,
+      position = button_offset
     }
   },
   [_crafting_button] = {
     view_name = "crafting_view",
     scenegraph_definition = {
-      parent = "screen",
+      parent = _contracts_button,
       vertical_alignment = "top",
-      horizontal_alignment = "center",
-      size = ButtonPassTemplates.ready_button.size,
-      position = { -ButtonPassTemplates.ready_button.size[1], 0, 0 }
+      horizontal_alignment = "right",
+      size = button_size,
+      position = button_offset
+    }
+  },
+  [_cosmetics_button] = {
+    view_name = "cosmetics_vendor_background_view",
+    scenegraph_definition = {
+      parent = _crafting_button,
+      vertical_alignment = "top",
+      horizontal_alignment = "right",
+      size = button_size,
+      position = button_offset
     }
   },
   [_inventory_button] = {
     view_name = "inventory_background_view",
     scenegraph_definition = {
-      parent = "screen",
+      parent = "wallet_element_background",
       vertical_alignment = "bottom",
-      horizontal_alignment = "center",
-      size = ButtonPassTemplates.ready_button.size,
-      position = { 0, -ButtonPassTemplates.ready_button.size[2] / 2, 0 }
+      horizontal_alignment = "right",
+      size = button_size,
+      position = { -15, button_size[2] + 25, 0 }
     }
   }
 }
@@ -101,7 +115,7 @@ local function _get_challenge_level()
   return challenge_level
 end
 
-local MainMenuView = mod:original_require("scripts/ui/views/main_menu_view/main_menu_view")
+local MainMenuView = require("scripts/ui/views/main_menu_view/main_menu_view")
 function MainMenuView:cb_on_toggle_view_buttons()
   local widgets_by_name = self._widgets_by_name
   for _, button_name in ipairs(_view_button_names) do
@@ -123,17 +137,26 @@ local legend_input = {
   end
 }
 
+local _is_view_loading
 local function _open_view(view_name)
   local character_id = Managers.player:local_player(1):profile().character_id
-  local promise = Managers.narrative:load_character_narrative(character_id)
+  local narrative_promise = Managers.narrative:load_character_narrative(character_id)
 
-  Promise.all(promise):next(function (_)
-    Managers.ui:open_view(view_name, nil, nil, nil, nil, {
-      hub_interaction = true,
-    })
-  end):catch(function ()
-    return
-  end)
+  if not _is_view_loading then
+    _is_view_loading = true
+
+    Promise.all(narrative_promise):next(function (_)
+      _is_view_loading = false
+
+      Managers.ui:open_view(view_name, nil, nil, nil, nil, {
+        hub_interaction = true,
+      })
+    end):catch(function ()
+      _is_view_loading = false
+
+      return
+    end)
+  end
 end
 
 local main_menu_definitions_file = "scripts/ui/views/main_menu_view/main_menu_view_definitions"
@@ -151,26 +174,27 @@ mod:hook_require(main_menu_definitions_file, function(definitions)
     vertical_alignment = "bottom",
     horizontal_alignment = "center",
     size = { 300, 60 },
-    position = { -25, -200, 10 }
+    position = { -25, -75, 10 }
   }
 
   for button_name, button_settings in pairs(_button_settings) do
-    local button = UIWidget.create_definition(ButtonPassTemplates.ready_button, button_name, {
+    local button = UIWidget.create_definition(ButtonPassTemplates.terminal_button_small, button_name, {
       text = mod:localize(button_name),
       view_name = button_settings.view_name
     })
-    button.content.visible = false
+    --button.content.visible = false
     definitions.widget_definitions[button_name] = button
     definitions.scenegraph_definition[button_name] = button_settings.scenegraph_definition
   end
 
-  local definition = UIWidget.create_definition(table.clone(StepperPassTemplates.difficulty_stepper), _difficulty_stepper)
-  index = table.find_by_key(definition.passes, "pass_type", "texture")
+  local stepper_template = table.clone(StepperPassTemplates.difficulty_stepper)
+  local definition = UIWidget.create_definition(stepper_template, _difficulty_stepper)
+  index = table.find_by_key(definition.passes, "style_id", "danger")
   if index then
     table.remove(definition.passes, index)
   end
 
-  index = table.find_by_key(definition.passes, "value_id", "stepper_left")
+  index = table.find_by_key(definition.passes, "style_id", "stepper_left")
   if index then
     local pass = definition.passes[index]
     local style = definition.style[pass.style_id]
@@ -201,7 +225,7 @@ mod:hook_require(main_menu_definitions_file, function(definitions)
 
 end)
 
-mod:hook("StateMainMenu", "update", function(func, self, main_dt, main_t)
+mod:hook(CLASS.StateMainMenu, "update", function(func, self, main_dt, main_t)
 
   if self._continue and not self:_waiting_for_profile_synchronization() then
     if _go_to_shooting_range then
@@ -229,13 +253,16 @@ mod:hook("StateMainMenu", "update", function(func, self, main_dt, main_t)
 
       return next_state, state_context
     end
+  elseif self._continue then
+    self._continue = false
   end
 
   return func(self, main_dt, main_t)
 
 end)
 
-mod:hook_safe("MainMenuView", "_handle_input", function(self, input_service)
+local _wallet_update_t = 5
+mod:hook_safe(CLASS.MainMenuView, "_handle_input", function(self, input_service, dt, t)
   local play_button = self._widgets_by_name.play_button.content
 
   local widget = self._widgets_by_name[_psykhanium_button].content
@@ -245,9 +272,21 @@ mod:hook_safe("MainMenuView", "_handle_input", function(self, input_service)
   if not _setup_complete then
     self:_setup_interactions()
   end
+
+  local wallet_element = self._wallet_element
+  if wallet_element then
+    local wallet_update_t = (self._wallet_update_t or 0) + dt
+
+    if wallet_update_t > _wallet_update_t then
+      wallet_update_t = nil
+      wallet_element:update_wallets()
+    end
+
+    self._wallet_update_t = wallet_update_t
+  end
 end)
 
-mod:hook_safe("MainMenuView", "_setup_interactions", function(self)
+mod:hook_safe(CLASS.MainMenuView, "_setup_interactions", function(self)
 
   _setup_complete = true
   local widgets_by_name = self._widgets_by_name
@@ -277,77 +316,72 @@ local function _quit()
   Application.quit()
 end
 
-local function _setup_title_button()
-  local title_view_definitions_file = "scripts/ui/views/title_view/title_view_definitions"
-  mod:hook_require(title_view_definitions_file, function(definitions)
-    definitions.scenegraph_definition[_exit_text] = {
-      parent = "background_image",
-      vertical_alignment = "bottom",
-      horizontal_alignment = "center",
-      size = { 450, 50 },
-      position = { 0, -25, 4 }
-    }
+local title_view_definitions_file = "scripts/ui/views/title_view/title_view_definitions"
+mod:hook_require(title_view_definitions_file, function(definitions)
+  definitions.scenegraph_definition[_exit_text] = {
+    parent = "background_image",
+    vertical_alignment = "bottom",
+    horizontal_alignment = "center",
+    size = { 450, 50 },
+    position = { 0, -25, 4 }
+  }
 
-    definitions.widget_definitions[_exit_text] = UIWidget.create_definition({
-      {
-        pass_type = "hotspot",
-        content_id = "hotspot",
-        content = {
-          pressed_callback = _quit
-        },
+  definitions.widget_definitions[_exit_text] = UIWidget.create_definition({
+    {
+      pass_type = "hotspot",
+      content_id = "hotspot",
+      content = {
+        pressed_callback = _quit
       },
-      {
-        pass_type = "text",
-        value = "",
-        value_id = "text",
-        style = {
-          font_size = 24,
-          font_type = "proxima_nova_bold",
-          text_vertical_alignment = "center",
-          text_horizontal_alignment = "center",
-          text_color = Color.text_default(255, true),
-          offset = { 0, 0, 2 }
-        },
-        change_function = function(content, style)
-          local progress = 0.5 + math.sin(Application.time_since_launch() * 3) * 0.5
-          local text_color = style.text_color
-          local progress_color = 180 + 75 * progress
-          text_color[2] = progress_color
-          text_color[3] = progress_color
-          text_color[4] = progress_color
-        end
-      }
-    }, _exit_text)
-
-  end)
-
-  mod:hook_safe("TitleView", "update", function(self, dt, t, input_service)
-    if self._parent:is_loading() then
-      mod:hook_disable("TitleView", "update")
-
-      local exit_widget = self._widgets_by_name[_exit_text]
-      local widget_content = exit_widget and exit_widget.content
-      if widget_content then
-        widget_content.visible = false
+    },
+    {
+      pass_type = "text",
+      value = "",
+      value_id = "text",
+      style = {
+        font_size = 24,
+        font_type = "proxima_nova_bold",
+        text_vertical_alignment = "center",
+        text_horizontal_alignment = "center",
+        text_color = Color.text_default(255, true),
+        offset = { 0, 0, 2 }
+      },
+      change_function = function(content, style)
+        local progress = 0.5 + math.sin(Application.time_since_launch() * 3) * 0.5
+        local text_color = style.text_color
+        local progress_color = 180 + 75 * progress
+        text_color[2] = progress_color
+        text_color[3] = progress_color
+        text_color[4] = progress_color
       end
+    }
+  }, _exit_text)
 
-      return
+end)
+
+mod:hook_safe(CLASS.TitleView, "update", function(self, dt, t, input_service)
+  if self._parent:is_loading() then
+    mod:hook_disable(CLASS.TitleView, "update")
+
+    local exit_widget = self._widgets_by_name[_exit_text]
+    local widget_content = exit_widget and exit_widget.content
+    if widget_content then
+      widget_content.visible = false
     end
 
-    if input_service:get("hotkey_system") then
-      _quit()
-    end
-  end)
+    return
+  end
 
-  mod:hook_safe("TitleView", "_apply_title_text", function(self)
+  if input_service:get("hotkey_system") then
+    _quit()
+  end
+end)
+
+mod:hook_safe(CLASS.TitleView, "_apply_title_text", function(self)
+  local exit_text_widget = self._widgets_by_name[_exit_text]
+  if exit_text_widget then
     local input = InputUtils.input_text_for_current_input_device("View", "close_view", true)
     local text = mod:localize("exit_text", input)
-    self._widgets_by_name[_exit_text].content.text = text
-  end)
-end
-
---[[
-  Init
-]]--
-
-_setup_title_button()
+    exit_text_widget.content.text = text
+  end
+end)

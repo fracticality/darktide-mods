@@ -45,6 +45,9 @@ return {
     ru = "Кузница",
     ja = "クラフト",
   },
+  cosmetics_button = {
+    en = "Cosmetics"
+  },
   inventory_button = {
     en = "Inventory",
     ["zh-cn"] = "库存",
