@@ -48,6 +48,7 @@ return {
   cosmetics_button = {
     en = "Cosmetics",
     ru = "Интендант",
+    ["zh-cn"] = "装饰品",
   },
   inventory_button = {
     en = "Inventory",
