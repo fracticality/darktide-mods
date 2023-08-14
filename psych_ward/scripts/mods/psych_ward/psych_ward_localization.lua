@@ -18,7 +18,7 @@ return {
   psych_ward_description = {
     en = "Enables logging in straight to the Psykhanium, bypassing the Hub.",
     ["zh-cn"] = "启用直接进入灵能室功能，无需进入大厅。",
-    ru = "Позволяет войти прямо на стрельбище в Псайканиум, минуя Хаб.",
+    ru = "Psych Ward - Позволяет войти прямо на стрельбище в Псайканиум, минуя Хаб.",
     ja = "ハブを介さず、サイカニウムへと直接入場できるようになります。",
   },
   psykhanium_button = {
@@ -46,7 +46,8 @@ return {
     ja = "クラフト",
   },
   cosmetics_button = {
-    en = "Cosmetics"
+    en = "Cosmetics",
+    ru = "Интендант",
   },
   inventory_button = {
     en = "Inventory",
