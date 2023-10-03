@@ -1,10 +1,11 @@
 local mod = get_mod("crosshair_hud")
 
-local ArchetypeTalents = mod:original_require("scripts/settings/ability/archetype_talents/archetype_talents")
-local UIViewHandler = mod:original_require("scripts/managers/ui/ui_view_handler")
-local TextUtilities = mod:original_require("scripts/utilities/ui/text")
-local ReloadStates = mod:original_require("scripts/extension_systems/weapon/utilities/reload_states")
-local UIHudSettings = mod:original_require("scripts/settings/ui/ui_hud_settings")
+local Archetypes = require("scripts/settings/archetype/archetypes")
+local ArchetypeTalents = require("scripts/settings/ability/archetype_talents/archetype_talents")
+local UIViewHandler = require("scripts/managers/ui/ui_view_handler")
+local TextUtilities = require("scripts/utilities/ui/text")
+local ReloadStates = require("scripts/extension_systems/weapon/utilities/reload_states")
+local UIHudSettings = require("scripts/settings/ui/ui_hud_settings")
 
 local class_name = "HudElementCrosshairHud"
 local filename = "crosshair_hud/scripts/mods/crosshair_hud/hud_element_crosshair_hud/hud_element_crosshair_hud"
@@ -44,22 +45,18 @@ local function recreate_hud()
   end
 end
 
-local _loaded_specializations = {}
-local _loading_specializations = {}
+local _loaded_archetypes = {}
+local _loading_archetypes = {}
 local function load_talent_icon_packages()
-  _loaded_specializations = _loaded_specializations or {}
-  _loading_specializations = _loading_specializations or {}
+  _loaded_archetypes = _loaded_archetypes or {}
+  _loading_archetypes = _loading_archetypes or {}
 
   local talents_service = Managers.data_service.talents
 
-  for _, archetype_talents in pairs(ArchetypeTalents) do
-    for specialization_name, _ in pairs(archetype_talents) do
-      if specialization_name ~= "none" then
-        local on_package_loaded = callback(mod, "_cb_load_icons_for_profile", mod, specialization_name)
-        local load_id = talents_service:load_icons_for_profile({ specialization = specialization_name }, "CrosshairHUD", on_package_loaded, true)
-        _loading_specializations[specialization_name] = load_id
-      end
-    end
+  for archetype_name, archetype_data in pairs(Archetypes) do
+    local on_package_loaded = callback(mod, "_cb_load_icons_for_profile", mod, archetype_name)
+    local load_id = talents_service:load_icons_for_profile({ archetype = archetype_data }, "CrosshairHUD", on_package_loaded, true)
+    _loading_archetypes[archetype_name] = load_id
   end
 end
 
@@ -81,21 +78,21 @@ function mod.on_unload(exit_game)
 
 end
 
-function mod:_cb_load_icons_for_profile(specialization_name)
-  _loaded_specializations[specialization_name] = _loading_specializations[specialization_name]
-  _loading_specializations[specialization_name] = nil
+function mod:_cb_load_icons_for_profile(archetype_name)
+  _loaded_archetypes[archetype_name] = _loading_archetypes[archetype_name]
+  _loading_archetypes[archetype_name] = nil
 end
 
-function mod:specialization_is_loading(specialization_name)
-  return _loading_specializations[specialization_name] ~= nil
+function mod:archetype_is_loading(archetype_name)
+  return _loading_archetypes[archetype_name] ~= nil
 end
 
-function mod:specialization_is_loaded(specialization_name)
-  return _loaded_specializations[specialization_name] ~= nil
+function mod:archetype_is_loaded(archetype_name)
+  return _loaded_archetypes[archetype_name] ~= nil
 end
 
-function mod:specialization_load_id(specialization_name)
-  return _loaded_specializations[specialization_name] or _loading_specializations[specialization_name]
+function mod:archetype_load_id(archetype_name)
+  return _loaded_archetypes[archetype_name] or _loading_archetypes[archetype_name]
 end
 
 mod:hook_safe(UIViewHandler, "close_view", function(self, view_name, force_close)

@@ -507,9 +507,9 @@ local function update_peril(parent, dt, t, widget, player)
     return
   end
 
-  local specialization_warp_charge_template = WarpCharge.specialization_warp_charge_template(player)
+  local archetype_warp_charge_template = WarpCharge.archetype_warp_charge_template(player)
 
-  if specialization_warp_charge_template == ArchetypeWarpChargeTemplates.psyker then
+  if archetype_warp_charge_template == ArchetypeWarpChargeTemplates.psyker then
     local warp_charge_component = unit_data_extension and unit_data_extension:read_component("warp_charge")
     local current_percentage = warp_charge_component and warp_charge_component.current_percentage or 0
 
