@@ -5,7 +5,7 @@ local _definitions = mod:io_dofile("crosshair_hud/scripts/mods/crosshair_hud/hud
 local HudElementCrosshairHud = class("HudElementCrosshairHud", "HudElementBase")
 
 function HudElementCrosshairHud:init(parent, draw_layer, start_scale)
-  self._talents_by_unit = {}
+  self._talent_icons_by_player = {}
   self._parent = parent
 
   local features = _definitions.features

@@ -13,8 +13,8 @@ local global_offset = {
   mod:get("global_y_offset")
 }
 local kinetic_flayer_offset = {
-  mod:get("kinetic_flayer_x_offset") + global_offset[1],
-  mod:get("kinetic_flayer_y_offset") + global_offset[2]
+  mod:get("kinetic_flayer_x_offset"),
+  mod:get("kinetic_flayer_y_offset")
 }
 
 local feature_name = "kinetic_flayer"
@@ -32,8 +32,8 @@ feature.scenegraph_definition = {
       40 * kinetic_flayer_scale
     },
     position = {
-      kinetic_flayer_offset[1],
-      kinetic_flayer_offset[2],
+      kinetic_flayer_offset[1] + global_offset[1],
+      kinetic_flayer_offset[2] + global_offset[2],
       55
     }
   }
@@ -46,7 +46,7 @@ function feature.create_widget_definitions(parent)
   local archetype = profile and profile.archetype
   local archetype_name = archetype and archetype.name
 
-  if not (archetype_name and archetype_name == "psyker") or not profile.talents.psyker_2_tier_5_name_3 then
+  if not (archetype_name and archetype_name == "psyker") or not profile.talents.psyker_smite_on_hit then
     return
   end
 
@@ -67,7 +67,7 @@ function feature.create_widget_definitions(parent)
     },
     {
       pass_type = "texture",
-      value = "content/ui/materials/icons/talents/talent_icon_container",
+      value = "content/ui/materials/frames/talents/talent_icon_container",
       style_id = "kinetic_flayer_icon",
       style = {
         vertical_alignment = "center",
@@ -76,7 +76,10 @@ function feature.create_widget_definitions(parent)
         color = { 255, 255, 255, 255 },
         offset = { 0, -8 * kinetic_flayer_scale, 3 },
         material_values = {
-          icon_texture = "content/ui/textures/icons/talents/psyker_2/psyker_2_tier_2_1",
+          icon = "content/ui/textures/icons/buffs/hud/psyker/psyker_2_tier_5_name_3",
+          gradient_map = "content/ui/textures/color_ramps/talent_blitz",
+          frame = "content/ui/textures/frames/talents/circular_frame",
+          icon_mask = "content/ui/textures/frames/talents/circular_frame_mask"
         }
       },
     },
@@ -90,7 +93,10 @@ function feature.create_widget_definitions(parent)
         size = { 28 * kinetic_flayer_scale, 28 * kinetic_flayer_scale },
         color = Color.steel_blue(255, true),
         offset = { 0, -8 * kinetic_flayer_scale, 4 },
-      }
+      },
+      visibility_function = function(content, style)
+        return
+      end
     }
   }
 
@@ -127,8 +133,8 @@ function feature.update(parent, dt, t)
   for i = 1, #buffs do
     local buff = buffs[i]
     local buff_name = buff:template_name()
-    if buff_name == "psyker_biomancer_smite_on_hit" then
-      local template_data = buff._template_data
+    if buff_name == "psyker_smite_on_hit" then
+      local template_data = buff:template_data()
       if template_data then
         local next_allowed_t = template_data.next_allowed_t or 0
         local gameplay_time = Managers.time:time("gameplay") or 0
@@ -146,7 +152,6 @@ function feature.update(parent, dt, t)
   widget_style.kinetic_flayer_cooldown.visible = kinetic_flayer_is_on_cooldown
   widget_style.kinetic_flayer_icon.visible = has_kinetic_flayer
   widget_style.kinetic_flayer_icon_frame.visible = has_kinetic_flayer
-
 
   local kinetic_flayer_icon_style = widget_style.kinetic_flayer_icon
   local material_values = kinetic_flayer_icon_style.material_values

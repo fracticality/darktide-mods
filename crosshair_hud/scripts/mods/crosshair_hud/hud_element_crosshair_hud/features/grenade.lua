@@ -137,7 +137,7 @@ function feature.update(parent)
 
   local unit_data_extension = player_extensions.unit_data
   local warp_charge_component = unit_data_extension and unit_data_extension:read_component("warp_charge")
-  if warp_charge_component and max_ability_charges == 1 then
+  if (warp_charge_component and max_ability_charges == 1) or max_ability_charges == 0 then
     content.visible = false
     return
   end

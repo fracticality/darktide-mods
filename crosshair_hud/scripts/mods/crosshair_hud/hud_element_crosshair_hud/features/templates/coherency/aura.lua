@@ -1,10 +1,10 @@
 local mod = get_mod("crosshair_hud")
 local mod_utils = mod.utils
 
-local UIWidget = mod:original_require("scripts/managers/ui/ui_widget")
-local UIHudSettings = mod:original_require("scripts/settings/ui/ui_hud_settings")
-local ArchetypeTalents = mod:original_require("scripts/settings/ability/archetype_talents/archetype_talents")
-local UISettings = mod:original_require("scripts/settings/ui/ui_settings")
+local UIWidget = require("scripts/managers/ui/ui_widget")
+local UIHudSettings = require("scripts/settings/ui/ui_hud_settings")
+local Archetypes = require("scripts/settings/archetype/archetypes")
+local UISettings = require("scripts/settings/ui/ui_settings")
 local player_slot_colors = UISettings.player_slot_colors
 
 local global_scale = mod:get("global_scale")
@@ -96,7 +96,9 @@ function template.create_widget_definitions(feature_name)
           size = { 28 * coherency_scale, 28 * coherency_scale },
           offset = { -22 * coherency_scale, -2 * coherency_scale, 2 },
           color = { 255, 255, 255, 255 },
-          material_values = {}
+          material_values = {
+            gradient_map = "content/ui/textures/color_ramps/talent_aura",
+          }
         },
         visibility_function = function(content, style)
           return style.material_values.talent_icon ~= nil
@@ -112,7 +114,9 @@ function template.create_widget_definitions(feature_name)
           size = { 28 * coherency_scale, 28 * coherency_scale },
           offset = { 0, -2 * coherency_scale, 2 },
           color = { 255, 255, 255, 255 },
-          material_values = {}
+          material_values = {
+            gradient_map = "content/ui/textures/color_ramps/talent_aura",
+          }
         },
         visibility_function = function(content, style)
           return style.material_values.talent_icon ~= nil
@@ -128,7 +132,9 @@ function template.create_widget_definitions(feature_name)
           size = { 28 * coherency_scale, 28 * coherency_scale },
           offset = { 22 * coherency_scale, -2 * coherency_scale, 2 },
           color = { 255, 255, 255, 255 },
-          material_values = {}
+          material_values = {
+            gradient_map = "content/ui/textures/color_ramps/talent_aura",
+          }
         },
         visibility_function = function(content, style)
           return style.material_values.talent_icon ~= nil
@@ -138,43 +144,67 @@ function template.create_widget_definitions(feature_name)
   }
 end
 
-local _coherency_talents = {
-  psyker_2 = {
-    base = "psyker_2_base_3",
-    improved = "psyker_2_tier_3_name_2"
-  },
-  ogryn_2 = {
-    base = "ogryn_2_base_4",
-    improved = "ogryn_2_tier_3_name_2"
-  },
-  veteran_2 = {
-    base = "veteran_2_base_3",
-    improved = "veteran_2_tier_3_name_2"
-  },
-  zealot_2 = {
-    base = "zealot_2_base_3",
-    improved = "zealot_2_tier_3_name_2"
-  }
-}
+local _coherency_talents = {}
 
-local _psyker_talents = ArchetypeTalents.psyker
-local _ogryn_talents = ArchetypeTalents.ogryn
-local _veteran_talents = ArchetypeTalents.veteran
-local _zealot_talents = ArchetypeTalents.zealot
+local _aura_icon_by_talent_name = {}
 
-local _talent_by_name = {
-  psyker_2_tier_3_name_2 = _psyker_talents.psyker_2.psyker_2_tier_3_name_2,
-  psyker_2_base_3 = _psyker_talents.psyker_2.psyker_2_base_3,
+for archetype_name, archetype in pairs(Archetypes) do
+  local talent_names = {}
 
-  veteran_2_tier_3_name_2 = _veteran_talents.veteran_2.veteran_2_tier_3_name_2,
-  veteran_2_base_3 = _veteran_talents.veteran_2.veteran_2_base_3,
+  local talent_tree = require(archetype.talent_layout_file_path)
 
-  ogryn_2_base_4 = _ogryn_talents.ogryn_2.ogryn_2_base_4,
-  ogryn_2_tier_3_name_2 = _ogryn_talents.ogryn_2.ogryn_2_tier_3_name_2,
+  for i, talent_node in ipairs(talent_tree.nodes) do
+    local node_type = talent_node.type
 
-  zealot_2_base_3 = _zealot_talents.zealot_2.zealot_2_base_3,
-  zealot_2_tier_3_name_2 = _zealot_talents.zealot_2.zealot_2_tier_3_name_2
-}
+    if node_type == "aura" then
+      local talent_name = talent_node.talent
+      local talent_icon = talent_node.icon
+
+      _aura_icon_by_talent_name[talent_name] = talent_icon
+      table.insert(talent_names, talent_name)
+    end
+  end
+
+  for talent_name in pairs(archetype.base_talents) do
+    if string.find(talent_name, "aura") or string.find(talent_name, "coherency") then
+      table.insert(talent_names, talent_name)
+
+      break
+    end
+  end
+
+  _coherency_talents[archetype_name] = talent_names
+
+end
+
+local function _get_talent_icon(profile)
+  local archetype = profile.archetype
+  local archetype_name = archetype.name
+  local archetype_talents = archetype.talents
+  local talents = profile.talents
+  local aura_talent_names = _coherency_talents[archetype_name]
+
+  if not aura_talent_names then
+    return
+  end
+
+  for i, talent_name in ipairs(aura_talent_names) do
+    if talents[talent_name] then
+
+      local icon = _aura_icon_by_talent_name[talent_name]
+
+      if not icon then
+        local archetype_talent = archetype_talents[talent_name]
+
+        icon = archetype_talent.medium_icon or archetype_talent.icon
+        _aura_icon_by_talent_name[talent_name] = icon
+      end
+
+      return icon
+    end
+  end
+end
+
 function template.update(parent, dt, t)
   local feature_name = template.feature_name
   local widget = parent._widgets_by_name[feature_name]
@@ -230,12 +260,7 @@ function template.update(parent, dt, t)
         end
 
       elseif color_static then
-        color = {
-          255,
-          mod:get("coherency_color_static_red") or 255,
-          mod:get("coherency_color_static_green") or 255,
-          mod:get("coherency_color_static_blue") or 255
-        }
+        color = Color[mod:get("coherency_color_static_color")](255, true)
       end
 
       local frame_id = string.format("frame_%s", id)
@@ -247,29 +272,14 @@ function template.update(parent, dt, t)
       local style = widget_style[id]
       local material_values = style.material_values
       if material_values then
-        local talents_by_unit = parent._talents_by_unit
-        local talent_by_unit = talents_by_unit[unit]
-        if not talent_by_unit then
-          local talents = profile.talents
-          for _, coherency_talents in pairs(_coherency_talents) do
-            local improved_talent_name = coherency_talents.improved
-            local base_talent_name = coherency_talents.base
-            local talent_name = (talents[improved_talent_name] and improved_talent_name)
-                or (talents[base_talent_name] and base_talent_name)
-
-            if talent_name then
-              talents_by_unit[unit] = _talent_by_name[talent_name]
-              break
-            end
-          end
-
-          talent_by_unit = talents_by_unit[unit]
+        local talent_icons_by_player = parent._talent_icons_by_player
+        local talent_icon_by_player = talent_icons_by_player[player]
+        if not talent_icon_by_player then
+          talent_icon_by_player = _get_talent_icon(profile)
+          talent_icons_by_player[player] = talent_icon_by_player
         end
 
-        parent._talents_by_unit[unit] = talent_by_unit
-
-        local talent_icon = talent_by_unit and talent_by_unit.icon
-        material_values.talent_icon = talent_icon
+        material_values.talent_icon = talent_icon_by_player
         style.visible = true
       end
 

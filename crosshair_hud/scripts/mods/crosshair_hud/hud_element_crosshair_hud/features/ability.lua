@@ -197,10 +197,7 @@ function feature.update(parent)
   local symbol = _get_cooldown_symbol_for_percent_threshold(cooldown_percent, remaining_ability_charges)
   local content = ability_widget.content
   local style = ability_widget.style
-  --local color = (missing_ability_charges == 0 and { 255, 255, 150, 0 }) or (remaining_ability_charges == 0 and UIHudSettings.color_tint_alert_2) or UIHudSettings.color_tint_1
   local color = mod_utils.get_text_color_for_percent_threshold(cooldown_percent, "ability")
-
-  --- Full: { 255, 255, 150, 0 }
 
   content.symbol = symbol
   content.charge_count = (max_ability_charges > 1 and remaining_ability_charges) or ""
@@ -208,7 +205,7 @@ function feature.update(parent)
 
   local cooldown_display_texts = mod_utils.convert_number_to_display_texts(math.floor(remaining_ability_cooldown), 1, nil, false, true)
   local cooldown_text = table.concat(cooldown_display_texts)
-  content.cooldown_text = string.format(":%s", cooldown_text)
+  content.cooldown_text = cooldown_text
 
   style.symbol.color = color
   style.charge_count.text_color = color

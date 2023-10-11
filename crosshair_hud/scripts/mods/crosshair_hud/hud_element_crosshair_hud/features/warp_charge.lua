@@ -2,8 +2,9 @@ local mod = get_mod("crosshair_hud")
 local mod_utils = mod.utils
 local _shadows_enabled = mod_utils.shadows_enabled
 
-local UIWidget = mod:original_require("scripts/managers/ui/ui_widget")
-local UIHudSettings = mod:original_require("scripts/settings/ui/ui_hud_settings")
+local UIWidget = require("scripts/managers/ui/ui_widget")
+local UIHudSettings = require("scripts/settings/ui/ui_hud_settings")
+local ColorUtilities = require("scripts/utilities/ui/colors")
 
 local global_scale = mod:get("global_scale")
 local warp_charge_scale = mod:get("warp_charge_scale") * global_scale
@@ -13,8 +14,8 @@ local global_offset = {
   mod:get("global_y_offset")
 }
 local warp_charge_offset = {
-  mod:get("warp_charge_x_offset") + global_offset[1],
-  mod:get("warp_charge_y_offset") + global_offset[2]
+  mod:get("warp_charge_x_offset"),
+  mod:get("warp_charge_y_offset")
 }
 
 local feature_name = "warp_charge"
@@ -32,8 +33,8 @@ feature.scenegraph_definition = {
       20 * warp_charge_scale
     },
     position = {
-      warp_charge_offset[1],
-      warp_charge_offset[2],
+      warp_charge_offset[1] + global_offset[1],
+      warp_charge_offset[2] + global_offset[2],
       55
     }
   }
@@ -73,7 +74,7 @@ function feature.create_widget_definitions(parent)
 
     table.insert(passes, {
       pass_type = "texture",
-      value = "content/ui/materials/icons/talents/talent_icon_container",
+      value = "content/ui/materials/frames/talents/talent_icon_container",
       style_id = circle_style_id,
       style = {
         parent_style_id = frame_style_id,
@@ -82,30 +83,15 @@ function feature.create_widget_definitions(parent)
         size = { 28 * warp_charge_scale, 28 * warp_charge_scale },
         color = Color.white(255, true),
         material_values = {
-          icon_texture = "content/ui/textures/icons/talents/psyker_2/psyker_2_tactical"
-          --icon_texture = "content/ui/textures/icons/talents/psyker_2/psyker_2_base_1"
+          intensity = -0.25,
+          gradient_map = "content/ui/textures/color_ramps/talent_keystone",
+          icon = "content/ui/textures/icons/talents/psyker/psyker_keystone_warp_syphon",
+          frame = "content/ui/textures/frames/talents/circular_frame",
+          icon_mask = "content/ui/textures/frames/talents/circular_frame_mask"
         },
         offset = { 0, 0, 0 }
       },
-      visibility_function = function(content, style)
-        return style.parent[style.parent_style_id].visible
-      end
     })
-
-    table.insert(passes, {
-      value = "content/ui/vector_textures/hud/circle_full",
-      value_id = frame_style_id,
-      pass_type = "slug_icon",
-      style_id = frame_style_id,
-      style = {
-        vertical_alignment = "center",
-        horizontal_alignment = "left",
-        size = { 20 * warp_charge_scale, 20 * warp_charge_scale },
-        color = Color.steel_blue(255, true),
-        offset = { 0, 0, 1 },
-      }
-    })
-
   end
 
   return {
@@ -138,7 +124,7 @@ function feature.update(parent, dt, t)
   for i = 1, #buffs do
     local buff = buffs[i]
     local buff_name = buff:template_name()
-    if buff_name == "psyker_biomancer_souls" or buff_name == "psyker_biomancer_souls_increased_max_stacks" then
+    if buff_name == "psyker_souls" or buff_name == "psyker_souls_increased_max_stacks" then
       local duration = buff:duration()
       warp_charge_duration_progress = buff:duration_progress()
       warp_charge_duration = string.format(":%02d", duration * warp_charge_duration_progress)
@@ -148,7 +134,7 @@ function feature.update(parent, dt, t)
   end
 
   --local max_resource = specialization_resource_component.max_resource   -- Always returns 6; use when fixed
-  local max_resource = talents.psyker_2_tier_5_name_1 and 6 or 4
+  local max_resource = talents.psyker_increased_max_souls and 6 or 4
   local current_resource = specialization_resource_component.current_resource
   local offset_modifier = max_resource == 4 and (24 * warp_charge_scale) or 0
   local display_warp_charge_indicator = mod:get("display_warp_charge_indicator")
@@ -156,23 +142,13 @@ function feature.update(parent, dt, t)
   for i = 1, max_resource do
     local is_visible = i <= current_resource
     local circle_id = string.format("circle_%s", i)
-    local frame_id = string.format("frame_%s", i)
     local circle_style = widget_style[circle_id]
-    local frame_style = widget_style[frame_id]
     local offset = warp_charge_offset[1] + ((i - 1) * 24) * warp_charge_scale + offset_modifier
 
     circle_style.offset[1] = offset - 4 * warp_charge_scale
     circle_style.visible = display_warp_charge_indicator and is_visible
     circle_style.material_values.saturation = i < current_resource and 1 or (i == current_resource and warp_charge_duration_progress) or 0
     circle_style.color[1] = 200 * (i < current_resource and 1 or (i == current_resource and warp_charge_duration_progress) or 0) + 55
-
-    frame_style.offset[1] = offset
-    frame_style.visible = display_warp_charge_indicator
-  end
-
-  for i = max_resource + 1, 6 do
-    local style_id = string.format("frame_%s", i)
-    widget_style[style_id].visible = false
   end
 
   widget_content.warp_charge_duration = warp_charge_duration

@@ -555,7 +555,7 @@ local function update_grenade(parent, dt, t, widget, player)
 
   local unit_data_extension = ScriptUnit.has_extension(player.player_unit, "unit_data_system")
   local warp_charge_component = unit_data_extension and unit_data_extension:read_component("warp_charge")
-  if warp_charge_component and max_ability_charges == 1 then
+  if (warp_charge_component and max_ability_charges == 1) or max_ability_charges == 0 then
     style.grenade_icon.visible = false
     return
   end

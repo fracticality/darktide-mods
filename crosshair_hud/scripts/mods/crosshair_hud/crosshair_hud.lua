@@ -54,7 +54,7 @@ local function load_talent_icon_packages()
   local talents_service = Managers.data_service.talents
 
   for archetype_name, archetype_data in pairs(Archetypes) do
-    local on_package_loaded = callback(mod, "_cb_load_icons_for_profile", mod, archetype_name)
+    local on_package_loaded = callback(mod, "_cb_load_icons_for_profile", archetype_name)
     local load_id = talents_service:load_icons_for_profile({ archetype = archetype_data }, "CrosshairHUD", on_package_loaded, true)
     _loading_archetypes[archetype_name] = load_id
   end
@@ -68,6 +68,7 @@ local _packages_loaded = false
 function mod.on_game_state_changed(status, state)
   if state == "StateMainMenu" and status == "enter" then
     if not _packages_loaded then
+      Managers.package:load("packages/ui/views/talent_builder_view/talent_builder_view", "CrosshairHUD")
       load_talent_icon_packages()
       _packages_loaded = true
     end
@@ -129,8 +130,8 @@ mod:hook("ActionReloadShotgun", "start", start)
 local _setting_id_by_template_name = {
   coherency_toughness_regen = "hide_coherency_buff_bar",
   sprint_with_stamina_buff = "hide_sprint_buff",
-  psyker_biomancer_souls = "hide_warp_charges_buff",
-  psyker_biomancer_souls_increased_max_stacks = "hide_warp_charges_buff"
+  psyker_souls = "hide_warp_charges_buff",
+  psyker_souls_increased_max_stacks = "hide_warp_charges_buff"
 }
 mod:hook_require("scripts/settings/buff/player_buff_templates", function(templates)
 
@@ -142,7 +143,7 @@ mod:hook_require("scripts/settings/buff/player_buff_templates", function(templat
   end
 end)
 
-mod:hook_require("scripts/settings/buff/player_archetype_specialization/psyker_biomancer_buff_templates", function(templates)
+mod:hook_require("scripts/settings/buff/player_archetype_specialization/psyker_buff_templates_new", function(templates)
   for template_name, template in pairs(templates) do
     local setting_id = _setting_id_by_template_name[template_name]
     if setting_id then

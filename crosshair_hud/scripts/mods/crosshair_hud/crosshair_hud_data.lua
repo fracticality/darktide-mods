@@ -417,7 +417,7 @@ return {
               {
                 setting_id = "ability_cooldown_threshold",
                 type = "numeric",
-                range = { 0, 59 },
+                range = { 0, 120 },
                 default_value = 10,
                 decimals_number = 0,
                 step_size_value = 1
@@ -612,17 +612,17 @@ return {
               create_coordinate_setting("warp_charge", "y", 0),
             }
           },
-          --{
-          --  setting_id = "display_kinetic_flayer_indicator",
-          --  type = "checkbox",
-          --  default_value = true,
-          --  sub_widgets = {
-          --    create_shadow_setting("kinetic_flayer"),
-          --    create_scale_setting("kinetic_flayer"),
-          --    create_coordinate_setting("kinetic_flayer", "x", 0),
-          --    create_coordinate_setting("kinetic_flayer", "y", 0)
-          --  }
-          --}
+          {
+            setting_id = "display_kinetic_flayer_indicator",
+            type = "checkbox",
+            default_value = true,
+            sub_widgets = {
+              create_shadow_setting("kinetic_flayer"),
+              create_scale_setting("kinetic_flayer"),
+              create_coordinate_setting("kinetic_flayer", "x", 0),
+              create_coordinate_setting("kinetic_flayer", "y", 0)
+            }
+          }
         }
       },
       --{
