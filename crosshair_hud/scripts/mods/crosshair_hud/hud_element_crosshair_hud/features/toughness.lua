@@ -290,7 +290,7 @@ function feature.update(parent, dt, t)
 
   toughness_widget.style.toughness.uvs[1][2] = toughness_percent
   toughness_widget.style.toughness.size[2] = 56 * toughness_percent * toughness_scale
-  toughness_widget.style.toughness.offset[2] = (56 * (1 - toughness_percent) * 0.5) + toughness_gauge_offset[2]
+  toughness_widget.style.toughness.offset[2] = ((56 * (1 - toughness_percent) * 0.5) * toughness_scale) + toughness_gauge_offset[2]
 
   if not toughness_always_show and parent.toughness_visible_timer then
     parent.toughness_visible_timer = parent.toughness_visible_timer - dt

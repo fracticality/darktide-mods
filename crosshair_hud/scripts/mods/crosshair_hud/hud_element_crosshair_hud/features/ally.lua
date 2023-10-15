@@ -71,54 +71,6 @@ function feature.create_widget_definitions()
   for i = 1, 3 do
     local widget_id = string.format("%s_%s", feature_name, i)
     widget_definitions[widget_id] = UIWidget.create_definition({
-      --{
-      --  pass_type = "texture_uv",
-      --  value = "content/ui/materials/hud/crosshairs/charge_up",
-      --  style_id = "health_gauge",
-      --  style = {
-      --    vertical_alignment = "center",
-      --    horizontal_alignment = "left",
-      --    uvs = {
-      --      { 1, 0 },
-      --      { 0, 1 }
-      --    },
-      --    color = UIHudSettings.color_tint_main_1,
-      --    size = { 24 * ally_scale, 56 * ally_scale },
-      --    offset = { 0, 0, 1 }
-      --  }
-      --},
-      --{
-      --  pass_type = "texture_uv",
-      --  value = "content/ui/materials/hud/crosshairs/charge_up_mask",
-      --  style_id = "health_gauge_mask",
-      --  style = {
-      --    vertical_alignment = "center",
-      --    horizontal_alignment = "left",
-      --    uvs = {
-      --      { 1, 0 },
-      --      { 0, 1 }
-      --    },
-      --    color = UIHudSettings.color_tint_main_2,
-      --    size = { 24 * ally_scale, 56 * ally_scale },
-      --    offset = { 0, 0, 2 }
-      --  }
-      --},
-      --{
-      --  pass_type = "texture_uv",
-      --  value = "content/ui/materials/hud/crosshairs/charge_up_mask",
-      --  style_id = "permanent_gauge_mask",
-      --  style = {
-      --    vertical_alignment = "center",
-      --    horizontal_alignment = "left",
-      --    uvs = {
-      --      { 1, 0 },
-      --      { 0, 1 }
-      --    },
-      --    color = UIHudSettings.color_tint_8,
-      --    size = { 24 * ally_scale, 56 * ally_scale },
-      --    offset = { 0, 0, 2 }
-      --  }
-      --},
       {
         pass_type = "text",
         value = "",
@@ -257,10 +209,7 @@ function feature.create_widget_definitions()
           text_horizontal_alignment = "left",
           text_color = UIHudSettings.color_tint_main_1,
           offset = { 78 * ally_scale, 0, 2 }
-        },
-        visibility_function = function(content, style)
-          return style.parent.ammo_icon.visible
-        end
+        }
       },
       {
         pass_type = "text",
@@ -274,10 +223,7 @@ function feature.create_widget_definitions()
           text_horizontal_alignment = "left",
           text_color = UIHudSettings.color_tint_main_1,
           offset = { 98 * ally_scale, 0, 2 }
-        },
-        visibility_function = function(content, style)
-          return style.parent.ammo_icon.visible
-        end
+        }
       },
       {
         pass_type = "text",
@@ -569,13 +515,6 @@ local function update_grenade(parent, dt, t, widget, player)
 end
 
 local function update_ammo(parent, dt, t, widget, player)
-  local display_ammo_indicator = mod:get("display_ammo_indicator")
-  widget.style.ammo_icon.visible = display_ammo_indicator
-
-  if not display_ammo_indicator then
-    return
-  end
-
   local unit_data_extension = ScriptUnit.has_extension(player.player_unit, "unit_data_system")
   local inventory_component = unit_data_extension and unit_data_extension:read_component("slot_secondary")
 
@@ -595,23 +534,23 @@ local function update_ammo(parent, dt, t, widget, player)
   local clip_ammo = inventory_component.current_ammunition_clip or 0
   local reserve_ammo = inventory_component.current_ammunition_reserve or 0
   local current_ammo = clip_ammo + reserve_ammo
-  local current_ammo_percent = 0
+  local current_ammo_percent = current_ammo / max_ammo
+  local current_clip_percent = clip_ammo / clip_max
 
   current_ammo_percent = current_ammo / max_ammo
 
   local content = widget.content
-  content.max_ammo = max_ammo or 0
-  content.current_ammo = current_ammo or 0
+  content.max_ammo = reserve_ammo
+  content.current_ammo = clip_ammo
 
   local style = widget.style
   local icon_style = style.ammo_icon
-  local color = mod_utils.get_text_color_for_percent_threshold(current_ammo_percent, "ammo")
+  local clip_color = mod_utils.get_text_color_for_percent_threshold(current_clip_percent, "ammo")
+  local reserve_color = mod_utils.get_text_color_for_percent_threshold(current_ammo_percent, "ammo")
 
-  icon_style.color = color
-  style.current_ammo.text_color = color
-
-  local show_ammo_icon = mod:get("show_ammo_icon")
-  icon_style.visible = show_ammo_icon
+  style.current_ammo.text_color = clip_color
+  style.max_ammo.text_color = reserve_color
+  icon_style.color = reserve_color
 end
 
 local unit_alive = Unit.alive
@@ -665,6 +604,7 @@ end
 local temp_team_players = {}
 local function update_players(parent, dt, t)
   local players = PlayerCompositions.players(feature._player_composition_name, temp_team_players)
+  local hud_player = parent._parent:player()
 
   local i = 1
   for unique_id, player in pairs(players) do
@@ -673,8 +613,7 @@ local function update_players(parent, dt, t)
     end
 
     repeat
-      local hud_player = parent._parent:player()
-      if hud_player == player then
+      if hud_player == player or player.__deleted then
         break
       end
 
@@ -693,7 +632,6 @@ function feature.update(parent, dt, t)
     local widget_id = string.format("%s_%s", feature_name, i)
     local ally_widget = parent._widgets_by_name[widget_id]
     local ally_content = ally_widget.content
-    local ally_style = ally_widget.style
 
     repeat
       if not mod:get("display_ally_indicator") then
@@ -702,21 +640,20 @@ function feature.update(parent, dt, t)
       end
 
       local player = feature._players[i]
-      if player and not player.__deleted then
-        ally_content.visible = true
-
-        update_status(parent, dt, t, ally_widget, player)
-        update_health(parent, dt, t, ally_widget, player)
-        update_toughness(parent, dt, t, ally_widget, player)
-        update_grenade(parent, dt, t, ally_widget, player)
-        update_peril(parent, dt, t, ally_widget, player)
-        update_ammo(parent, dt, t, ally_widget, player)
-        update_pocketable(parent, dt, t, ally_widget, player)
-      else
-        feature._players[i] = nil
-
+      if not player then
         ally_content.visible = false
+        break
       end
+
+      ally_content.visible = true
+
+      update_status(parent, dt, t, ally_widget, player)
+      update_health(parent, dt, t, ally_widget, player)
+      update_toughness(parent, dt, t, ally_widget, player)
+      update_grenade(parent, dt, t, ally_widget, player)
+      update_peril(parent, dt, t, ally_widget, player)
+      update_ammo(parent, dt, t, ally_widget, player)
+      update_pocketable(parent, dt, t, ally_widget, player)
     until true
 
   end

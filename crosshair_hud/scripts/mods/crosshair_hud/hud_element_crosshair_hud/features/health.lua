@@ -559,6 +559,11 @@ function feature.update(parent, dt, t)
 
   if health_percent == 1 and mod:get("health_hide_at_full") then
     health_widget.content.visible = false
+
+    for i, segment_widget in ipairs(feature._health_segment_widgets or {}) do
+      segment_widget.content.visible = false
+    end
+
     return
   end
 
@@ -606,6 +611,10 @@ function feature.update(parent, dt, t)
     if parent.health_visible_timer <= 0 then
       parent.health_visible_timer = nil
       health_widget.content.visible = false
+
+      for i, segment_widget in ipairs(feature._health_segment_widgets or {}) do
+        segment_widget.content.visible = false
+      end
     end
   end
 end

@@ -44,10 +44,13 @@ function feature.create_widget_definitions(parent)
   local ui_hud = parent._parent
   local hud_player = ui_hud and ui_hud:player()
   local profile = hud_player and hud_player:profile()
-  local archetype = profile and profile.archetype
-  local archetype_name = archetype and archetype.name
+  local talents = profile and profile.talents
 
-  if not (archetype_name and archetype_name == "psyker") then
+  if not talents then
+    return
+  end
+
+  if not (talents.psyker_increased_max_souls or talents.psyker_souls) then
     return
   end
 
