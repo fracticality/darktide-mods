@@ -424,6 +424,9 @@ local localizations = {
     en = "Display Kinetic Flayer Cooldown",
     ["zh-cn"] = "显示动能剥皮者冷却",
   },
+  hide_kinetic_flayer_buff = {
+    en = "Hide Kinetic Flayer Buff Icon"
+  }
 }
 
 local color_names = Color.list

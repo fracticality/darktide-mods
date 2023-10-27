@@ -131,10 +131,10 @@ local _setting_id_by_template_name = {
   coherency_toughness_regen = "hide_coherency_buff_bar",
   sprint_with_stamina_buff = "hide_sprint_buff",
   psyker_souls = "hide_warp_charges_buff",
-  psyker_souls_increased_max_stacks = "hide_warp_charges_buff"
+  psyker_souls_increased_max_stacks = "hide_warp_charges_buff",
+  psyker_smite_on_hit = "hide_kinetic_flayer_buff"
 }
 mod:hook_require("scripts/settings/buff/player_buff_templates", function(templates)
-
   for template_name, template in pairs(templates) do
     local setting_id = _setting_id_by_template_name[template_name]
     if setting_id then

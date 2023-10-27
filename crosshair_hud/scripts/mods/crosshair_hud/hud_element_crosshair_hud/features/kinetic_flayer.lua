@@ -62,7 +62,7 @@ function feature.create_widget_definitions(parent)
         text_vertical_alignment = "bottom",
         text_horizontal_alignment = "center",
         text_color = UIHudSettings.color_tint_main_1,
-        offset = { -2 * kinetic_flayer_scale, 0, 5 }
+        offset = { -2 * kinetic_flayer_scale, 4, 5 }
       }
     },
     {
@@ -82,21 +82,6 @@ function feature.create_widget_definitions(parent)
           icon_mask = "content/ui/textures/frames/talents/circular_frame_mask"
         }
       },
-    },
-    {
-      value = "content/ui/vector_textures/hud/circle_full",
-      pass_type = "slug_icon",
-      style_id = "kinetic_flayer_icon_frame",
-      style = {
-        vertical_alignment = "center",
-        horizontal_alignment = "center",
-        size = { 28 * kinetic_flayer_scale, 28 * kinetic_flayer_scale },
-        color = Color.steel_blue(255, true),
-        offset = { 0, -8 * kinetic_flayer_scale, 4 },
-      },
-      visibility_function = function(content, style)
-        return
-      end
     }
   }
 
@@ -134,24 +119,20 @@ function feature.update(parent, dt, t)
     local buff = buffs[i]
     local buff_name = buff:template_name()
     if buff_name == "psyker_smite_on_hit" then
-      local template_data = buff:template_data()
-      if template_data then
-        local next_allowed_t = template_data.next_allowed_t or 0
-        local gameplay_time = Managers.time:time("gameplay") or 0
-        cooldown_remaining = math.max(next_allowed_t - gameplay_time, 0)
-        kinetic_flayer_cooldown = string.format(":%02d", cooldown_remaining)
-        kinetic_flayer_is_on_cooldown = cooldown_remaining > 0
-        has_kinetic_flayer = true
+      local duration = 15
+      local duration_progress = buff:duration_progress() or 0
+      cooldown_remaining = duration - (duration * duration_progress)
+      kinetic_flayer_cooldown = string.format(":%02d", cooldown_remaining)
+      kinetic_flayer_is_on_cooldown = cooldown_remaining > 0
+      has_kinetic_flayer = true
 
-        break
-      end
+      break
     end
   end
 
   widget_content.kinetic_flayer_cooldown = kinetic_flayer_cooldown
   widget_style.kinetic_flayer_cooldown.visible = kinetic_flayer_is_on_cooldown
   widget_style.kinetic_flayer_icon.visible = has_kinetic_flayer
-  widget_style.kinetic_flayer_icon_frame.visible = has_kinetic_flayer
 
   local kinetic_flayer_icon_style = widget_style.kinetic_flayer_icon
   local material_values = kinetic_flayer_icon_style.material_values

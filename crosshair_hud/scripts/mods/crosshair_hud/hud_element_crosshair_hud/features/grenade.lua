@@ -130,14 +130,18 @@ function feature.update(parent)
     return
   end
 
+  local ui_hud = parent._parent
+  local hud_player = ui_hud:player()
+  local profile = hud_player:profile()
+  local talents = profile.talents
+  local ogryn_frag_grenade = talents.ogryn_grenade_frag
+
   local remaining_ability_charges = ability_extension:remaining_ability_charges("grenade_ability")
   local max_ability_charges = ability_extension:max_ability_charges("grenade_ability")
   local ability_charges_percent = remaining_ability_charges / max_ability_charges
   local style = grenade_widget.style
-
-  local unit_data_extension = player_extensions.unit_data
-  local warp_charge_component = unit_data_extension and unit_data_extension:read_component("warp_charge")
-  if (warp_charge_component and max_ability_charges == 1) or max_ability_charges == 0 then
+  
+  if (max_ability_charges == 1 and not ogryn_frag_grenade) or max_ability_charges == 0 then
     content.visible = false
     return
   end

@@ -50,7 +50,7 @@ function feature.create_widget_definitions(parent)
     return
   end
 
-  if not (talents.psyker_increased_max_souls or talents.psyker_souls) then
+  if not (talents.psyker_increased_max_souls or talents.psyker_passive_souls_from_elite_kills) then
     return
   end
 
@@ -84,6 +84,7 @@ function feature.create_widget_definitions(parent)
         vertical_alignment = "center",
         horizontal_alignment = "left",
         size = { 28 * warp_charge_scale, 28 * warp_charge_scale },
+        visible = false,
         color = Color.white(255, true),
         material_values = {
           intensity = -0.25,

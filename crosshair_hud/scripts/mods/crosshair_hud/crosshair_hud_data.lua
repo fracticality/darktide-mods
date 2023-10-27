@@ -617,6 +617,11 @@ return {
             type = "checkbox",
             default_value = true,
             sub_widgets = {
+              {
+                setting_id = "hide_kinetic_flayer_buff",
+                type = "checkbox",
+                default_value = false
+              },
               create_shadow_setting("kinetic_flayer"),
               create_scale_setting("kinetic_flayer"),
               create_coordinate_setting("kinetic_flayer", "x", 0),
