@@ -229,6 +229,11 @@ function HudElementCustomizer:_setup_elements(render_settings)
                 local children_scenegraphs = element_scenegraphs[element_name]
                 local hierarchical_scenegraph = (ui_scenegraph and ui_scenegraph.hierarchical_scenegraph) or {}
 
+                if not children_scenegraphs then
+                    element_scenegraphs[element_name] = {}
+                    children_scenegraphs = element_scenegraphs[element_name]
+                end
+
                 for j, scenegraph in ipairs(hierarchical_scenegraph) do
                     local children = scenegraph.children or {}
                     for _, child in ipairs(children) do
