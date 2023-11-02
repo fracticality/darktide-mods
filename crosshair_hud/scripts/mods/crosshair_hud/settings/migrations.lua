@@ -1,4 +1,5 @@
 local mod = get_mod("crosshair_hud")
+local mod_settings = Application.user_setting("mods_settings").crosshair_hud or {}
 
 local migrations = {
   {
@@ -16,7 +17,6 @@ local migrations = {
   {
     name = "rename_threshold_empty_to_critical",
     migration_func = function(data)
-      local mod_settings = Application.user_setting("mods_settings").crosshair_hud
       for setting_id, setting_value in pairs(mod_settings) do
         if string.find(setting_id, "empty") then
           local new_setting_id = string.gsub(setting_id, "empty", "critical")
@@ -36,7 +36,6 @@ local migrations = {
     name = "find_closest_colors",
     migration_func = function(data)
       local color_settings = {}
-      local mod_settings = Application.user_setting("mods_settings").crosshair_hud
       for setting_id, setting_value in pairs(mod_settings) do
         if string.ends_with(setting_id, "_red") then
           local base_setting = string.sub(setting_id, 1, -5)

@@ -1,7 +1,4 @@
--- TODO: Convert rgb to closest built-in color
-
 local mod = get_mod("crosshair_hud")
-local migrations = mod:io_dofile("crosshair_hud/scripts/mods/crosshair_hud/settings/migrations")
 
 local options_display_type = table.enum("percent", "value")
 mod.options_display_type = options_display_type
@@ -14,6 +11,7 @@ local options_coherency_type = {
 }
 mod.options_coherency_type = options_coherency_type
 
+local migrations = mod:io_dofile("crosshair_hud/scripts/mods/crosshair_hud/settings/migrations")
 migrations.run()
 
 local color_options = {}
