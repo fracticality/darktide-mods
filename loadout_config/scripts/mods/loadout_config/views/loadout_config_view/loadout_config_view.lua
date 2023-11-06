@@ -875,10 +875,6 @@ function LoadoutConfigView:init(settings)
   Managers.event:register(self, "event_player_profile_updated", "event_player_profile_updated")
 end
 
-function LoadoutConfigView:destroy()
-  Managers.event:unregister(self, "event_player_profile_updated")
-end
-
 function LoadoutConfigView:event_player_profile_updated(peer_id, local_player_id, new_profile)
   if peer_id ~= Network.peer_id() or local_player_id ~= 1 then
     return
@@ -1488,6 +1484,7 @@ function LoadoutConfigView:on_exit()
 
   self:_apply_custom_loadout()
 
+  Managers.event:unregister(self, "event_player_profile_updated")
   LoadoutConfigView.super.on_exit(self)
 end
 
