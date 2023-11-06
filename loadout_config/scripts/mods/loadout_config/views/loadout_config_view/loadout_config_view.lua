@@ -14,7 +14,6 @@ local ViewElementInputLegend = require("scripts/ui/view_elements/view_element_in
 local ViewElementPerksItem = require("scripts/ui/view_elements/view_element_perks_item/view_element_perks_item")
 local ViewElementTraitInventory = require("scripts/ui/view_elements/view_element_trait_inventory/view_element_trait_inventory")
 local ButtonPassTemplates = require("scripts/ui/pass_templates/button_pass_templates")
-local TextInputPassTemplates = require("scripts/ui/pass_templates/text_input_pass_templates")
 local LoadoutList = mod:io_dofile("loadout_config/scripts/mods/loadout_config/view_elements/loadout_list/loadout_list")
 
 local function sort_offer_by_display_name(a, b)
@@ -1499,8 +1498,6 @@ function LoadoutConfigView:_pack_loadout_to_profile()
     return
   end
 
-  profile = table.clone_instance(profile)
-
   local loadout_item_ids = profile.loadout_item_ids
   local loadout_item_data = profile.loadout_item_data
   local selected_card = self._selected_card
@@ -1557,6 +1554,7 @@ function LoadoutConfigView:_apply_custom_loadout()
       return
     end
 
+    self:_pack_loadout_to_profile()
     local profile = self._profile
 
     synchronizer_host:override_singleplay_profile(Network.peer_id(), player:local_player_id(), profile)

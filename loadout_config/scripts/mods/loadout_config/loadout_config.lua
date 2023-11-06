@@ -55,3 +55,8 @@ end
 mod:command("loadout_config", "", mod.open_view)
 
 mod:command("lc", mod:localize("mod_name"), mod.open_view)
+
+local PackageSynchronizerHost = require("scripts/loading/package_synchronizer_host")
+mod:hook(PackageSynchronizerHost, "_item_instance_altered", function(func, ...)
+  return true
+end)
