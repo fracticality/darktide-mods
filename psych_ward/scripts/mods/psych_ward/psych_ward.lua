@@ -101,7 +101,7 @@ local _button_settings = {
 
 local function _get_challenge_level()
   local PsykhaniumDefaultDifficulty = get_mod("PsykaniumDefaultDifficulty")
-  local challenge_level = PsykhaniumDefaultDifficulty and PsykhaniumDefaultDifficulty:get_internal_data("is_enabled") and PsykhaniumDefaultDifficulty:get("default_difficulty")
+  local challenge_level = PsykhaniumDefaultDifficulty and PsykhaniumDefaultDifficulty:is_enabled() and PsykhaniumDefaultDifficulty:get("default_difficulty")
 
   if not challenge_level then
     challenge_level = mod:get("selected_difficulty")
@@ -109,7 +109,9 @@ local function _get_challenge_level()
 
   if not challenge_level then
     local save_data = Managers.save:account_data()
-    challenge_level = save_data.mission_board.quickplay_difficulty or 3
+    local mission_board_data = save_data and save_data.mission_board
+
+    challenge_level = (mission_board_data and mission_board_data.quickplay_difficulty) or 3
   end
 
   return challenge_level
