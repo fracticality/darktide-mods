@@ -1531,6 +1531,8 @@ function LoadoutConfigView:_pack_loadout_to_profile()
     end
   end
 
+  loadout_item_data.custom = true
+
   return loadout_item_data
 end
 

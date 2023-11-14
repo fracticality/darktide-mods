@@ -60,3 +60,18 @@ local PackageSynchronizerHost = require("scripts/loading/package_synchronizer_ho
 mod:hook(PackageSynchronizerHost, "_item_instance_altered", function(func, ...)
   return true
 end)
+
+local ViewElementProfilePresets = require("scripts/ui/view_elements/view_element_profile_presets/view_element_profile_presets")
+mod:hook(ViewElementProfilePresets, "cb_add_new_profile_preset", function(func, self)
+  local player = Managers.player:local_player(1)
+  local profile = player and player:profile()
+  local loadout_item_data = profile and profile.loadout_item_data
+  local is_custom = loadout_item_data and loadout_item_data.custom
+
+  if is_custom then
+    mod:notify("Cannot create base game presets with modded loadouts\nUse loadout system provided by Loadout Config")
+    return
+  end
+
+  return func(self)
+end)

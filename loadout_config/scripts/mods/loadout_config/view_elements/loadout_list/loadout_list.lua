@@ -132,7 +132,8 @@ function ViewElementLoadoutList:_on_create_button_pressed()
     slot_secondary = loadout_item_data.slot_secondary,
     slot_attachment_1 = loadout_item_data.slot_attachment_1,
     slot_attachment_2 = loadout_item_data.slot_attachment_2,
-    slot_attachment_3 = loadout_item_data.slot_attachment_3
+    slot_attachment_3 = loadout_item_data.slot_attachment_3,
+    custom = true
   }
 
   local loadout = {
