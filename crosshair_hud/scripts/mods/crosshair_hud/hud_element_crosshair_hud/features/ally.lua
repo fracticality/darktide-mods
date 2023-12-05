@@ -2,16 +2,16 @@ local mod = get_mod("crosshair_hud")
 local mod_utils = mod.utils
 local _shadows_enabled = mod_utils.shadows_enabled
 
-local UIWorkspaceSettings = mod:original_require("scripts/settings/ui/ui_workspace_settings")
-local UIWidget = mod:original_require("scripts/managers/ui/ui_widget")
-local UIHudSettings = mod:original_require("scripts/settings/ui/ui_hud_settings")
-local PlayerUnitStatus = mod:original_require("scripts/utilities/attack/player_unit_status")
-local UISettings = mod:original_require("scripts/settings/ui/ui_settings")
+local UIWorkspaceSettings = require("scripts/settings/ui/ui_workspace_settings")
+local UIWidget = require("scripts/managers/ui/ui_widget")
+local UIHudSettings = require("scripts/settings/ui/ui_hud_settings")
+local PlayerUnitStatus = require("scripts/utilities/attack/player_unit_status")
+local UISettings = require("scripts/settings/ui/ui_settings")
 local player_slot_colors = UISettings.player_slot_colors
 
-local PlayerCompositions = mod:original_require("scripts/utilities/players/player_compositions")
-local WarpCharge = mod:original_require("scripts/utilities/warp_charge")
-local ArchetypeWarpChargeTemplates = mod:original_require("scripts/settings/warp_charge/archetype_warp_charge_templates")
+local PlayerCompositions = require("scripts/utilities/players/player_compositions")
+local WarpCharge = require("scripts/utilities/warp_charge")
+local ArchetypeWarpChargeTemplates = require("scripts/settings/warp_charge/archetype_warp_charge_templates")
 
 local global_scale = mod:get("global_scale")
 local ally_scale = mod:get("ally_scale") * global_scale

@@ -2,12 +2,12 @@ local mod = get_mod("crosshair_hud")
 local mod_utils = mod.utils
 local _shadows_enabled = mod_utils.shadows_enabled
 
-local UIWorkspaceSettings = mod:original_require("scripts/settings/ui/ui_workspace_settings")
-local UIWidget = mod:original_require("scripts/managers/ui/ui_widget")
-local UIHudSettings = mod:original_require("scripts/settings/ui/ui_hud_settings")
+local UIWorkspaceSettings = require("scripts/settings/ui/ui_workspace_settings")
+local UIWidget = require("scripts/managers/ui/ui_widget")
+local UIHudSettings = require("scripts/settings/ui/ui_hud_settings")
 
-local WeaponTemplate = mod:original_require("scripts/utilities/weapon/weapon_template")
-local ReloadStates = mod:original_require("scripts/extension_systems/weapon/utilities/reload_states")
+local WeaponTemplate = require("scripts/utilities/weapon/weapon_template")
+local ReloadStates = require("scripts/extension_systems/weapon/utilities/reload_states")
 
 local global_scale = mod:get("global_scale")
 local reload_scale = mod:get("reload_scale") * global_scale
@@ -146,7 +146,7 @@ function feature.update(parent)
   local player_extensions = parent._parent:player_extensions()
   local unit_data_extension = player_extensions and player_extensions.unit_data
   local weapon_action_component = unit_data_extension and unit_data_extension:read_component("weapon_action")
-  local weapon_template = weapon_action_component and WeaponTemplate.weapon_template(weapon_action_component.template_name)
+  local weapon_template = weapon_action_component and WeaponTemplate.current_weapon_template(weapon_action_component)
   local reload_template = weapon_template and weapon_template.reload_template
   local current_action_name = weapon_action_component and weapon_action_component.current_action_name
   local current_action_settings = weapon_template and weapon_template.actions[current_action_name]

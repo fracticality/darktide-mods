@@ -1,6 +1,6 @@
 local mod = get_mod("crosshair_hud")
 
-local UIWorkspaceSettings = mod:original_require("scripts/settings/ui/ui_workspace_settings")
+local UIWorkspaceSettings = require("scripts/settings/ui/ui_workspace_settings")
 
 local scenegraph_definition = {
   screen = UIWorkspaceSettings.screen

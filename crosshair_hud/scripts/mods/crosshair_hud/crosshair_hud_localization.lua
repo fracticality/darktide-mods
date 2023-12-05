@@ -1,5 +1,5 @@
 local mod = get_mod("crosshair_hud")
-local InputUtils = mod:original_require("scripts/managers/input/input_utils")
+local InputUtils = require("scripts/managers/input/input_utils")
 
 local function readable(text)
   local readable_string = ""

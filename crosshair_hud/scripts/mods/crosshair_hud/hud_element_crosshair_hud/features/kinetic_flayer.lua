@@ -2,8 +2,8 @@ local mod = get_mod("crosshair_hud")
 local mod_utils = mod.utils
 local _shadows_enabled = mod_utils.shadows_enabled
 
-local UIWidget = mod:original_require("scripts/managers/ui/ui_widget")
-local UIHudSettings = mod:original_require("scripts/settings/ui/ui_hud_settings")
+local UIWidget = require("scripts/managers/ui/ui_widget")
+local UIHudSettings = require("scripts/settings/ui/ui_hud_settings")
 
 local global_scale = mod:get("global_scale")
 local kinetic_flayer_scale = mod:get("kinetic_flayer_scale") * global_scale
