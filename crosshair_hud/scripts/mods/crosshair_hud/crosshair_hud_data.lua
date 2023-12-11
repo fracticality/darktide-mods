@@ -12,7 +12,9 @@ local options_coherency_type = {
 mod.options_coherency_type = options_coherency_type
 
 local migrations = mod:io_dofile("crosshair_hud/scripts/mods/crosshair_hud/settings/migrations")
-migrations.run()
+if migrations then
+  migrations.run()
+end
 
 local color_options = {}
 for i, color_name in ipairs(Color.list) do

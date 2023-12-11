@@ -109,7 +109,7 @@ local _ignored_elements = {
 }
 
 local function draw_hook(func, self, ...)
-    if self._is_locked then
+    if self._is_hidden then
         return
     end
 
@@ -143,3 +143,5 @@ mod:hook_safe(UIViewHandler, "close_view", function(self, view_name, force_close
         recreate_hud()
     end
 end)
+
+mod._hooked_elements = {}

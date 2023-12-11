@@ -4,7 +4,7 @@ return {
     name = mod:localize("custom_hud"),
     description = mod:localize("custom_hud_description"),
     is_togglable = true,
-    allow_rehooking = true,
+    --allow_rehooking = true,
     options = {
         widgets = {
             {

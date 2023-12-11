@@ -46,6 +46,18 @@ local function is_shift_held()
     return Keyboard.button(Keyboard.button_index("left shift")) > 0.5
 end
 
+local function is_alt_held()
+    if not Keyboard then
+        Keyboard = rawget(_G, "Keyboard")
+
+        if not Keyboard then
+            return
+        end
+    end
+
+    return Keyboard.button(Keyboard.button_index("left alt")) > 0.5
+end
+
 local function is_ctrl_held()
     if not Keyboard then
         Keyboard = rawget(_G, "Keyboard")
@@ -79,11 +91,12 @@ local _definitions = {
     widget_definitions = {}
 }
 
-
 local HudElementCustomizer = class("HudElementCustomizer", "HudElementBase")
 
 function HudElementCustomizer:init(parent, draw_layer, start_scale)
 
+    self._selected_node_list = {}
+    self._widget_press_stack = {}
     self._grid_line_positions = { {}, {} }
     self._always_full_alpha = true
     self._start_scale = start_scale
@@ -94,7 +107,7 @@ function HudElementCustomizer:init(parent, draw_layer, start_scale)
 
     local visibility_groups = parent._visibility_groups
     local num_visibility_groups = #visibility_groups
-    local elements_by_group  = {}
+    local elements_by_group = {}
     local scenegraphs = {}
     for i = 2, num_visibility_groups do
         local visibility_group = visibility_groups[i]
@@ -205,7 +218,7 @@ function HudElementCustomizer:_setup_elements(render_settings)
     local saved_node_settings = self._saved_node_settings
     local default_node_settings = self._default_node_settings
     local inverse_scale = render_settings.inverse_scale
-    local font_type = "machine_medium"
+    local font_type = "proxima_nova_bold"
     local font_size = 16
 
     -- Populate element scenegraph data once all elements are created
@@ -255,6 +268,7 @@ function HudElementCustomizer:_setup_elements(render_settings)
                             local horizontal_alignment = (node_settings and node_settings.horizontal_alignment) or "left"
                             local position = (node_settings and node_settings.position) or child.world_position
                             local size = (node_settings and node_settings.size) or child.size
+                            local scale = (node_settings and node_settings.scale) or 1
 
                             local scenegraph_node = scenegraph_definition and scenegraph_definition[scenegraph_id]
                             local default_settings = (node_settings and node_settings.default_settings) or {
@@ -281,6 +295,10 @@ function HudElementCustomizer:_setup_elements(render_settings)
                                 position[2] = position[2] * inverse_hud_scale
                             end
 
+                            position[1] = position[1] * scale
+                            position[2] = position[2] * scale
+                            size = { size[1] * scale, size[2] * scale }
+
                             table.insert(children_scenegraphs, {
                                 name = node_name,
                                 size = size,
@@ -298,7 +316,9 @@ function HudElementCustomizer:_setup_elements(render_settings)
                             }
 
                             local content_overrides = {
-                                is_hidden = node_settings and node_settings.is_hidden
+                                is_hidden = node_settings and node_settings.is_hidden,
+                                size = size,
+                                scale = scale
                             }
                             local definition = UIWidget.create_definition({
                                 {
@@ -316,7 +336,10 @@ function HudElementCustomizer:_setup_elements(render_settings)
                                     style = {
                                         color = { 255, 0, 0, 0 },
                                         offset = { 0, 0, 1 }
-                                    }
+                                    },
+                                    change_function = function(content, style)
+                                        style.color = content.hotspot.is_selected and { 255, 255, 255, 0 } or { 255, 0, 0, 0 }
+                                    end
                                 },
                                 {
                                     pass_type = "rect",
@@ -331,21 +354,19 @@ function HudElementCustomizer:_setup_elements(render_settings)
                                         size = { size[1] - 4, size[2] - 4 },
                                         offset = { 2, 2, 2 }
                                     },
-                                    change_function = function (content, style)
+                                    change_function = function(content, style)
                                         local color = style.color
                                         local ignore_alpha = false
                                         local hotspot = content.hotspot
                                         local anim_hover_progress = hotspot.anim_hover_progress
                                         local is_hidden = content.is_hidden
-
-                                        --style.color = (is_hidden and hotspot.is_hover and style.color_hidden_hovered)
-                                        --            or (is_hidden and style.color_hidden)
-                                        --            or (hotspot.is_hover and style.color_hovered)
-                                        --            or  style.color_default
-
-                                        --style.color = (hotspot.is_hover and { 255, 168, 168, 168 }) or { 168, 168, 168, 168 }
                                         local color_from = is_hidden and style.color_hidden or style.color_default
                                         local color_to = is_hidden and style.color_hidden_hovered or style.color_hovered
+                                        local content_size = content.size
+
+                                        if content_size then
+                                            style.size = { content_size[1] - 4, content_size[2] - 4 }
+                                        end
 
                                         ColorUtilities.color_lerp(color_from, color_to, anim_hover_progress, color, ignore_alpha)
                                     end
@@ -356,17 +377,37 @@ function HudElementCustomizer:_setup_elements(render_settings)
                                     value = node_name,
                                     style_id = "text",
                                     style = {
-                                        size = { 1920, size[2] },
+                                        size = { 1920, 1080 },
                                         font_size = font_size * inverse_scale,
                                         font_type = font_type,
                                         text_horizontal_alignment = "left",
                                         text_vertical_alignment = "top",
                                         text_color = Color.terminal_text_body(255, true),
                                         drop_shadow = true,
-                                        offset = { 0, -14 * inverse_scale, 3 }
+                                        offset = { 0, -14 * inverse_scale, 4 }
                                     },
                                     visibility_function = function(content, style)
                                         return content.hotspot.is_hover
+                                    end
+                                },
+                                {
+                                    pass_type = "text",
+                                    value_id = "scale_text",
+                                    value = scale,
+                                    style = {
+                                        font_size = font_size * inverse_scale,
+                                        font_type = font_type,
+                                        text_horizontal_alignment = "center",
+                                        text_vertical_alignment = "center",
+                                        text_color = Color.terminal_text_body(255, true),
+                                        drop_shadow = true,
+                                        offset = { 0, 0, 4 }
+                                    },
+                                    visibility_function = function(content, style)
+                                        return content.hotspot.is_hover or content.hotspot.is_selected
+                                    end,
+                                    change_function = function(content, style)
+                                        content.scale_text = string.format("x%.02f", content.scale)
                                     end
                                 }
                             }, node_name, content_overrides)
@@ -413,38 +454,56 @@ function HudElementCustomizer:reset_node(node_name)
     local vertical_alignment = default_node_settings.vertical_alignment
     local horizontal_alignment = default_node_settings.horizontal_alignment
     element:set_scenegraph_position(scenegraph_id, position[1], position[2], position[3], horizontal_alignment, vertical_alignment)
+    element._render_scale = 1
 
     self._saved_node_settings[node_name] = nil
     self._default_node_settings[node_name] = nil
     self._setup_complete = nil
 end
 
-function HudElementCustomizer:_on_widget_pressed(node_name)
-    self._selected_node_name = node_name
+function HudElementCustomizer:_process_widget_press_left(node_name)
     self._cursor_start_position = nil
     self._cursor_end_position = nil
+
+    local widgets_by_name = self._widgets_by_name
+    local selected_node_list = self._selected_node_list
+    local num_selected_nodes = #selected_node_list
+    local node_name_index = table.index_of(selected_node_list, node_name)
+    local ctrl_held = is_ctrl_held()
+    local shift_held = is_shift_held()
+
+    if node_name_index > 0 then
+        if shift_held then
+            mod:echo("begin dragging")
+            self._start_dragging = true
+            self._cursor_start_position = nil
+            self._cursor_end_position = nil
+        elseif ctrl_held or num_selected_nodes == 1 then
+            table.remove(selected_node_list, node_name_index)
+            widgets_by_name[node_name].content.hotspot.is_selected = false
+
+            return
+        end
+    end
+
+    if shift_held then
+        return
+    end
+
+    if not ctrl_held then
+        for i, selected_node_name in ipairs(selected_node_list) do
+            widgets_by_name[selected_node_name].content.hotspot.is_selected = false
+        end
+
+        table.clear(selected_node_list)
+    end
+
+    table.insert(selected_node_list, node_name)
+    widgets_by_name[node_name].content.hotspot.is_selected = true
 end
 
-function HudElementCustomizer:_on_widget_double_clicked(node_name)
-    self:reset_node(node_name)
-end
-
-function HudElementCustomizer:_init_node_settings(node_name)
-    local scenegraph_position = self:scenegraph_position(node_name)
-    local scenegraph_size = self:scenegraph_size(node_name)
-    local node_settings = {
-        x = scenegraph_position[1],
-        y = scenegraph_position[2],
-        size = { scenegraph_size[1], scenegraph_size[2] },
-        default_settings = self._default_node_settings[node_name]
-    }
-    self._saved_node_settings[node_name] = node_settings
-
-    return node_settings
-end
-
-function HudElementCustomizer:_on_widget_right_pressed(node_name)
-    local element_name = split_node_name(node_name)
+function HudElementCustomizer:_process_widget_press_right(node_name)
+    local element_name, scenegraph_id = split_node_name(node_name)
     local element = self:_get_element(element_name)
     if not element then
         return
@@ -472,6 +531,39 @@ function HudElementCustomizer:_on_widget_right_pressed(node_name)
     end
 
     node_settings.is_hidden = should_hide
+end
+
+function HudElementCustomizer:_on_widget_pressed(node_name)
+    table.insert(self._widget_press_stack, {
+        node_name = node_name,
+        press_type = "left"
+    })
+end
+
+function HudElementCustomizer:_on_widget_double_clicked(node_name)
+    self:reset_node(node_name)
+end
+
+function HudElementCustomizer:_init_node_settings(node_name)
+    local scenegraph_position = self:scenegraph_position(node_name)
+    local scenegraph_size = self:scenegraph_size(node_name)
+    local node_settings = {
+        x = scenegraph_position[1],
+        y = scenegraph_position[2],
+        z = scenegraph_position[3],
+        size = { scenegraph_size[1], scenegraph_size[2] },
+        default_settings = self._default_node_settings[node_name]
+    }
+    self._saved_node_settings[node_name] = node_settings
+
+    return node_settings
+end
+
+function HudElementCustomizer:_on_widget_right_pressed(node_name)
+    table.insert(self._widget_press_stack, {
+        node_name = node_name,
+        press_type = "right"
+    })
 end
 
 function HudElementCustomizer:using_input()
@@ -510,6 +602,51 @@ function HudElementCustomizer:_get_inverse_hud_scale()
     return inverse_hud_scale
 end
 
+function HudElementCustomizer:_handle_widget_presses()
+    local widget_press_stack = self._widget_press_stack
+    local stack_size = #widget_press_stack
+    if stack_size > 0 then
+        if stack_size == 1 then
+            local press_data = widget_press_stack[1]
+            local node_name = press_data.node_name
+            local press_type = press_data.press_type
+            local press_func_name = string.format("_process_widget_press_%s", press_type)
+            local press_func = self[press_func_name]
+
+            if press_func then
+                press_func(self, node_name)
+            end
+        elseif stack_size > 1 then
+            local highest_z = -math.huge
+            local index
+            for i, press_data in ipairs(widget_press_stack) do
+                local node_name = press_data.node_name
+                local scenegraph_position = self:scenegraph_position(node_name)
+                local z = scenegraph_position[3]
+
+                if z > highest_z then
+                    highest_z = z
+                    index = i
+                end
+            end
+
+            if index then
+                local press_data = widget_press_stack[index]
+                local node_name = press_data.node_name
+                local press_type = press_data.press_type
+                local press_func_name = string.format("_process_widget_press_%s", press_type)
+                local press_func = self[press_func_name]
+
+                if press_func then
+                    press_func(self, node_name)
+                end
+            end
+        end
+
+        table.clear(self._widget_press_stack)
+    end
+end
+
 function HudElementCustomizer:update(dt, t, ui_renderer, render_settings, input_service)
 
     if not self._setup_complete then
@@ -529,7 +666,9 @@ function HudElementCustomizer:update(dt, t, ui_renderer, render_settings, input_
 
     self:_update_group_visibility()
 
-    self:_handle_mouse_input(input_service)
+    self:_handle_widget_presses()
+
+    self:_handle_input(input_service)
 
     HudElementCustomizer.super.update(self, dt, t, ui_renderer, render_settings, input_service)
 end
@@ -571,7 +710,6 @@ function HudElementCustomizer:_draw_grid(ui_renderer)
 
         grid_line_positions[1][i] = position[2] / inverse_scale
 
-
         UIRenderer.draw_rect(ui_renderer, position, size, color)
     end
 
@@ -592,92 +730,132 @@ function HudElementCustomizer:_draw_grid(ui_renderer)
 
 end
 
-function HudElementCustomizer:_handle_mouse_input(input_service)
-    local selected_node_name = self._selected_node_name
-    if not selected_node_name then
-        return
-    end
-
-    local size = self:scenegraph_size(selected_node_name)
-
-    local node_widget = self._widgets_by_name[selected_node_name]
-    if node_widget.content and node_widget.content.is_hidden then
-        self.selected_node_name = nil
-        return
-    end
-
-    local inverse_scale = self._inverse_scale or RESOLUTION_LOOKUP.inverse_scale
-
+function HudElementCustomizer:_handle_input(input_service)
     local saved_node_settings = self._saved_node_settings
-    local node_settings = saved_node_settings[selected_node_name]
-    if not node_settings then
-        node_settings = self:_init_node_settings(selected_node_name)
+    local selected_node_list = self._selected_node_list
+    local num_selected_nodes = #selected_node_list
+
+    if num_selected_nodes == 0 then
+        return
     end
 
-    if input_service:get("left_hold") then
+    if input_service:get("left_hold") and is_shift_held() then
         if not self._cursor_start_position then
             self._cursor_start_position = Vector3.to_array(input_service:get("cursor"))
         end
 
         self._cursor_end_position = Vector3.to_array(input_service:get("cursor"))
     else
-        self._selected_node_name = nil
+        self._start_dragging = false
     end
 
-    local cursor_end_position = self._cursor_end_position
-    if cursor_end_position then
-        local cursor_start_position = self._cursor_start_position
-        local cursor_diff_x = (cursor_end_position[1] - cursor_start_position[1]) * inverse_scale
-        local cursor_diff_y = (cursor_end_position[2] - cursor_start_position[2]) * inverse_scale
-        local dest_x = cursor_diff_x + node_settings.x
-        local dest_y = cursor_diff_y + node_settings.y
+    local should_clear_cursor_positions = false
 
-        local ctrl_held = is_ctrl_held()
-        self._display_grid = mod:get("display_grid")
-        self._snap_to_grid = mod:get("snap_to_grid")
-
-        if self._display_grid and (ctrl_held and not self._snap_to_grid) or (not ctrl_held and self._snap_to_grid) then
-
-            local shift_held = is_shift_held()
-
-            for _, line_y in ipairs(self._grid_line_positions[1]) do
-                local diff_y = (cursor_end_position[2] - line_y)
-
-                if shift_held then
-                    local distance = math.abs(diff_y)
-                    if distance >= 0 and distance < 5 then
-                        dest_y = (line_y * inverse_scale) - (size[2] / 2)
-                    end
-                elseif diff_y < -3 and diff_y > -10 then
-                    dest_y = (line_y * inverse_scale) - size[2]
-                elseif diff_y > 3 and diff_y < 10 then
-                    dest_y = line_y * inverse_scale
-                end
-            end
-
-            for _, line_x in ipairs(self._grid_line_positions[2]) do
-                local diff_x = (cursor_end_position[1] - line_x) * inverse_scale
-
-                if shift_held then
-                    local distance = math.abs(diff_x)
-                    if distance >= 0 and distance < 5 then
-                        dest_x = (line_x * inverse_scale) - (size[1] / 2)
-                    end
-                elseif diff_x < -3 and diff_x > -10 then
-                    dest_x = (line_x * inverse_scale) - size[1]
-                elseif diff_x > 3 and diff_x < 10 then
-                    dest_x = line_x * inverse_scale
-                end
-            end
+    for i, node_name in ipairs(selected_node_list) do
+        local node_settings = saved_node_settings[node_name]
+        if not node_settings then
+            node_settings = self:_init_node_settings(node_name)
         end
 
-        if self._selected_node_name then
-            self:set_scenegraph_position(selected_node_name, dest_x, dest_y)
+        local size = self:scenegraph_size(node_name)
+        local scale = node_settings.scale or 1
+        local inverse_scale = self._inverse_scale or RESOLUTION_LOOKUP.inverse_scale
+
+        local scroll_axis = input_service:get("scroll_axis")
+        if scroll_axis and scroll_axis[2] ~= 0 then
+            local original_size = { size[1] / scale, size[2] / scale }
+            local scroll_diff = (scroll_axis[2] > 0 and 0.05) or (scroll_axis[2] < 0 and -0.05) or 0
+
+            scale = math.max(scale + scroll_diff, 0.05)
+            node_settings.scale = scale
+
+            local new_size = { original_size[1] * scale, original_size[2] * scale }
+            node_settings.size = new_size
+
+            local widget = self._widgets_by_name[node_name]
+
+            widget.content.size = new_size
+            widget.content.scale = scale
+
+            self:_set_scenegraph_size(node_name, original_size[1] * scale, original_size[2] * scale)
+        end
+
+        local cursor_end_position = self._cursor_end_position
+        if cursor_end_position then
+            local cursor_start_position = self._cursor_start_position
+            local cursor_diff_x = (cursor_end_position[1] - cursor_start_position[1]) * inverse_scale
+            local cursor_diff_y = (cursor_end_position[2] - cursor_start_position[2]) * inverse_scale
+            local dest_x = cursor_diff_x + node_settings.x
+            local dest_y = cursor_diff_y + node_settings.y
+
+            local ctrl_held = is_ctrl_held()
+            self._display_grid = mod:get("display_grid")
+            self._snap_to_grid = mod:get("snap_to_grid")
+
+            if (num_selected_nodes == 1) and self._display_grid and (ctrl_held and not self._snap_to_grid) or (not ctrl_held and self._snap_to_grid) then
+
+                local alt_held = is_alt_held()
+
+                for _, line_y in ipairs(self._grid_line_positions[1]) do
+                    local diff_y = (cursor_end_position[2] - line_y)
+
+                    if alt_held then
+                        local distance = math.abs(diff_y)
+                        if distance >= 0 and distance < 5 then
+                            dest_y = (line_y * inverse_scale) - (size[2] / 2)
+                        end
+                    elseif diff_y < -3 and diff_y > -10 then
+                        dest_y = (line_y * inverse_scale) - size[2]
+                    elseif diff_y > 3 and diff_y < 10 then
+                        dest_y = line_y * inverse_scale
+                    end
+                end
+
+                for _, line_x in ipairs(self._grid_line_positions[2]) do
+                    local diff_x = (cursor_end_position[1] - line_x) * inverse_scale
+
+                    if alt_held then
+                        local distance = math.abs(diff_x)
+                        if distance >= 0 and distance < 5 then
+                            dest_x = (line_x * inverse_scale) - (size[1] / 2)
+                        end
+                    elseif diff_x < -3 and diff_x > -10 then
+                        dest_x = (line_x * inverse_scale) - size[1]
+                    elseif diff_x > 3 and diff_x < 10 then
+                        dest_x = line_x * inverse_scale
+                    end
+                end
+            end
+
+            if self._start_dragging then
+                self:set_scenegraph_position(node_name, dest_x, dest_y)
+            else
+                node_settings.x = dest_x
+                node_settings.y = dest_y
+                self:set_scenegraph_position(node_name, dest_x, dest_y)
+                should_clear_cursor_positions = true
+            end
         else
-            node_settings.x = dest_x
-            node_settings.y = dest_y
-            self:set_scenegraph_position(selected_node_name, dest_x, dest_y)
+            if input_service:get("cycle_chat_channel") then
+                self:reset_node(node_name)
+            end
+
+            local input = input_service:get("navigation_keys_virtual_axis")
+
+            if is_shift_held() then
+                node_settings.z = (node_settings.z or self:scenegraph_position(node_name)[3]) + input[2]
+            else
+                node_settings.x = node_settings.x + input[1]
+                node_settings.y = node_settings.y - input[2]
+            end
+
+            self:set_scenegraph_position(node_name, node_settings.x, node_settings.y, node_settings.z)
         end
+    end
+
+    if should_clear_cursor_positions then
+        self._cursor_start_position = nil
+        self._cursor_end_position = nil
     end
 end
 
@@ -709,6 +887,14 @@ function HudElementCustomizer:set_visible(status)
         end
 
         self:_apply_saved_node_settings()
+
+        --local widgets_by_name = self._widgets_by_name
+        --local selected_node_list = self._selected_node_list
+        --for i, node_name in ipairs(selected_node_list) do
+        --    widgets_by_name[node_name].content.hotspot.is_selected = false
+        --end
+        --
+        --table.clear(selected_node_list)
     end
 end
 
@@ -726,7 +912,6 @@ function HudElementCustomizer:_apply_saved_node_settings()
     end
 
     local inverse_hud_scale = self:_get_inverse_hud_scale()
-
     for node_name, node_settings in pairs(saved_node_settings) do
         local element_name, scenegraph_id = split_node_name(node_name)
         local element = self:_get_element(element_name)
@@ -736,32 +921,47 @@ function HudElementCustomizer:_apply_saved_node_settings()
 
             if has_scenegraph_id then
                 local is_constant_element = string.starts_with(element_name, "ConstantElement")
+                local scale = node_settings.scale or 1
                 local x = node_settings.x
                 local y = node_settings.y
+                local z = node_settings.z
                 if is_constant_element then
                     x = x / inverse_hud_scale
                     y = y / inverse_hud_scale
                 end
 
-                element:set_scenegraph_position(scenegraph_id, x , y, nil, "left", "top")
+                if not element._hidden_scenegraphs then
+                    element._hidden_scenegraphs = {}
+                end
+
+                element._render_scale = scale
+                element:set_scenegraph_position(scenegraph_id, x / scale, y / scale, z, "left", "top")
                 element._is_hidden = node_settings.is_hidden
 
-                mod:hook(element, "draw", function(func, self, ...)
-                    -- TODO: Find a good way to hide individual scenegraph_ids instead of all
-                    if self._is_hidden then
-                        return
-                    end
-
-                    local opacity = tonumber(mod:get("opacity"))
-                    if opacity ~= nil then
-                        local element_render_settings = select(4, ...)
-                        if type(element_render_settings) == "table" then
-                            element_render_settings.alpha_multiplier = opacity
+                local hooked_elements = mod._hooked_elements
+                if not hooked_elements[element] then
+                    mod:hook(element, "draw", function(func, self, ...)
+                        -- TODO: Find a good way to hide individual scenegraph_ids instead of all
+                        if self._is_hidden then
+                            return
                         end
-                    end
 
-                    return func(self, ...)
-                end)
+                        local element_render_settings = select(4, ...)
+
+                        element_render_settings.scale = self._render_scale
+
+                        local opacity = tonumber(mod:get("opacity"))
+                        if opacity ~= nil then
+                            if type(element_render_settings) == "table" then
+                                element_render_settings.alpha_multiplier = opacity
+                            end
+                        end
+
+                        return func(self, ...)
+                    end)
+
+                    hooked_elements[element] = true
+                end
             else
                 saved_node_settings[node_name] = nil
             end
