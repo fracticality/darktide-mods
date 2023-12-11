@@ -50,10 +50,6 @@ function feature.create_widget_definitions(parent)
     return
   end
 
-  if not (talents.psyker_increased_max_souls or talents.psyker_passive_souls_from_elite_kills) then
-    return
-  end
-
   local passes = {
     {
       pass_type = "text",
