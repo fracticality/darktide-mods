@@ -71,7 +71,7 @@ function feature.create_widget_definitions()
           return content.pocketable_icon and _shadows_enabled("pocketable")
         end
       },
-    }, "pocketable_indicator")
+    }, feature_name)
   }
 end
 

@@ -476,6 +476,25 @@ return {
         }
       },
 
+      --- Stimm ---
+      {
+        setting_id = "options_stimm",
+        type = "group",
+        sub_widgets = {
+          {
+            setting_id = "display_stimm_indicator",
+            type = "checkbox",
+            default_value = true,
+            sub_widgets = {
+              create_shadow_setting("stimm"),
+              create_scale_setting("stimm"),
+              create_coordinate_setting("stimm", "x", 0),
+              create_coordinate_setting("stimm", "y", 240)
+            }
+          }
+        }
+      },
+
       --- Peril ---
       {
         setting_id = "options_peril",
