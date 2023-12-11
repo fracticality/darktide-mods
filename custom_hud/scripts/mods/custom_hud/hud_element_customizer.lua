@@ -268,7 +268,7 @@ function HudElementCustomizer:_setup_elements(render_settings)
                             local horizontal_alignment = (node_settings and node_settings.horizontal_alignment) or "left"
                             local position = (node_settings and node_settings.position) or child.world_position
                             local size = (node_settings and node_settings.size) or child.size
-                            local scale = (node_settings and node_settings.scale) or 1
+                            --local scale = (node_settings and node_settings.scale) or 1
 
                             local scenegraph_node = scenegraph_definition and scenegraph_definition[scenegraph_id]
                             local default_settings = (node_settings and node_settings.default_settings) or {
@@ -295,9 +295,9 @@ function HudElementCustomizer:_setup_elements(render_settings)
                                 position[2] = position[2] * inverse_hud_scale
                             end
 
-                            position[1] = position[1] * scale
-                            position[2] = position[2] * scale
-                            size = { size[1] * scale, size[2] * scale }
+                            --position[1] = position[1] * scale
+                            --position[2] = position[2] * scale
+                            --size = { size[1] * scale, size[2] * scale }
 
                             table.insert(children_scenegraphs, {
                                 name = node_name,
@@ -318,7 +318,7 @@ function HudElementCustomizer:_setup_elements(render_settings)
                             local content_overrides = {
                                 is_hidden = node_settings and node_settings.is_hidden,
                                 size = size,
-                                scale = scale
+                                scale = 1
                             }
                             local definition = UIWidget.create_definition({
                                 {
@@ -393,7 +393,7 @@ function HudElementCustomizer:_setup_elements(render_settings)
                                 {
                                     pass_type = "text",
                                     value_id = "scale_text",
-                                    value = scale,
+                                    value = 1,
                                     style = {
                                         font_size = font_size * inverse_scale,
                                         font_type = font_type,
@@ -920,7 +920,7 @@ function HudElementCustomizer:_apply_saved_node_settings()
 
             if has_scenegraph_id then
                 local is_constant_element = string.starts_with(element_name, "ConstantElement")
-                local scale = node_settings.scale or 1
+                --local scale = node_settings.scale or 1
                 local x = node_settings.x
                 local y = node_settings.y
                 local z = node_settings.z
@@ -933,8 +933,8 @@ function HudElementCustomizer:_apply_saved_node_settings()
                     element._hidden_scenegraphs = {}
                 end
 
-                element._render_scale = scale
-                element:set_scenegraph_position(scenegraph_id, x / scale, y / scale, z, "left", "top")
+                --element._render_scale = scale
+                element:set_scenegraph_position(scenegraph_id, x, y, z, "left", "top")
                 element._is_hidden = node_settings.is_hidden
 
                 local hooked_elements = mod._hooked_elements
