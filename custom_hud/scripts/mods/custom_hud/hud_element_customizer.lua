@@ -454,7 +454,7 @@ function HudElementCustomizer:reset_node(node_name)
     local vertical_alignment = default_node_settings.vertical_alignment
     local horizontal_alignment = default_node_settings.horizontal_alignment
     element:set_scenegraph_position(scenegraph_id, position[1], position[2], position[3], horizontal_alignment, vertical_alignment)
-    element._render_scale = 1
+    --element._render_scale = 1
 
     self._saved_node_settings[node_name] = nil
     self._default_node_settings[node_name] = nil
@@ -947,8 +947,7 @@ function HudElementCustomizer:_apply_saved_node_settings()
 
                         local element_render_settings = select(4, ...)
 
-                        element_render_settings.scale = self._render_scale
-
+                        --element_render_settings.scale = self._render_scale or 1
                         local opacity = tonumber(mod:get("opacity"))
                         if opacity ~= nil then
                             if type(element_render_settings) == "table" then
