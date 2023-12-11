@@ -474,7 +474,6 @@ function HudElementCustomizer:_process_widget_press_left(node_name)
 
     if node_name_index > 0 then
         if shift_held then
-            mod:echo("begin dragging")
             self._start_dragging = true
             self._cursor_start_position = nil
             self._cursor_end_position = nil
