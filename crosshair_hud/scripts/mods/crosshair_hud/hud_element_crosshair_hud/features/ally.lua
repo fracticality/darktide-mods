@@ -253,7 +253,7 @@ function feature.create_widget_definitions()
           horizontal_alignment = "center",
           text_vertical_alignment = "center",
           text_horizontal_alignment = "center",
-          size = { 120 * ally_scale, 56 * ally_scale },
+          size = { 500 * ally_scale, 56 * ally_scale },
           text_color = UIHudSettings.color_tint_main_1,
           offset = { 0, 35 * ally_scale, 3 }
         }
@@ -267,10 +267,25 @@ function feature.create_widget_definitions()
           vertical_alignment = "center",
           horizontal_alignment = "center",
           color = UIHudSettings.color_tint_main_1,
-          offset = { 0, -30 * ally_scale, 1 },
+          offset = { -10, -35 * ally_scale, 1 },
         },
         visibility_function = function(content, style)
           return content.pocketable_icon
+        end
+      },
+      {
+        pass_type = "texture",
+        value_id = "stimm_icon",
+        style_id = "stimm_icon",
+        style = {
+          size = { 20 * ally_scale, 20 * ally_scale },
+          vertical_alignment = "center",
+          horizontal_alignment = "center",
+          color = UIHudSettings.color_tint_main_1,
+          offset = { 10 * ally_scale, -35 * ally_scale, 1 },
+        },
+        visibility_function = function(content, style)
+          return content.stimm_icon
         end
       },
       {
@@ -353,12 +368,15 @@ end
 local function update_health(parent, dt, t, widget, player)
   local health_extension = ScriptUnit.has_extension(player.player_unit, "health_system")
 
+  local current_health = health_extension and health_extension:current_health() or 0
   local health_percent = health_extension and health_extension:current_health_percent() or 0
   local permanent_damage_percent = health_extension and health_extension:permanent_damage_taken_percent() or 0
   local max_wounds = health_extension and health_extension:max_wounds() or 1
 
   local content = widget.content
-  content.health_text = math.ceil(health_percent * 100)
+  local health_display_type = mod:get("ally_health_display_type")
+  local number_to_display = (health_display_type == mod.options_display_type.percent and health_percent * 100) or current_health
+  content.health_text = math.ceil(number_to_display)
 
   if not feature._wounds_widgets_by_player[player] then
     local wounds_widgets = {}
@@ -425,6 +443,8 @@ local function update_toughness(parent, dt, t, widget, player)
   if not toughness_extension then
     return
   end
+
+  local current_toughness = toughness_extension:remaining_toughness()
   local toughness_percent = toughness_extension:current_toughness_percent()
 
   local mask_height_max = 56
@@ -432,7 +452,9 @@ local function update_toughness(parent, dt, t, widget, player)
   local mask_height_offset = mask_height_max * (1 - toughness_percent) * 0.5
 
   local content = widget.content
-  content.toughness_text = math.ceil(toughness_percent * 100)
+  local toughness_display_type = mod:get("ally_toughness_display_type")
+  local number_to_display = (toughness_display_type == mod.options_display_type.percent and toughness_percent * 100) or current_toughness
+  content.toughness_text = math.ceil(number_to_display)
 
   local style = widget.style.toughness_gauge_mask
   style.uvs[1][2] = toughness_percent
@@ -444,7 +466,8 @@ local function update_peril(parent, dt, t, widget, player)
   local content = widget.content
   local style = widget.style
 
-  content.visible = false
+  style.symbol_text.visible = false
+  style.peril_text.visible = false
 
   local unit_data_extension = ScriptUnit.has_extension(player.player_unit, "unit_data_system")
   local weapon_extension = ScriptUnit.has_extension(player.player_unit, "weapon_system")
@@ -461,7 +484,8 @@ local function update_peril(parent, dt, t, widget, player)
 
     content.symbol_text = ""
     content.peril_text = string.format("%.0f", current_percentage * 100)
-    content.visible = true
+    style.peril_text.visible = true
+    style.symbol_text.visible = true
     local text_color = mod_utils.get_text_color_for_percent_threshold((1 - current_percentage), "peril")
     style.peril_text.text_color = text_color
     style.symbol_text.text_color = text_color
@@ -477,7 +501,8 @@ local function update_peril(parent, dt, t, widget, player)
 
     content.symbol_text = ""
     content.peril_text = math.ceil(overheat_current_percentage * 100)
-    content.visible = true
+    style.symbol_text.visible = true
+    style.peril_text.visible = true
     local text_color = mod_utils.get_text_color_for_percent_threshold((1 - overheat_current_percentage), "peril")
     style.peril_text.text_color = text_color
     style.symbol_text.text_color = text_color
@@ -584,15 +609,62 @@ local function update_status(parent, dt, t, widget, player)
   widget.style.status_icon.color = (not is_alive and UIHudSettings.player_status_colors.dead) or (is_disabled and UIHudSettings.player_status_colors[character_state_name])
 end
 
+local _stimm_colors = {
+  syringe_corruption_pocketable = { 255, 38, 205, 26 },
+  syringe_ability_boost_pocketable = { 255, 230, 192, 13 },
+  syringe_power_boost_pocketable = { 255, 205, 51, 26 },
+  syringe_speed_boost_pocketable = { 255, 0, 127, 218 },
+}
+
+local function update_stimm(parent, dt, t, widget, player)
+  local display_stimm_indicator = mod:get("display_stimm_indicator")
+  local content = widget.content
+  local style = widget.style
+
+  style.stimm_icon.visible = false
+
+  if not display_stimm_indicator then
+    return
+  end
+
+  local unit_data_extension = ScriptUnit.has_extension(player.player_unit, "unit_data_system")
+  local visual_loadout_extension = ScriptUnit.has_extension(player.player_unit, "visual_loadout_system")
+  local inventory_component = unit_data_extension and unit_data_extension:read_component("inventory")
+  local has_stimm = inventory_component and inventory_component.slot_pocketable_small
+  local item = has_stimm and visual_loadout_extension:item_from_slot("slot_pocketable_small")
+
+  if not item then
+    return
+  end
+
+  local stimm_name = item.weapon_template
+  local weapon_template = has_stimm and visual_loadout_extension:weapon_template_from_slot("slot_pocketable_small")
+  local color = _stimm_colors[stimm_name]
+  local RecolorStimms = get_mod("RecolorStimms")
+
+  if RecolorStimms and RecolorStimms:is_enabled() then
+    if RecolorStimms.get_stimm_argb_255 then
+      color = RecolorStimms.get_stimm_argb_255(stimm_name)
+    end
+  end
+
+  content.stimm_icon = weapon_template and weapon_template.hud_icon_small
+  style.stimm_icon.visible = true
+  style.stimm_icon.color = color or { 255, 255, 255, 255 }
+end
+
 local function update_pocketable(parent, dt, t, widget, player)
   local display_pocketable_indicator = mod:get("display_pocketable_indicator")
   local content = widget.content
+  local style = widget.style
 
-  content.visible = display_pocketable_indicator
+  style.pocketable_icon.visible = false
 
   if not display_pocketable_indicator then
     return
   end
+
+  style.pocketable_icon.visible = true
 
   local unit_data_extension = ScriptUnit.has_extension(player.player_unit, "unit_data_system")
   local visual_loadout_extension = ScriptUnit.has_extension(player.player_unit, "visual_loadout_system")
@@ -604,18 +676,18 @@ end
 
 local temp_team_players = {}
 local function update_players(parent, dt, t)
-  local players = PlayerCompositions.players(feature._player_composition_name, temp_team_players)
+  local players = PlayerCompositions.players("players", temp_team_players)
   local hud_player = parent._parent:player()
 
   local i = 1
   for unique_id, player in pairs(players) do
-    if i > 3 then
-      break
-    end
+    --if i > 3 then
+    --  break
+    --end
 
     repeat
       if hud_player == player or player.__deleted then
-        break
+        --break
       end
 
       feature._players[i] = player
@@ -643,6 +715,7 @@ function feature.update(parent, dt, t)
       local player = feature._players[i]
       if not player or player.__deleted then
         ally_content.visible = false
+        table.remove(feature._players, i)
         break
       end
 
@@ -655,6 +728,7 @@ function feature.update(parent, dt, t)
       update_peril(parent, dt, t, ally_widget, player)
       update_ammo(parent, dt, t, ally_widget, player)
       update_pocketable(parent, dt, t, ally_widget, player)
+      update_stimm(parent, dt, t, ally_widget, player)
     until true
 
   end

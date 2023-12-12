@@ -70,6 +70,9 @@ local localizations = {
     en = "Health Settings",
     ["zh-cn"] = "生命值设置",
   },
+  hide_health_text = {
+    en = "Hide Health Text"
+  },
   permanent_health_position = {
     en = "Permanent Health Position",
     ["zh-cn"] = "生命上限位置",
@@ -110,6 +113,9 @@ local localizations = {
   options_toughness = {
     en = "Toughness Settings",
     ["zh-cn"] = "韧性设置",
+  },
+  hide_toughness_text = {
+    en = "Hide Toughness Text"
   },
   toughness_always_show = {
     en = "Always Show Toughness",
@@ -259,6 +265,13 @@ local localizations = {
     ["zh-cn"] = "显示指示器",
   },
 
+  options_stimm = {
+    en = "Stimm Settings"
+  },
+  display_stimm_indicator = {
+    en = "Display Indicator"
+  },
+
   options_peril = {
     en = "Peril / Overheat Settings",
     ["zh-cn"] = "危机 / 热量设置",
@@ -344,6 +357,12 @@ local localizations = {
   display_ally_indicator = {
     en = "Display Ally Indicators",
     ["zh-cn"] = "显示队友指示器",
+  },
+  ally_health_display_type = {
+    en = "Health Display Type"
+  },
+  ally_toughness_display_type = {
+    en = "Toughness Display Type"
   },
 
   options_global = {

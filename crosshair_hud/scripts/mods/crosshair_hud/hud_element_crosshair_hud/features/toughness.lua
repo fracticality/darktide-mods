@@ -70,6 +70,25 @@ function feature.create_widget_definitions()
       {
         pass_type = "texture_uv",
         value = "content/ui/materials/hud/crosshairs/charge_up_mask",
+        style_id = "bonus_toughness",
+        style = {
+          vertical_alignment = "center",
+          horizontal_alignment = "right",
+          uvs = mod:get("mirror_toughness_gauge") and {
+            { 1, 1 },
+            { 0, 0 }
+          } or {
+            { 0, 1 },
+            { 1, 0 }
+          },
+          color = Color.ui_toughness_buffed(255, true),
+          size = { 24 * toughness_scale, 56 * toughness_scale },
+          offset = { toughness_gauge_offset[1], toughness_gauge_offset[2], 6 }
+        },
+      },
+      {
+        pass_type = "texture_uv",
+        value = "content/ui/materials/hud/crosshairs/charge_up_mask",
         style_id = "toughness",
         style = {
           vertical_alignment = "center",
@@ -252,24 +271,33 @@ end
 
 function feature.update(parent, dt, t)
   local player_extensions = parent._parent:player_extensions()
+  local buff_extension = player_extensions.buff
+  local stat_buffs = buff_extension:stat_buffs()
+  local bonus_toughness_value = stat_buffs.toughness_bonus_flat or 0
+  local has_bonus_toughness = bonus_toughness_value > 0
   local toughness_extension = player_extensions.toughness
+  local max_toughness = toughness_extension:max_toughness()
+  local bonus_toughness_percent = (bonus_toughness_value / max_toughness)
   local toughness_percent = toughness_extension:current_toughness_percent()
   local current_toughness = toughness_extension:remaining_toughness()
   local toughness_widget = parent._widgets_by_name.toughness_indicator
+  local style = toughness_widget.style
+  local bonus_style = style.bonus_toughness
 
   if toughness_percent == 1 and mod:get("toughness_hide_at_full") then
     toughness_widget.content.visible = false
+
     return
   end
 
   toughness_widget.content.visible = true
 
   local toughness_always_show = mod:get("toughness_always_show")
-
   if toughness_always_show or current_toughness ~= parent.current_toughness then
     parent.current_toughness = current_toughness
     parent.toughness_visible_timer = mod:get("toughness_stay_time") or 1.5
 
+    local show_text = not mod:get("hide_toughness_text")
     local toughness_display_type = mod:get("toughness_display_type")
     local number_to_display = (toughness_display_type == mod.options_display_type.percent and (toughness_percent * 100)) or current_toughness
     local text_color = mod_utils.get_text_color_for_percent_threshold(toughness_percent, "toughness") or UIHudSettings.color_tint_6
@@ -279,18 +307,30 @@ function feature.update(parent, dt, t)
     for i = 1, 3 do
       local key = string.format("text_%s", i)
       toughness_widget.content[key] = texts[i] or ""
-      toughness_widget.style[key].text_color = text_color
-      toughness_widget.style[key].visible = true
+      style[key].text_color = text_color
+      style[key].visible = show_text
     end
 
-    toughness_widget.style.text_symbol.visible = toughness_display_type == mod.options_display_type.percent
-    toughness_widget.style.text_symbol.text_color = text_color
+    style.text_symbol.visible = show_text and toughness_display_type == mod.options_display_type.percent
+    style.text_symbol.text_color = text_color
     toughness_widget.dirty = true
   end
 
-  toughness_widget.style.toughness.uvs[1][2] = toughness_percent
-  toughness_widget.style.toughness.size[2] = 56 * toughness_percent * toughness_scale
-  toughness_widget.style.toughness.offset[2] = ((56 * (1 - toughness_percent) * 0.5) * toughness_scale) + toughness_gauge_offset[2]
+  bonus_style.visible = false
+
+  if has_bonus_toughness then
+    --style.toughness.color = UIHudSettings.color_tint_10
+    --bonus_style.uvs[2][2] = toughness_percent - bonus_toughness_percent
+    --bonus_style.uvs[1][2] = toughness_percent
+    --bonus_style.size[2] = 56 * (bonus_toughness_percent) * toughness_scale
+    --bonus_style.offset[2] = (-(56 * ((1 - bonus_toughness_percent)) * 0.5) * toughness_scale) + (toughness_gauge_offset[2])
+  else
+    style.toughness.color = UIHudSettings.color_tint_6
+  end
+
+  style.toughness.uvs[1][2] = toughness_percent
+  style.toughness.size[2] = 56 * (toughness_percent) * toughness_scale
+  style.toughness.offset[2] = ((56 * (1 - (toughness_percent)) * 0.5) * toughness_scale) + toughness_gauge_offset[2]
 
   if not toughness_always_show and parent.toughness_visible_timer then
     parent.toughness_visible_timer = parent.toughness_visible_timer - dt
@@ -298,7 +338,8 @@ function feature.update(parent, dt, t)
       parent.toughness_visible_timer = nil
       for i = 1, 3 do
         local key = string.format("text_%s", i)
-        toughness_widget.style[key].visible = false
+
+        style[key].visible = false
       end
     end
   end

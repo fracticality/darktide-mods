@@ -1,6 +1,6 @@
 local mod = get_mod("crosshair_hud")
 
-local options_display_type = table.enum("percent", "value")
+local options_display_type = table.enum("percent", "value", "hide")
 mod.options_display_type = options_display_type
 
 local options_coherency_type = {
@@ -224,7 +224,8 @@ return {
             default_value = options_display_type.value,
             options = {
               { text = "display_type_value", value = options_display_type.value },
-              { text = "display_type_percent", value = options_display_type.percent }
+              { text = "display_type_percent", value = options_display_type.percent },
+              { text = "hide_health_text", value = options_display_type.hide }
             }
           },
           {
@@ -315,7 +316,8 @@ return {
             default_value = options_display_type.value,
             options = {
               { text = "display_type_value", value = options_display_type.value },
-              { text = "display_type_percent", value = options_display_type.percent }
+              { text = "display_type_percent", value = options_display_type.percent },
+              { text = "hide_toughness_text", value = options_display_type.hide }
             }
           },
           {
@@ -603,6 +605,26 @@ return {
                 sub_widgets = {
                   create_coordinate_setting("ally_3", "x", 200),
                   create_coordinate_setting("ally_3", "y", 345)
+                }
+              },
+              {
+                setting_id = "ally_health_display_type",
+                type = "dropdown",
+                default_value = options_display_type.value,
+                options = {
+                  { text = "display_type_value", value = options_display_type.value },
+                  { text = "display_type_percent", value = options_display_type.percent },
+                  { text = "hide_health_text", value = options_display_type.hide }
+                }
+              },
+              {
+                setting_id = "ally_toughness_display_type",
+                type = "dropdown",
+                default_value = options_display_type.value,
+                options = {
+                  { text = "display_type_value", value = options_display_type.value },
+                  { text = "display_type_percent", value = options_display_type.percent },
+                  { text = "hide_toughness_text", value = options_display_type.hide }
                 }
               }
             }

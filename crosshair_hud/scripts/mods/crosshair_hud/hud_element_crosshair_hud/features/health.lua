@@ -574,8 +574,9 @@ function feature.update(parent, dt, t)
 
     health_widget.content.visible = true
 
+    local show_permanent_text = mod:get("display_permanent_health_text")
     local health_display_type = mod:get("health_display_type")
-    local is_display_type_number = health_display_type == mod.options_display_type.percent or health_display_type == mod.options_display_type.value
+    local show_text = health_display_type ~= mod.options_display_type.hide
 
     local number_to_display = (health_display_type == mod.options_display_type.percent and (health_percent * 100)) or current_health
     local text_color = mod_utils.get_text_color_for_percent_threshold(health_percent, "health") or UIHudSettings.color_tint_main_2
@@ -588,10 +589,10 @@ function feature.update(parent, dt, t)
       local permanent_key = string.format("permanent_%s", key)
       health_widget.content[key] = texts[i] or ""
       health_widget.style[key].text_color = text_color
-      health_widget.style[key].visible = is_display_type_number
+      health_widget.style[key].visible = show_text
 
       health_widget.content[permanent_key] = permanent_texts[i] or ""
-      health_widget.style[permanent_key].visible = mod:get("display_permanent_health_text") and is_display_type_number and permanent_damage_taken > 0
+      health_widget.style[permanent_key].visible = show_text and show_permanent_text and permanent_damage_taken > 0
     end
 
     health_widget.style.text_symbol.visible = health_display_type == mod.options_display_type.percent

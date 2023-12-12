@@ -77,9 +77,9 @@ function feature.create_widget_definitions()
           font_size = 30 * ammo_scale,
           font_type = "machine_medium",
           text_vertical_alignment = "top",
-          text_horizontal_alignment = "right",
+          text_horizontal_alignment = "center",
           text_color = UIHudSettings.color_tint_1,
-          offset = { 1 * ammo_scale, 0, 2 }
+          offset = { 10 * ammo_scale, 0, 2 }
         }
       },
       {
@@ -91,9 +91,9 @@ function feature.create_widget_definitions()
           font_size = 30 * ammo_scale,
           font_type = "machine_medium",
           text_vertical_alignment = "top",
-          text_horizontal_alignment = "right",
+          text_horizontal_alignment = "center",
           text_color = UIHudSettings.color_tint_0,
-          offset = { 3 * ammo_scale, 2 * ammo_scale, 1 }
+          offset = { 12 * ammo_scale, 2 * ammo_scale, 1 }
         },
         visibility_function = function(content, style)
           return _shadows_enabled("ammo")
@@ -108,9 +108,9 @@ function feature.create_widget_definitions()
           font_size = 18 * ammo_scale,
           font_type = "machine_medium",
           text_vertical_alignment = "bottom",
-          text_horizontal_alignment = "right",
+          text_horizontal_alignment = "center",
           text_color = UIHudSettings.color_tint_1,
-          offset = { 0, 0, 2 }
+          offset = { 10 * ammo_scale, 0, 2 }
         }
       },
       {
@@ -122,9 +122,9 @@ function feature.create_widget_definitions()
           font_size = 18 * ammo_scale,
           font_type = "machine_medium",
           text_vertical_alignment = "bottom",
-          text_horizontal_alignment = "right",
+          text_horizontal_alignment = "center",
           text_color = UIHudSettings.color_tint_0,
-          offset = { 2 * ammo_scale, 2 * ammo_scale, 1 }
+          offset = { 12 * ammo_scale, 2 * ammo_scale, 1 }
         },
         visibility_function = function(content, style)
           return _shadows_enabled("ammo")
