@@ -71,7 +71,8 @@ local localizations = {
     ["zh-cn"] = "生命值设置",
   },
   hide_health_text = {
-    en = "Hide Health Text"
+    en = "Hide Health Text",
+    ["zh-cn"] = "隐藏生命值文本",
   },
   permanent_health_position = {
     en = "Permanent Health Position",
@@ -115,7 +116,8 @@ local localizations = {
     ["zh-cn"] = "韧性设置",
   },
   hide_toughness_text = {
-    en = "Hide Toughness Text"
+    en = "Hide Toughness Text",
+    ["zh-cn"] = "隐藏韧性文本",
   },
   toughness_always_show = {
     en = "Always Show Toughness",
@@ -266,10 +268,12 @@ local localizations = {
   },
 
   options_stimm = {
-    en = "Stimm Settings"
+    en = "Stimm Settings",
+    ["zh-cn"] = "兴奋剂设置",
   },
   display_stimm_indicator = {
-    en = "Display Indicator"
+    en = "Display Indicator",
+    ["zh-cn"] = "显示指示器",
   },
 
   options_peril = {
@@ -359,10 +363,12 @@ local localizations = {
     ["zh-cn"] = "显示队友指示器",
   },
   ally_health_display_type = {
-    en = "Health Display Type"
+    en = "Health Display Type",
+    ["zh-cn"] = "生命值显示类型",
   },
   ally_toughness_display_type = {
-    en = "Toughness Display Type"
+    en = "Toughness Display Type",
+    ["zh-cn"] = "韧性显示类型",
   },
 
   options_global = {
@@ -444,7 +450,8 @@ local localizations = {
     ["zh-cn"] = "显示动能剥皮者冷却",
   },
   hide_kinetic_flayer_buff = {
-    en = "Hide Kinetic Flayer Buff Icon"
+    en = "Hide Kinetic Flayer Buff Icon",
+    ["zh-cn"] = "隐藏动能剥皮者增益图标",
   }
 }
 
