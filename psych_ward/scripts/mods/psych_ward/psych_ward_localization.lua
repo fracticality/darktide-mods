@@ -27,6 +27,9 @@ return {
     ru = "Стрельбище",
     ja = "演習場",
   },
+  mission_button = {
+    en = "Mission Board"
+  },
   vendor_button= {
     en = "Armoury",
     ["zh-cn"] = "军械交易所",

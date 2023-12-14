@@ -11,8 +11,9 @@ local SINGLEPLAY_TYPES = MatchmakingConstants.SINGLEPLAY_TYPES
 
 local _setup_complete = false
 local _go_to_shooting_range = false
-local _psykhanium_button = "psykhanium_button"
 local _exit_text = "exit_text"
+local _psykhanium_button = "psykhanium_button"
+local _mission_button = "mission_button"
 local _vendor_button = "vendor_button"
 local _contracts_button = "contracts_button"
 local _crafting_button = "crafting_button"
@@ -26,7 +27,8 @@ local _view_button_names = {
   _contracts_button,
   _crafting_button,
   _inventory_button,
-  _cosmetics_button
+  _cosmetics_button,
+  _mission_button
   --_psykhanium_button
 }
 
@@ -34,13 +36,23 @@ local button_size = { 150, ButtonPassTemplates.terminal_button_small.size[2] }
 local button_offset = { 0, button_size[2] + 10, 0 }
 local _button_settings = {
   [_psykhanium_button] = {
-    view_name = "training_grounds_view",
+    view_name = "mission_board_view",
     scenegraph_definition = {
       parent = "character_info",
       vertical_alignment = "top",
       horizontal_alignment = "center",
       size = ButtonPassTemplates.terminal_button_small.size,
       position = { 0, -25, 0 }
+    }
+  },
+  [_mission_button] = {
+    view_name = "mission_board_view",
+    scenegraph_definition = {
+      parent = "character_info",
+      vertical_alignment = "top",
+      horizontal_alignment = "center",
+      size = ButtonPassTemplates.terminal_button_small.size,
+      position = { 0, -250, 0 }
     }
   },
   [_vendor_button] = {
@@ -161,6 +173,23 @@ local function _open_view(view_name)
   end
 end
 
+local _presence_hook_top_views = {
+  mission_board_view = true,
+  story_mission_play_view = true
+}
+
+mod:hook(CLASS.PartyImmateriumMemberMyself, "presence_name", function(func, self)
+  local result = func(self)
+
+  if _presence_hook_top_views[Managers.ui:active_top_view()] then
+    if result == "training_grounds" or result == "main_menu" then
+      return "hub"
+    end
+  end
+
+  return result
+end)
+
 local main_menu_definitions_file = "scripts/ui/views/main_menu_view/main_menu_view_definitions"
 mod:hook_require(main_menu_definitions_file, function(definitions)
 
@@ -184,7 +213,7 @@ mod:hook_require(main_menu_definitions_file, function(definitions)
       text = mod:localize(button_name),
       view_name = button_settings.view_name
     })
-    --button.content.visible = false
+
     definitions.widget_definitions[button_name] = button
     definitions.scenegraph_definition[button_name] = button_settings.scenegraph_definition
   end
@@ -230,6 +259,9 @@ end)
 mod:hook(CLASS.StateMainMenu, "update", function(func, self, main_dt, main_t)
 
   if self._continue and not self:_waiting_for_profile_synchronization() then
+
+    mod:hook_disable(CLASS.PartyImmateriumMemberMyself, "presence_name")
+
     if _go_to_shooting_range then
       _go_to_shooting_range = false
 
@@ -265,11 +297,21 @@ end)
 
 local _wallet_update_t = 5
 mod:hook_safe(CLASS.MainMenuView, "_handle_input", function(self, input_service, dt, t)
-  local play_button = self._widgets_by_name.play_button.content
+  local is_in_matchmaking = Managers.party_immaterium:is_in_matchmaking()
+  local play_button_content = self._widgets_by_name.play_button.content
+  local create_button_content = self._widgets_by_name.create_button.content
+  local psykhanium_button_content = self._widgets_by_name[_psykhanium_button].content
+  local mission_button_content = self._widgets_by_name[_mission_button].content
 
-  local widget = self._widgets_by_name[_psykhanium_button].content
-  widget.hotspot.disabled = self._is_main_menu_open
-  widget.visible = play_button.visible
+  psykhanium_button_content.hotspot.disabled = is_in_matchmaking or self._is_main_menu_open
+  psykhanium_button_content.visible = play_button_content.visible
+  play_button_content.hotspot.disabled = is_in_matchmaking
+  mission_button_content.hotspot.disabled = is_in_matchmaking
+  create_button_content.hotspot.disabled = is_in_matchmaking
+
+  for i, character_list_widget in ipairs(self._character_list_widgets) do
+    character_list_widget.content.hotspot.disabled = is_in_matchmaking
+  end
 
   if not _setup_complete then
     self:_setup_interactions()
@@ -286,11 +328,16 @@ mod:hook_safe(CLASS.MainMenuView, "_handle_input", function(self, input_service,
 
     self._wallet_update_t = wallet_update_t
   end
+
+  if is_in_matchmaking then
+    mod:hook_disable(CLASS.PartyImmateriumMemberMyself, "presence_name")
+  else
+    mod:hook_enable(CLASS.PartyImmateriumMemberMyself, "presence_name")
+  end
 end)
 
 mod:hook_safe(CLASS.MainMenuView, "_setup_interactions", function(self)
 
-  _setup_complete = true
   local widgets_by_name = self._widgets_by_name
 
   local challenge_level = _get_challenge_level()
@@ -308,6 +355,9 @@ mod:hook_safe(CLASS.MainMenuView, "_setup_interactions", function(self)
       _open_view(content.view_name)
     end
   end
+
+  mod:hook_enable(CLASS.PartyImmateriumMemberMyself, "presence_name")
+  _setup_complete = true
 end)
 
 --[[
