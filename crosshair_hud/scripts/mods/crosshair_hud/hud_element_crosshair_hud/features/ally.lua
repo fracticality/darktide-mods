@@ -687,7 +687,7 @@ local function update_players(parent, dt, t)
 
     repeat
       if hud_player == player or player.__deleted then
-        --break
+        break
       end
 
       feature._players[i] = player
