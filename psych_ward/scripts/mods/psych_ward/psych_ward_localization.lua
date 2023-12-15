@@ -29,6 +29,7 @@ return {
   },
   mission_button = {
     en = "Mission Board",
+    ja = "ミッションボード",
     ["zh-cn"] = "任务面板",
   },
   vendor_button= {
@@ -53,6 +54,7 @@ return {
     en = "Cosmetics",
     ru = "Интендант",
     ["zh-cn"] = "装饰品",
+    ja = "装飾品",
   },
   inventory_button = {
     en = "Inventory",
