@@ -31,6 +31,7 @@ return {
     en = "Mission Board",
     ja = "ミッションボード",
     ["zh-cn"] = "任务面板",
+    ru = "Меню выбора миссий",
   },
   vendor_button= {
     en = "Armoury",
