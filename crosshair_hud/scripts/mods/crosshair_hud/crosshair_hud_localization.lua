@@ -421,6 +421,12 @@ local localizations = {
     en = "Display Permanent Health Text",
     ["zh-cn"] = "显示生命值上限文本",
   },
+  customize_permanent_health_color = {
+    en = "Customize Permanent Health Color"
+  },
+  permanent_health_color = {
+    en = "Permanent Health Color"
+  },
   display_peril_icon = {
     en = "Display Peril Icon",
     ["zh-cn"] = "显示危机值图标",

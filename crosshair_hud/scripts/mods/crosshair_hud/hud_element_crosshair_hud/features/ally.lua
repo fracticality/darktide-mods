@@ -372,11 +372,15 @@ local function update_health(parent, dt, t, widget, player)
   local health_percent = health_extension and health_extension:current_health_percent() or 0
   local permanent_damage_percent = health_extension and health_extension:permanent_damage_taken_percent() or 0
   local max_wounds = health_extension and health_extension:max_wounds() or 1
+  local threshold_color = mod_utils.get_text_color_for_percent_threshold(health_percent, "health") or UIHudSettings.color_tint_main_2
+  local permanent_color = mod:get("customize_permanent_health_color") and Color[mod:get("permanent_health_color")](255, true) or UIHudSettings.color_tint_8
 
   local content = widget.content
+  local style = widget.style
   local health_display_type = mod:get("ally_health_display_type")
   local number_to_display = (health_display_type == mod.options_display_type.percent and health_percent * 100) or current_health
   content.health_text = math.ceil(number_to_display)
+  style.health_text.text_color = threshold_color
 
   if not feature._wounds_widgets_by_player[player] then
     local wounds_widgets = {}
@@ -418,12 +422,14 @@ local function update_health(parent, dt, t, widget, player)
     end
 
     local widget_style = wounds_widget.style
+    widget_style.health.color = threshold_color
     widget_style.health.size[2] = health_fraction * segment_height
     widget_style.health.uvs[1][2] = (step_fraction * i) - ((1 - health_fraction) / max_wounds)
     widget_style.health.uvs[2][2] = (i - 1) * step_fraction
     widget_style.health.offset[2] = segment_height * (1 - health_fraction) * 0.5
 
     wounds_widget.content.permanent_damage = permanent_damage_percent
+    widget_style.permanent_damage.color = permanent_color
     widget_style.permanent_damage.size[2] = permanent_fraction * segment_height
     widget_style.permanent_damage.uvs[1][2] = (step_fraction * i)
     widget_style.permanent_damage.uvs[2][2] = (step_fraction * i) - permanent_fraction / max_wounds
@@ -456,7 +462,11 @@ local function update_toughness(parent, dt, t, widget, player)
   local number_to_display = (toughness_display_type == mod.options_display_type.percent and toughness_percent * 100) or current_toughness
   content.toughness_text = math.ceil(number_to_display)
 
+  local threshold_color = mod_utils.get_text_color_for_percent_threshold(toughness_percent, "toughness") or UIHudSettings.color_tint_main_2
+  widget.style.toughness_text.text_color = threshold_color
+
   local style = widget.style.toughness_gauge_mask
+  style.color = threshold_color
   style.uvs[1][2] = toughness_percent
   style.size[2] = mask_height
   style.offset[2] = mask_height_offset

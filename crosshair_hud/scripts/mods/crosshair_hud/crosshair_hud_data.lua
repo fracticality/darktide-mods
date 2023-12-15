@@ -117,16 +117,7 @@ local function create_threshold_settings(setting_id)
           type = "dropdown",
           default_value = "ui_terminal",
           options = get_color_options()
-        },
-        --create_color_setting(threshold_id, "red"),
-        --create_color_setting(threshold_id, "green"),
-        --create_color_setting(threshold_id, "blue")
-        --{
-        --    setting_id = threshold_id,
-        --    type = "group",
-        --    sub_widgets = {
-        --    }
-        --}
+        }
       }
     }
 
@@ -233,6 +224,19 @@ return {
             type = "checkbox",
             default_value = true,
             sub_widgets = {
+              {
+                setting_id = "customize_permanent_health_color",
+                type = "checkbox",
+                default_value = false,
+                sub_widgets = {
+                  {
+                    setting_id = "permanent_health_color",
+                    type = "dropdown",
+                    default_value = "ui_terminal",
+                    options = get_color_options()
+                  }
+                }
+              },
               {
                 setting_id = "permanent_health_position",
                 type = "dropdown",

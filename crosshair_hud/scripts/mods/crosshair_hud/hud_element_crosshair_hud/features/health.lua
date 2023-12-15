@@ -483,6 +483,8 @@ local function update_gauge(parent, dt, t)
   local health_percent = health_extension:current_health_percent()
   local permanent_damage_taken_percent = health_extension:permanent_damage_taken_percent()
   local max_wounds = health_extension:max_wounds()
+  local threshold_color = mod_utils.get_text_color_for_percent_threshold(health_percent, "health") or UIHudSettings.color_tint_main_2
+  local permanent_color = mod:get("customize_permanent_health_color") and Color[mod:get("permanent_health_color")](255, true) or UIHudSettings.color_tint_8
 
   local spacing = 1 * health_scale
   local bar_height = 56 * health_scale
@@ -527,12 +529,14 @@ local function update_gauge(parent, dt, t)
     end
 
     local widget_style = widget.style
+    widget_style.health.color = threshold_color
     widget_style.health.size[2] = health_fraction * segment_height
     widget_style.health.uvs[1][2] = (step_fraction * i) - ((1 - health_fraction) / max_wounds)
     widget_style.health.uvs[2][2] = (i - 1) * step_fraction
     widget_style.health.offset[2] = segment_height * (1 - health_fraction) * 0.5
 
     widget.content.permanent_damage = permanent_damage_taken_percent
+    widget_style.permanent_damage.color = permanent_color
     widget_style.permanent_damage.size[2] = corruption_fraction * segment_height
     widget_style.permanent_damage.uvs[1][2] = (step_fraction * i)
     widget_style.permanent_damage.uvs[2][2] = (step_fraction * i) - corruption_fraction / max_wounds
@@ -580,6 +584,7 @@ function feature.update(parent, dt, t)
 
     local number_to_display = (health_display_type == mod.options_display_type.percent and (health_percent * 100)) or current_health
     local text_color = mod_utils.get_text_color_for_percent_threshold(health_percent, "health") or UIHudSettings.color_tint_main_2
+    local permanent_color = mod:get("customize_permanent_health_color") and Color[mod:get("permanent_health_color")](255, true) or UIHudSettings.color_tint_8
 
     local permanent_number_to_display = (health_display_type == mod.options_display_type.percent and ((1 - permanent_damage_taken_percent) * 100)) or (max_health - permanent_damage_taken)
     local permanent_texts = mod_utils.convert_number_to_display_texts(math.floor(permanent_number_to_display), 3, nil, false, true)
@@ -592,6 +597,7 @@ function feature.update(parent, dt, t)
       health_widget.style[key].visible = show_text
 
       health_widget.content[permanent_key] = permanent_texts[i] or ""
+      health_widget.style[permanent_key].text_color = permanent_color
       health_widget.style[permanent_key].visible = show_text and show_permanent_text and permanent_damage_taken > 0
     end
 

@@ -318,16 +318,19 @@ function feature.update(parent, dt, t)
 
   bonus_style.visible = false
 
-  if has_bonus_toughness then
-    --style.toughness.color = UIHudSettings.color_tint_10
-    --bonus_style.uvs[2][2] = toughness_percent - bonus_toughness_percent
-    --bonus_style.uvs[1][2] = toughness_percent
-    --bonus_style.size[2] = 56 * (bonus_toughness_percent) * toughness_scale
-    --bonus_style.offset[2] = (-(56 * ((1 - bonus_toughness_percent)) * 0.5) * toughness_scale) + (toughness_gauge_offset[2])
-  else
-    style.toughness.color = UIHudSettings.color_tint_6
-  end
+  --if has_bonus_toughness then
+  --  style.toughness.color = UIHudSettings.color_tint_10
+  --  bonus_style.uvs[2][2] = toughness_percent - bonus_toughness_percent
+  --  bonus_style.uvs[1][2] = toughness_percent
+  --  bonus_style.size[2] = 56 * (bonus_toughness_percent) * toughness_scale
+  --  bonus_style.offset[2] = (-(56 * ((1 - bonus_toughness_percent)) * 0.5) * toughness_scale) + (toughness_gauge_offset[2])
+  --else
+  --  style.toughness.color = UIHudSettings.color_tint_6
+  --end
 
+  local threshold_color = mod_utils.get_text_color_for_percent_threshold(toughness_percent, "toughness") or UIHudSettings.color_tint_main_2
+
+  style.toughness.color = threshold_color
   style.toughness.uvs[1][2] = toughness_percent
   style.toughness.size[2] = 56 * (toughness_percent) * toughness_scale
   style.toughness.offset[2] = ((56 * (1 - (toughness_percent)) * 0.5) * toughness_scale) + toughness_gauge_offset[2]
