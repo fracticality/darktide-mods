@@ -30,6 +30,7 @@ return {
   mission_button = {
     en = "Mission Board",
     ja = "ミッションボード",
+    ["zh-cn"] = "任务面板",
   },
   vendor_button= {
     en = "Armoury",
