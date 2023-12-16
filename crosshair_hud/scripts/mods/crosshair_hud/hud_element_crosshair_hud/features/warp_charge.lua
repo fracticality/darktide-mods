@@ -108,6 +108,11 @@ function feature.update(parent, dt, t)
   local hud_player = ui_hud:player()
   local profile = hud_player and hud_player:profile()
   local talents = profile.talents
+
+  if not (talents.psyker_increased_max_souls or talents.psyker_passive_souls_from_elite_kills) then
+    return
+  end
+
   local player_extensions = ui_hud:player_extensions()
   local buff_extension = player_extensions.buff
   local unit_data_extension = player_extensions.unit_data
