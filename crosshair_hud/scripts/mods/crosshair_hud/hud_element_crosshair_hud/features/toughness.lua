@@ -297,8 +297,8 @@ function feature.update(parent, dt, t)
     parent.current_toughness = current_toughness
     parent.toughness_visible_timer = mod:get("toughness_stay_time") or 1.5
 
-    local show_text = not mod:get("hide_toughness_text")
     local toughness_display_type = mod:get("toughness_display_type")
+    local show_text = toughness_display_type ~= mod.options_display_type.hide
     local number_to_display = (toughness_display_type == mod.options_display_type.percent and (toughness_percent * 100)) or current_toughness
     local text_color = mod_utils.get_text_color_for_percent_threshold(toughness_percent, "toughness") or UIHudSettings.color_tint_6
 
