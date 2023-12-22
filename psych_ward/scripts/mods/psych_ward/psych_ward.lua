@@ -453,14 +453,6 @@ mod:hook_safe(CLASS.TitleView, "_apply_title_text", function(self)
   end
 end)
 
-function mod.event_multiplayer_session_failed_to_boot()
-  mod:notify("Failed to boot session")
-end
-
-function mod.event_multiplayer_session_disconnected_from_host()
-  mod:notify("Disconnected from host")
-end
-
 function mod.on_all_mods_loaded()
   Managers.event:register(mod, "event_multiplayer_session_failed_to_boot", "event_multiplayer_session_failed_to_boot")
   Managers.event:register(mod, "event_multiplayer_session_disconnected_from_host", "event_multiplayer_session_disconnected_from_host")
