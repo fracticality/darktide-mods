@@ -9,6 +9,7 @@ local StepperPassTemplates = mod:original_require("scripts/ui/pass_templates/ste
 local MatchmakingConstants = mod:original_require("scripts/settings/network/matchmaking_constants")
 local SINGLEPLAY_TYPES = MatchmakingConstants.SINGLEPLAY_TYPES
 
+local _is_matchmaking_from_main_menu = false
 local _setup_complete = false
 local _go_to_shooting_range = false
 local _exit_text = "exit_text"
@@ -256,6 +257,18 @@ mod:hook_require(main_menu_definitions_file, function(definitions)
 
 end)
 
+mod:hook(CLASS.StateMainMenu, "_show_reconnect_popup", function(func, self)
+  if _is_matchmaking_from_main_menu then
+    self._reconnect_popup_id = nil
+    self._reconnect_pressed = true
+    self:_rejoin_game()
+
+    return
+  end
+
+  return func(self)
+end)
+
 mod:hook(CLASS.StateMainMenu, "update", function(func, self, main_dt, main_t)
 
   if self._continue and not self:_waiting_for_profile_synchronization() then
@@ -334,6 +347,8 @@ mod:hook_safe(CLASS.MainMenuView, "_handle_input", function(self, input_service,
   else
     mod:hook_enable(CLASS.PartyImmateriumMemberMyself, "presence_name")
   end
+
+  _is_matchmaking_from_main_menu = is_in_matchmaking
 end)
 
 mod:hook_safe(CLASS.MainMenuView, "_setup_interactions", function(self)
@@ -437,3 +452,21 @@ mod:hook_safe(CLASS.TitleView, "_apply_title_text", function(self)
     exit_text_widget.content.text = text
   end
 end)
+
+function mod.event_multiplayer_session_failed_to_boot()
+  mod:notify("Failed to boot session")
+end
+
+function mod.event_multiplayer_session_disconnected_from_host()
+  mod:notify("Disconnected from host")
+end
+
+function mod.on_all_mods_loaded()
+  Managers.event:register(mod, "event_multiplayer_session_failed_to_boot", "event_multiplayer_session_failed_to_boot")
+  Managers.event:register(mod, "event_multiplayer_session_disconnected_from_host", "event_multiplayer_session_disconnected_from_host")
+end
+
+function mod.on_disabled()
+  Managers.event:unregister(mod, "event_multiplayer_session_failed_to_boot")
+  Managers.event:unregister(mod, "event_multiplayer_session_disconnected_from_host")
+end
