@@ -11,6 +11,8 @@ local SINGLEPLAY_TYPES = MatchmakingConstants.SINGLEPLAY_TYPES
 
 local _is_matchmaking_from_main_menu = false
 local _setup_complete = false
+local _flag_for_return = false
+local _return_to_character_select = false
 local _go_to_shooting_range = false
 local _exit_text = "exit_text"
 local _psykhanium_button = "psykhanium_button"
@@ -37,12 +39,11 @@ local button_size = { 150, ButtonPassTemplates.terminal_button_small.size[2] }
 local button_offset = { 0, button_size[2] + 10, 0 }
 local _button_settings = {
   [_psykhanium_button] = {
-    view_name = "mission_board_view",
     scenegraph_definition = {
       parent = "character_info",
       vertical_alignment = "top",
       horizontal_alignment = "center",
-      size = ButtonPassTemplates.terminal_button_small.size,
+      size = { 200, 40 },
       position = { 0, -25, 0 }
     }
   },
@@ -52,7 +53,7 @@ local _button_settings = {
       parent = "character_info",
       vertical_alignment = "top",
       horizontal_alignment = "center",
-      size = ButtonPassTemplates.terminal_button_small.size,
+      size = { 200, 40 },
       position = { 0, -250, 0 }
     }
   },
@@ -191,6 +192,20 @@ mod:hook(CLASS.PartyImmateriumMemberMyself, "presence_name", function(func, self
   return result
 end)
 
+mod:hook(CLASS.MultiplayerSessionManager, "find_available_session", function(func, ...)
+
+  if _return_to_character_select then
+    return CLASS.StateExitToMainMenu, {}
+  end
+
+  if _flag_for_return then
+    _return_to_character_select = true
+    _flag_for_return = false
+  end
+
+  return func(...)
+end)
+
 local main_menu_definitions_file = "scripts/ui/views/main_menu_view/main_menu_view_definitions"
 mod:hook_require(main_menu_definitions_file, function(definitions)
 
@@ -263,6 +278,8 @@ mod:hook(CLASS.StateMainMenu, "_show_reconnect_popup", function(func, self)
     self._reconnect_pressed = true
     self:_rejoin_game()
 
+    _flag_for_return = true
+
     return
   end
 
@@ -304,7 +321,9 @@ mod:hook(CLASS.StateMainMenu, "update", function(func, self, main_dt, main_t)
     self._continue = false
   end
 
-  return func(self, main_dt, main_t)
+  local next_state, next_state_params = func(self, main_dt, main_t)
+
+  return next_state, next_state_params
 
 end)
 
@@ -372,6 +391,7 @@ mod:hook_safe(CLASS.MainMenuView, "_setup_interactions", function(self)
   end
 
   mod:hook_enable(CLASS.PartyImmateriumMemberMyself, "presence_name")
+  _return_to_character_select = false
   _setup_complete = true
 end)
 
