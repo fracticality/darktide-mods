@@ -1,3 +1,6 @@
+--TODO: Add remaining vendors
+
+
 local mod = get_mod("psych_ward")
 
 local Promise = mod:original_require("scripts/foundation/utilities/promise")
@@ -12,6 +15,7 @@ local SINGLEPLAY_TYPES = MatchmakingConstants.SINGLEPLAY_TYPES
 local _is_matchmaking_from_main_menu = false
 local _setup_complete = false
 local _flag_for_return = false
+local _is_transitioning = false
 local _return_to_character_select = false
 local _go_to_shooting_range = false
 local _exit_text = "exit_text"
@@ -192,6 +196,26 @@ mod:hook(CLASS.PartyImmateriumMemberMyself, "presence_name", function(func, self
   return result
 end)
 
+-- This handles cases where the player times out in the post-mission screen
+mod:hook(CLASS.MechanismHub, "wanted_transition", function(func, self)
+  if _return_to_character_select then
+
+    if not _is_transitioning then
+      _is_transitioning = true
+
+      return false, CLASS.StateLoading, {
+        next_state = CLASS.StateExitToMainMenu,
+        next_state_params = {}
+      }
+    end
+
+    return false
+  end
+
+  return func(self)
+end)
+
+-- This handles cases where the player skipped post-mission timeout or left a mission
 mod:hook(CLASS.MultiplayerSessionManager, "find_available_session", function(func, ...)
 
   if _return_to_character_select then
@@ -273,12 +297,12 @@ mod:hook_require(main_menu_definitions_file, function(definitions)
 end)
 
 mod:hook(CLASS.StateMainMenu, "_show_reconnect_popup", function(func, self)
+  _flag_for_return = true
+
   if _is_matchmaking_from_main_menu then
     self._reconnect_popup_id = nil
     self._reconnect_pressed = true
     self:_rejoin_game()
-
-    _flag_for_return = true
 
     return
   end
@@ -392,7 +416,10 @@ mod:hook_safe(CLASS.MainMenuView, "_setup_interactions", function(self)
 
   mod:hook_enable(CLASS.PartyImmateriumMemberMyself, "presence_name")
   _return_to_character_select = false
+  _is_transitioning = false
   _setup_complete = true
+
+  Managers.data_service.store:reset()
 end)
 
 --[[
