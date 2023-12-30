@@ -184,7 +184,7 @@ local _presence_hook_top_views = {
   story_mission_play_view = true
 }
 
-mod:hook(CLASS.PartyImmateriumMemberMyself, "presence_name", function(func, self)
+local function presence_name_hook(func, self)
   local result = func(self)
 
   if _presence_hook_top_views[Managers.ui:active_top_view()] then
@@ -194,7 +194,10 @@ mod:hook(CLASS.PartyImmateriumMemberMyself, "presence_name", function(func, self
   end
 
   return result
-end)
+end
+
+mod:hook(CLASS.PartyImmateriumMemberMyself, "presence_name", presence_name_hook)
+mod:hook(CLASS.PartyImmateriumMember, "presence_name", presence_name_hook)
 
 -- This handles cases where the player times out in the post-mission screen
 mod:hook(CLASS.MechanismHub, "wanted_transition", function(func, self)
@@ -385,11 +388,13 @@ mod:hook_safe(CLASS.MainMenuView, "_handle_input", function(self, input_service,
     self._wallet_update_t = wallet_update_t
   end
 
-  if is_in_matchmaking then
-    mod:hook_disable(CLASS.PartyImmateriumMemberMyself, "presence_name")
-  else
-    mod:hook_enable(CLASS.PartyImmateriumMemberMyself, "presence_name")
-  end
+  --if is_in_matchmaking then
+  --  mod:hook_disable(CLASS.PartyImmateriumMemberMyself, "presence_name")
+  --  mod:hook_disable(CLASS.PartyImmateriumMember, "presence_name")
+  --else
+  --  mod:hook_enable(CLASS.PartyImmateriumMemberMyself, "presence_name")
+  --  mod:hook_enable(CLASS.PartyImmateriumMember, "presence_name")
+  --end
 
   _is_matchmaking_from_main_menu = is_in_matchmaking
 end)
