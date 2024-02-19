@@ -18,35 +18,35 @@ local scenegraph_definition = {
     parent = "pivot",
     vertical_alignment = "top",
     horizontal_alignment = "left",
-    size = { 150, 26 },
-    position = { 0, 0, 0 }
+    size = { 800, 25 },
+    position = { 0, 25, 0 }
   },
   create_button = {
     parent = "header",
     vertical_alignment = "top",
-    horizontal_alignment = "left",
+    horizontal_alignment = "center",
     size = { 150, 20 },
-    position = { 155, 2.5, 0 }
+    position = { -155, 32.5, 0 }
   },
   delete_button = {
-    parent = "create_button",
+    parent = "header",
     vertical_alignment = "top",
-    horizontal_alignment = "left",
+    horizontal_alignment = "center",
     size = { 150, 20 },
-    position = { 155, 0, 0 }
+    position = { 0, 32.5, 0 }
   },
   reset_button = {
-    parent = "delete_button",
+    parent = "header",
     vertical_alignment = "top",
-    horizontal_alignment = "left",
+    horizontal_alignment = "center",
     size = { 150, 20 },
-    position = { 155, 0, 0 }
+    position = { 155, 32.5, 0 }
   },
   background = {
     parent = "header",
     vertical_alignment = "top",
     horizontal_alignment = "left",
-    size = { 800, 140 },
+    size = { 800, 175 },
     position = { 0, 25, 0 }
   },
   button_root = {
@@ -58,39 +58,14 @@ local scenegraph_definition = {
   }
 }
 
-local widget_blueprints = {
-  loadout_button = function(content_overrides)
-    return UIWidget.create_definition(ButtonPassTemplates.terminal_button_small, "button_root", content_overrides)
-  end
-}
-
 local widget_definitions = {
   header = UIWidget.create_definition({
-    {
-      pass_type = "rect",
-      style = {
-        vertical_alignment = "center",
-        horizontal_alignment = "center",
-        color = Color.terminal_background(255, true),
-        offset = { 0, 0, 0 }
-      }
-    },
-    {
-      pass_type = "texture",
-      value = "content/ui/materials/frames/frame_tile_2px",
-      style = {
-        vertical_alignment = "center",
-        horizontal_alignment = "center",
-        color = Color.terminal_frame(255, true),
-        offset = { 0, 0, 2 }
-      }
-    },
     {
       pass_type = "text",
       value = mod:localize("loadouts_header"),
       style = {
-        font_type = "machine_medium",
-        font_size = 18,
+        font_type = "proxima_nova_bold",
+        font_size = 24,
         text_vertical_alignment = "center",
         text_horizontal_alignment = "center",
         text_color = Color.terminal_text_body(255, true),
@@ -98,27 +73,6 @@ local widget_definitions = {
       }
     }
   }, "header"),
-  background = UIWidget.create_definition({
-    {
-      pass_type = "rect",
-      style = {
-        vertical_alignment = "center",
-        horizontal_alignment = "center",
-        color = Color.terminal_background(255, true),
-        offset = { 0, 0, 0 }
-      }
-    },
-    {
-      pass_type = "texture",
-      value = "content/ui/materials/frames/frame_tile_2px",
-      style = {
-        vertical_alignment = "center",
-        horizontal_alignment = "center",
-        color = Color.terminal_frame(255, true),
-        offset = { 0, 0, 2 }
-      }
-    }
-  }, "background"),
   create_button = UIWidget.create_definition(ButtonPassTemplates.terminal_button_small, "create_button", {
     text = "Create",
     hotspot = {
@@ -154,10 +108,24 @@ local widget_definitions = {
   }),
 }
 
+local menu_settings = {
+  scrollbar_width = 10,
+  grid_size = { 790, 225 },
+  grid_spacing = { 10, 10 },
+  mask_size = { 800, 225 },
+  title_height = 0,
+  top_padding = 60,
+  edge_padding = 20,
+  scrollbar_position = { 0, 0 },
+  use_terminal_background = true,
+  --hide_dividers = true
+}
+
 local definitions = {
   scenegraph_definition = scenegraph_definition,
   widget_definitions = widget_definitions,
-  widget_blueprints = widget_blueprints
+  widget_blueprints = widget_blueprints,
+  menu_settings = menu_settings
 }
 
 return definitions

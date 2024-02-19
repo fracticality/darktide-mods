@@ -30,5 +30,12 @@ return {
 	default_base_stat_value = {
 		en = "Default Weapon Modifier Value",
 		["zh-cn"] = "默认武器修正值",
+	},
+
+	error_no_preset_with_modded_loadout = {
+		en = "Cannot create base game presets with modded loadouts\nUse loadout system provided by Loadout Config"
+	},
+	error_only_open_as_host = {
+		en = "Loadout Config can only be opened in the Psykhanium or during a SoloPlay-enabled game."
 	}
 }

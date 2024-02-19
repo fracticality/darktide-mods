@@ -4,20 +4,25 @@ local UIWidget = require("scripts/managers/ui/ui_widget")
 local Archetypes = require("scripts/settings/archetype/archetypes")
 
 local Definitions = mod:io_dofile("loadout_config/scripts/mods/loadout_config/view_elements/loadout_list/loadout_list_definitions")
-local ViewElementLoadoutList = class("ViewElementLoadoutList", "ViewElementBase")
+local ViewElementLoadoutListBlueprints = mod:io_dofile("loadout_config/scripts/mods/loadout_config/view_elements/loadout_list/loadout_list_blueprints")
+
+local MAX_LOADOUTS = 25
+
+local ViewElementLoadoutList = class("ViewElementLoadoutList", "ViewElementGrid")
 --------------------------------------------------------------------------------
 --- LIFECYCLE METHODS ----------------------------------------------------------
 --------------------------------------------------------------------------------
 
 function ViewElementLoadoutList:init(parent, draw_layer, scale, context)
+  self._reference_name = "ViewElementLoadoutList_" .. tostring(self)
   self._selected_loadout = nil
 
   self._external_pressed_callback = context.pressed_callback
   self._external_create_callback = context.create_callback
   self._external_reset_callback = context.reset_callback
-  self._max_loadouts = context.max_loadouts or 20
+  self._max_loadouts = context.max_loadouts or MAX_LOADOUTS
 
-  ViewElementLoadoutList.super.init(self, parent, draw_layer, scale, Definitions)
+  ViewElementLoadoutList.super.init(self, parent, draw_layer, scale, Definitions.menu_settings, Definitions)
 
   self:_init_loadouts()
 
@@ -100,9 +105,30 @@ function ViewElementLoadoutList:_init_loadouts()
   local archetype_name = archetype.name
   local archetype_loadouts = saved_loadouts[archetype_name] or {}
 
-  for _, loadout in ipairs(archetype_loadouts) do
-    self:_create_loadout_button(loadout)
+  if not archetype_loadouts or #archetype_loadouts == 0 then
+    return
   end
+
+  local layout = {
+    {
+      widget_type = "spacing_vertical_small"
+    }
+  }
+
+  for i, loadout in ipairs(archetype_loadouts) do
+    table.insert(layout, {
+      widget_type = "loadout_button",
+      loadout = loadout
+    })
+  end
+
+  table.insert(layout, {
+    widget_type = "spacing_vertical"
+  })
+
+  local left_click_callback = callback(self, "_on_loadout_button_pressed")
+
+  self:present_grid_layout(layout, ViewElementLoadoutListBlueprints, left_click_callback)
 end
 
 function ViewElementLoadoutList:_on_reset_button_pressed()
@@ -115,7 +141,7 @@ function ViewElementLoadoutList:_on_reset_button_pressed()
 end
 
 function ViewElementLoadoutList:_on_create_button_pressed()
-  local loadout_widgets = self._loadout_widgets
+  local loadout_widgets = self:widgets()
   local index = #loadout_widgets + 1
 
   if index > self._max_loadouts then
@@ -141,24 +167,29 @@ function ViewElementLoadoutList:_on_create_button_pressed()
     item_data = loadout_item_data
   }
 
-  self._selected_loadout = index
-  self:_create_loadout_button(loadout)
-
   local profile = parent:player_profile()
   local archetype = profile.archetype
   local archetype_name = archetype.name
   local archetype_loadouts = self._saved_loadouts[archetype_name]
   table.insert(archetype_loadouts, loadout)
+
+  mod:set("saved_loadouts", self._saved_loadouts)
+
+  self:_init_loadouts()
 end
 
 function ViewElementLoadoutList:_on_delete_button_pressed()
   local saved_loadouts = self._saved_loadouts
-  local selected_loadout_index = self._selected_loadout
-  local loadout_widgets = self._loadout_widgets
 
-  if not selected_loadout_index then
+  local selected_widget = self:selected_grid_widget()
+
+  if not selected_widget then
     return
   end
+
+  local selected_widget_index = self:widget_index(selected_widget)
+
+  self:remove_widget(selected_widget)
 
   local parent = self._parent
   local profile = parent:player_profile()
@@ -166,40 +197,11 @@ function ViewElementLoadoutList:_on_delete_button_pressed()
   local archetype_name = archetype.name
   local archetype_loadouts = saved_loadouts[archetype_name]
 
-  table.remove(archetype_loadouts, selected_loadout_index)
-  table.remove(loadout_widgets, selected_loadout_index)
-
-  for i, loadout_widget in ipairs(loadout_widgets) do
-    loadout_widget.content.index = i
-  end
-
-  self._selected_loadout = nil
-
-  self:_update_loadout_button_positions()
-end
-
-function ViewElementLoadoutList:_create_loadout_button(loadout)
-  local loadout_widgets = self._loadout_widgets
-  local index = #loadout_widgets + 1
-  local loadout_widget_definition = Definitions.widget_blueprints.loadout_button({
-    index = index,
-    text = loadout.name,
-    loadout_item_data = loadout.item_data
-  })
-  local widget_id = string.format("loadout_widget_%s", index)
-  local widget = self:_create_widget(widget_id, loadout_widget_definition)
-
-  widget.content.hotspot.pressed_callback = callback(self, "_on_loadout_button_pressed", widget)
-
-  table.insert(loadout_widgets, widget)
-
-  self:_update_loadout_button_positions()
+  table.remove(archetype_loadouts, selected_widget_index)
 end
 
 function ViewElementLoadoutList:_on_loadout_button_pressed(loadout_button)
-  local content = loadout_button.content
-
-  self._selected_loadout = content.index
+  self:select_grid_widget(loadout_button)
 
   local external_pressed_callback = self._external_pressed_callback
 
@@ -209,22 +211,14 @@ function ViewElementLoadoutList:_on_loadout_button_pressed(loadout_button)
 end
 
 function ViewElementLoadoutList:_update_active_selection()
-  local loadout_widgets = self._loadout_widgets or {}
-  local selected_loadout_index = self._selected_loadout
-
-  for i, loadout_widget in ipairs(loadout_widgets) do
-    local content = loadout_widget.content
-    local index = content.index
-
-    content.hotspot.is_selected = index == selected_loadout_index
-  end
+  local loadout_widgets = self:widgets()
 
   local widgets_by_name = self._widgets_by_name
   local delete_button = widgets_by_name.delete_button
-  delete_button.content.hotspot.disabled = not self._selected_loadout
+  delete_button.content.hotspot.disabled = not self:selected_grid_index()
 
   local create_button = widgets_by_name.create_button
-  create_button.content.hotspot.disabled = #loadout_widgets > self._max_loadouts
+  create_button.content.hotspot.disabled = #loadout_widgets >= self._max_loadouts
 end
 
 return ViewElementLoadoutList
