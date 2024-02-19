@@ -3,13 +3,14 @@
 
 local mod = get_mod("psych_ward")
 
-local Promise = mod:original_require("scripts/foundation/utilities/promise")
-local UIWidget = mod:original_require("scripts/managers/ui/ui_widget")
-local InputUtils = mod:original_require("scripts/managers/input/input_utils")
-local ButtonPassTemplates = mod:original_require("scripts/ui/pass_templates/button_pass_templates")
-local Missions = mod:original_require("scripts/settings/mission/mission_templates")
-local StepperPassTemplates = mod:original_require("scripts/ui/pass_templates/stepper_pass_templates")
-local MatchmakingConstants = mod:original_require("scripts/settings/network/matchmaking_constants")
+local ProfileUtils = require("scripts/utilities/profile_utils")
+local Promise = require("scripts/foundation/utilities/promise")
+local UIWidget = require("scripts/managers/ui/ui_widget")
+local InputUtils = require("scripts/managers/input/input_utils")
+local ButtonPassTemplates = require("scripts/ui/pass_templates/button_pass_templates")
+local Missions = require("scripts/settings/mission/mission_templates")
+local StepperPassTemplates = require("scripts/ui/pass_templates/stepper_pass_templates")
+local MatchmakingConstants = require("scripts/settings/network/matchmaking_constants")
 local SINGLEPLAY_TYPES = MatchmakingConstants.SINGLEPLAY_TYPES
 
 local _is_matchmaking_from_main_menu = false
@@ -318,6 +319,7 @@ mod:hook(CLASS.StateMainMenu, "update", function(func, self, main_dt, main_t)
   if self._continue and not self:_waiting_for_profile_synchronization() then
 
     mod:hook_disable(CLASS.PartyImmateriumMemberMyself, "presence_name")
+    mod:hook_disable(CLASS.PartyImmateriumMember, "presence_name")
 
     if _go_to_shooting_range then
       _go_to_shooting_range = false
@@ -355,7 +357,16 @@ mod:hook(CLASS.StateMainMenu, "update", function(func, self, main_dt, main_t)
 end)
 
 local _wallet_update_t = 5
-mod:hook_safe(CLASS.MainMenuView, "_handle_input", function(self, input_service, dt, t)
+mod:hook(CLASS.MainMenuView, "_handle_input", function(func, self, input_service, dt, t)
+
+  local constant_elements = Managers.ui:ui_constant_elements()
+  if input_service:get("confirm_pressed") then
+    constant_elements._elements.ConstantElementChat:set_visible(true)
+    return
+  end
+
+  func(self, input_service, dt, t)
+
   local is_in_matchmaking = Managers.party_immaterium:is_in_matchmaking()
   local play_button_content = self._widgets_by_name.play_button.content
   local create_button_content = self._widgets_by_name.create_button.content
@@ -420,6 +431,8 @@ mod:hook_safe(CLASS.MainMenuView, "_setup_interactions", function(self)
   end
 
   mod:hook_enable(CLASS.PartyImmateriumMemberMyself, "presence_name")
+  mod:hook_enable(CLASS.PartyImmateriumMember, "presence_name")
+
   _return_to_character_select = false
   _is_transitioning = false
   _setup_complete = true
