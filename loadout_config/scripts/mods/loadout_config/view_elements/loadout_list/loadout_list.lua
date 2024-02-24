@@ -37,9 +37,9 @@ function ViewElementLoadoutList:init(parent, draw_layer, scale, context)
 end
 
 function ViewElementLoadoutList:update(dt, t, input_service)
-  self:_update_active_selection()
-
   ViewElementLoadoutList.super.update(self, dt, t, input_service)
+
+  self:_update_active_selection()
 end
 
 function ViewElementLoadoutList:_draw_widgets(dt, t, input_service, ui_renderer, render_settings)
@@ -75,14 +75,6 @@ end
 
 function ViewElementLoadoutList:set_pivot_offset(x, y)
   self:_set_scenegraph_position("pivot", x, y)
-end
-
-function ViewElementLoadoutList:_update_loadout_button_positions()
-  local loadout_widgets = self._loadout_widgets
-  for i, loadout_widget in ipairs(loadout_widgets) do
-    loadout_widget.offset[1] = (i - 1) % 5 * 160
-    loadout_widget.offset[2] = math.floor((i - 1) / 5) * 35
-  end
 end
 
 function ViewElementLoadoutList:_init_loadouts()
@@ -211,7 +203,7 @@ function ViewElementLoadoutList:_on_loadout_button_pressed(loadout_button)
 end
 
 function ViewElementLoadoutList:_update_active_selection()
-  local loadout_widgets = self:widgets()
+  local loadout_widgets = self:widgets() or {}
 
   local widgets_by_name = self._widgets_by_name
   local delete_button = widgets_by_name.delete_button
