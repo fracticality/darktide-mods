@@ -134,23 +134,19 @@ local _setting_id_by_template_name = {
   psyker_souls_increased_max_stacks = "hide_warp_charges_buff",
   psyker_smite_on_hit = "hide_kinetic_flayer_buff"
 }
-mod:hook_require("scripts/settings/buff/player_buff_templates", function(templates)
-  for template_name, template in pairs(templates) do
-    local setting_id = _setting_id_by_template_name[template_name]
-    if setting_id then
-      template.hide_icon_in_hud = mod:get(setting_id)
-    end
-  end
-end)
 
-mod:hook_require("scripts/settings/buff/player_archetype_specialization/psyker_buff_templates_new", function(templates)
+local hide_icon_hook = function(templates)
+  templates = templates.__data or templates
   for template_name, template in pairs(templates) do
     local setting_id = _setting_id_by_template_name[template_name]
     if setting_id then
       template.hide_icon_in_hud = mod:get(setting_id)
     end
   end
-end)
+end
+
+mod:hook_require("scripts/settings/buff/player_buff_templates", hide_icon_hook)
+mod:hook_require("scripts/settings/buff/archetype_buff_templates/psyker_buff_templates", hide_icon_hook)
 
 local function _shadows_enabled(setting_id)
   local enable_shadows_id = string.format("enable_shadows_%s", setting_id)

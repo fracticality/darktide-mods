@@ -116,9 +116,9 @@ function feature.update(parent, dt, t)
   local player_extensions = ui_hud:player_extensions()
   local buff_extension = player_extensions.buff
   local unit_data_extension = player_extensions.unit_data
-  local specialization_resource_component = unit_data_extension:read_component("specialization_resource")
+  local talent_resource_component = unit_data_extension:read_component("talent_resource")
 
-  if not specialization_resource_component then
+  if not talent_resource_component then
     return
   end
 
@@ -138,9 +138,9 @@ function feature.update(parent, dt, t)
     end
   end
 
-  --local max_resource = specialization_resource_component.max_resource   -- Always returns 6; use when fixed
+  --local max_resource = talent_resource_component.max_resource   -- Always returns 6; use when fixed
   local max_resource = talents.psyker_increased_max_souls and 6 or 4
-  local current_resource = specialization_resource_component.current_resource
+  local current_resource = talent_resource_component.current_resource
   local offset_modifier = max_resource == 4 and (24 * warp_charge_scale) or 0
   local display_warp_charge_indicator = mod:get("display_warp_charge_indicator")
 
