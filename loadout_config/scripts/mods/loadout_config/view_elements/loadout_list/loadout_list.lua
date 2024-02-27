@@ -34,6 +34,8 @@ function ViewElementLoadoutList:init(parent, draw_layer, scale, context)
   create_button.content.hotspot.pressed_callback = callback(self, "_on_create_button_pressed")
   delete_button.content.hotspot.pressed_callback = callback(self, "_on_delete_button_pressed")
   reset_button.content.hotspot.pressed_callback = callback(self, "_on_reset_button_pressed")
+
+  self:set_empty_message("")
 end
 
 function ViewElementLoadoutList:update(dt, t, input_service)
@@ -98,6 +100,7 @@ function ViewElementLoadoutList:_init_loadouts()
   local archetype_loadouts = saved_loadouts[archetype_name] or {}
 
   if not archetype_loadouts or #archetype_loadouts == 0 then
+    self:present_grid_layout({}, ViewElementLoadoutListBlueprints)
     return
   end
 
@@ -168,6 +171,7 @@ function ViewElementLoadoutList:_on_create_button_pressed()
   mod:set("saved_loadouts", self._saved_loadouts)
 
   self:_init_loadouts()
+  self._grid:select_last_index()
 end
 
 function ViewElementLoadoutList:_on_delete_button_pressed()
