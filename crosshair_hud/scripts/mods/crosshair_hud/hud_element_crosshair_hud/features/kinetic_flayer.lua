@@ -39,7 +39,7 @@ feature.scenegraph_definition = {
   }
 }
 
-function feature.create_widget_definitions(parent)
+function feature.create_widget_definitions()
   local passes = {
     {
       pass_type = "text",

@@ -5,16 +5,13 @@ local _definitions = mod:io_dofile("crosshair_hud/scripts/mods/crosshair_hud/hud
 local HudElementCrosshairHud = class("HudElementCrosshairHud", "HudElementBase")
 
 function HudElementCrosshairHud:init(parent, draw_layer, start_scale)
-  self._talent_icons_by_player = {}
-  self._parent = parent
-
   local features = _definitions.features
   local scenegraph_definition = _definitions.scenegraph_definition
   local widget_definitions = _definitions.widget_definitions
   local features_by_name = {}
 
   for feature_name, feature in pairs(features) do
-    local definitions = feature.create_widget_definitions(self)
+    local definitions = feature.create_widget_definitions()
 
     if definitions then
       table.merge_recursive(scenegraph_definition, feature.scenegraph_definition)
@@ -34,7 +31,7 @@ end
 function HudElementCrosshairHud:update(dt, t, ui_renderer, render_settings, input_service)
   HudElementCrosshairHud.super.update(self, dt, t, ui_renderer, render_settings, input_service)
 
-  for template_name, feature in pairs(self._features_by_name) do
+  for feature_name, feature in pairs(self._features_by_name) do
     feature.update(self, dt, t)
   end
 

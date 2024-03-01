@@ -312,6 +312,9 @@ local localizations = {
     ["zh-cn"] = "仅在装弹状态下显示。\n自定义位置时可以禁用此选项。",
   },
 
+  custom_threshold_bonus = {
+    en = "Bonus Threshold Color",
+  },
   custom_threshold_full = {
     en = "Full Threshold Color",
     ["zh-cn"] = "满阈值颜色",

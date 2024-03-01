@@ -145,8 +145,8 @@ function template.create_widget_definitions(feature_name)
 end
 
 local _coherency_talents = {}
-
 local _aura_icon_by_talent_name = {}
+local _talent_icons_by_player = {}
 
 for archetype_name, archetype in pairs(Archetypes) do
   local talent_names = {}
@@ -272,7 +272,7 @@ function template.update(parent, dt, t)
       local style = widget_style[id]
       local material_values = style.material_values
       if material_values then
-        local talent_icons_by_player = parent._talent_icons_by_player
+        local talent_icons_by_player = _talent_icons_by_player
         local talent_icon_by_player = talent_icons_by_player[player]
         if not talent_icon_by_player then
           talent_icon_by_player = _get_talent_icon(profile)

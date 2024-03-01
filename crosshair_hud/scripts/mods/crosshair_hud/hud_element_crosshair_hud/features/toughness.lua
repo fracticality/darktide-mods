@@ -81,7 +81,7 @@ function feature.create_widget_definitions()
             { 0, 1 },
             { 1, 0 }
           },
-          color = Color.ui_toughness_buffed(255, true),
+          color = UIHudSettings.color_tint_10,
           size = { 24 * toughness_scale, 56 * toughness_scale },
           offset = { toughness_gauge_offset[1], toughness_gauge_offset[2], 6 }
         },
@@ -271,15 +271,16 @@ end
 
 function feature.update(parent, dt, t)
   local player_extensions = parent._parent:player_extensions()
-  local buff_extension = player_extensions.buff
-  local stat_buffs = buff_extension:stat_buffs()
-  local bonus_toughness_value = stat_buffs.toughness_bonus_flat or 0
-  local has_bonus_toughness = bonus_toughness_value > 0
   local toughness_extension = player_extensions.toughness
   local max_toughness = toughness_extension:max_toughness()
-  local bonus_toughness_percent = (bonus_toughness_value / max_toughness)
+  local max_toughness_visual = toughness_extension:max_toughness_visual()
   local toughness_percent = toughness_extension:current_toughness_percent()
-  local current_toughness = toughness_extension:remaining_toughness()
+  local toughness_percent_visual = toughness_extension:current_toughness_percent_visual()
+  local current_toughness = toughness_percent * max_toughness
+  local current_toughness_visual = toughness_percent * max_toughness_visual
+  local overshield_amount = max_toughness > current_toughness_visual and math.floor(math.max(current_toughness - max_toughness_visual, 0)) or 0
+  local overshield_percent = overshield_amount / max_toughness_visual
+  local has_overshield = overshield_amount > 0
   local toughness_widget = parent._widgets_by_name.toughness_indicator
   local style = toughness_widget.style
   local bonus_style = style.bonus_toughness
@@ -299,9 +300,8 @@ function feature.update(parent, dt, t)
 
     local toughness_display_type = mod:get("toughness_display_type")
     local show_text = toughness_display_type ~= mod.options_display_type.hide
-    local number_to_display = (toughness_display_type == mod.options_display_type.percent and (toughness_percent * 100)) or current_toughness
-    local text_color = mod_utils.get_text_color_for_percent_threshold(toughness_percent, "toughness") or UIHudSettings.color_tint_6
-
+    local number_to_display = (toughness_display_type == mod.options_display_type.percent and ((toughness_percent_visual + overshield_percent) * 100)) or current_toughness
+    local text_color = mod_utils.get_text_color_for_percent_threshold((toughness_percent_visual + overshield_percent), "toughness") or UIHudSettings.color_tint_6
     local amount = math.ceil(number_to_display)
     local texts = mod_utils.convert_number_to_display_texts(amount, 3, nil, false, true)
     for i = 1, 3 do
@@ -316,24 +316,20 @@ function feature.update(parent, dt, t)
     toughness_widget.dirty = true
   end
 
-  bonus_style.visible = false
+  bonus_style.visible = has_overshield
 
-  --if has_bonus_toughness then
-  --  style.toughness.color = UIHudSettings.color_tint_10
-  --  bonus_style.uvs[2][2] = toughness_percent - bonus_toughness_percent
-  --  bonus_style.uvs[1][2] = toughness_percent
-  --  bonus_style.size[2] = 56 * (bonus_toughness_percent) * toughness_scale
-  --  bonus_style.offset[2] = (-(56 * ((1 - bonus_toughness_percent)) * 0.5) * toughness_scale) + (toughness_gauge_offset[2])
-  --else
-  --  style.toughness.color = UIHudSettings.color_tint_6
-  --end
+  if has_overshield then
+    bonus_style.color = mod_utils.get_text_color_for_percent_threshold(toughness_percent_visual + overshield_percent, "toughness") or UIHudSettings.color_tint_10
+    bonus_style.uvs[1][2] = overshield_percent
+    bonus_style.size[2] = 56 * overshield_percent * toughness_scale
+    bonus_style.offset[2] = ((56 * (1 - overshield_percent) * 0.5) * toughness_scale) + toughness_gauge_offset[2]
+  end
 
-  local threshold_color = mod_utils.get_text_color_for_percent_threshold(toughness_percent, "toughness") or UIHudSettings.color_tint_main_2
-
+  local threshold_color = mod_utils.get_text_color_for_percent_threshold(toughness_percent_visual, "toughness") or UIHudSettings.color_tint_6
   style.toughness.color = threshold_color
-  style.toughness.uvs[1][2] = toughness_percent
-  style.toughness.size[2] = 56 * (toughness_percent) * toughness_scale
-  style.toughness.offset[2] = ((56 * (1 - (toughness_percent)) * 0.5) * toughness_scale) + toughness_gauge_offset[2]
+  style.toughness.uvs[1][2] = toughness_percent_visual
+  style.toughness.size[2] = 56 * (toughness_percent_visual) * toughness_scale
+  style.toughness.offset[2] = ((56 * (1 - (toughness_percent_visual)) * 0.5) * toughness_scale) + toughness_gauge_offset[2]
 
   if not toughness_always_show and parent.toughness_visible_timer then
     parent.toughness_visible_timer = parent.toughness_visible_timer - dt

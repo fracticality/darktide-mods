@@ -82,6 +82,7 @@ function feature.create_widget_definitions()
     }
 end
 
+local RecolorStimms = get_mod("RecolorStimms")
 function feature.update(parent)
     local stimm_widget = parent._widgets_by_name[feature_name]
     if not stimm_widget then
@@ -112,9 +113,8 @@ function feature.update(parent)
     end
 
     local stimm_name = item.weapon_template
-    local weapon_template = has_stimm and visual_loadout_extension:weapon_template_from_slot("slot_pocketable_small")
+    local weapon_template = visual_loadout_extension:weapon_template_from_slot("slot_pocketable_small")
     local color = _stimm_colors[stimm_name]
-    local RecolorStimms = get_mod("RecolorStimms")
 
     if RecolorStimms and RecolorStimms:is_enabled() then
         if RecolorStimms.get_stimm_argb_255 then

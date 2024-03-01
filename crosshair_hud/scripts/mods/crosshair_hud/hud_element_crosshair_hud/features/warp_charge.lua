@@ -40,16 +40,7 @@ feature.scenegraph_definition = {
   }
 }
 
-function feature.create_widget_definitions(parent)
-  local ui_hud = parent._parent
-  local hud_player = ui_hud and ui_hud:player()
-  local profile = hud_player and hud_player:profile()
-  local talents = profile and profile.talents
-
-  if not talents then
-    return
-  end
-
+function feature.create_widget_definitions()
   local passes = {
     {
       pass_type = "text",

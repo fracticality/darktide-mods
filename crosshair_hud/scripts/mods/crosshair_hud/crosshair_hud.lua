@@ -224,6 +224,13 @@ local _threshold_settings = {
     validation_function = function(percent)
       return percent == 1
     end
+  },
+  {
+    threshold = "bonus",
+    default_color = UIHudSettings.color_tint_10,
+    validation_function = function(percent)
+      return percent > 1
+    end
   }
 }
 local function _get_text_color_for_percent_threshold(percent, setting)

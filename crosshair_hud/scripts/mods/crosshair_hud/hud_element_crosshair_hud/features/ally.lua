@@ -114,6 +114,22 @@ function feature.create_widget_definitions()
         }
       },
       {
+        pass_type = "texture_uv",
+        value = "content/ui/materials/hud/crosshairs/charge_up_mask",
+        style_id = "bonus_toughness_gauge_mask",
+        style = {
+          vertical_alignment = "center",
+          horizontal_alignment = "right",
+          uvs = {
+            { 0, 1 },
+            { 1, 0 }
+          },
+          color = UIHudSettings.color_tint_10,
+          size = { 24 * ally_scale, 56 * ally_scale },
+          offset = { 0, 0, 2 }
+        }
+      },
+      {
         pass_type = "text",
         value = "",
         value_id = "toughness_text",
@@ -231,7 +247,7 @@ function feature.create_widget_definitions()
         value_id = "archetype_symbol",
         style_id = "archetype_symbol",
         style = {
-          font_size = 24,
+          font_size = 24 * ally_scale,
           font_type = "machine_medium",
           vertical_alignment = "center",
           horizontal_alignment = "center",
@@ -450,26 +466,43 @@ local function update_toughness(parent, dt, t, widget, player)
     return
   end
 
-  local current_toughness = toughness_extension:remaining_toughness()
+  local max_toughness = toughness_extension:max_toughness()
+  local max_toughness_visual = toughness_extension:max_toughness_visual()
   local toughness_percent = toughness_extension:current_toughness_percent()
+  local toughness_percent_visual = toughness_extension:current_toughness_percent_visual()
+  local current_toughness = toughness_percent * max_toughness
+  local current_toughness_visual = toughness_percent * max_toughness_visual
+  local overshield_amount = max_toughness > current_toughness_visual and math.floor(math.max(current_toughness - max_toughness_visual, 0)) or 0
+  local overshield_percent = overshield_amount / max_toughness_visual
+  local has_overshield = overshield_amount > 0
 
   local mask_height_max = 56
-  local mask_height = mask_height_max * toughness_percent
-  local mask_height_offset = mask_height_max * (1 - toughness_percent) * 0.5
+  local mask_height = mask_height_max * toughness_percent * ally_scale
+  local mask_height_offset = mask_height_max * (1 - toughness_percent) * 0.5 * ally_scale
 
   local content = widget.content
   local toughness_display_type = mod:get("ally_toughness_display_type")
-  local number_to_display = (toughness_display_type == mod.options_display_type.percent and toughness_percent * 100) or current_toughness
+  local number_to_display = (toughness_display_type == mod.options_display_type.percent and (toughness_percent_visual + overshield_percent) * 100) or current_toughness
   content.toughness_text = math.ceil(number_to_display)
 
-  local threshold_color = mod_utils.get_text_color_for_percent_threshold(toughness_percent, "toughness") or UIHudSettings.color_tint_main_2
-  widget.style.toughness_text.text_color = threshold_color
+  local text_color = mod_utils.get_text_color_for_percent_threshold((toughness_percent_visual + overshield_percent), "toughness") or UIHudSettings.color_tint_6
+  widget.style.toughness_text.text_color = text_color
 
   local style = widget.style.toughness_gauge_mask
-  style.color = threshold_color
+  style.color = mod_utils.get_text_color_for_percent_threshold(toughness_percent_visual, "toughness") or UIHudSettings.color_tint_6
   style.uvs[1][2] = toughness_percent
   style.size[2] = mask_height
   style.offset[2] = mask_height_offset
+
+  local bonus_style = widget.style.bonus_toughness_gauge_mask
+  bonus_style.visible = has_overshield
+
+  if has_overshield then
+    bonus_style.color = mod_utils.get_text_color_for_percent_threshold((toughness_percent_visual + overshield_percent), "toughness") or UIHudSettings.color_tint_10
+    bonus_style.uvs[1][2] = overshield_percent
+    bonus_style.size[2] = mask_height_max * overshield_percent * ally_scale
+    bonus_style.offset[2] = ((mask_height_max * (1 - overshield_percent) * 0.5) * ally_scale)
+  end
 end
 
 local function update_peril(parent, dt, t, widget, player)
@@ -562,8 +595,9 @@ local function update_ammo(parent, dt, t, widget, player)
   local reserve_max = inventory_component.max_ammunition_reserve or 0
   local max_ammo = clip_max + reserve_max
 
+  widget.style.ammo_icon.visible = max_ammo > 0
+
   if max_ammo == 0 then
-    widget.style.ammo_icon.visible = false
     return
   end
 
@@ -626,6 +660,7 @@ local _stimm_colors = {
   syringe_speed_boost_pocketable = { 255, 0, 127, 218 },
 }
 
+local RecolorStimms = get_mod("RecolorStimms")
 local function update_stimm(parent, dt, t, widget, player)
   local display_stimm_indicator = mod:get("display_stimm_indicator")
   local content = widget.content
@@ -650,7 +685,6 @@ local function update_stimm(parent, dt, t, widget, player)
   local stimm_name = item.weapon_template
   local weapon_template = has_stimm and visual_loadout_extension:weapon_template_from_slot("slot_pocketable_small")
   local color = _stimm_colors[stimm_name]
-  local RecolorStimms = get_mod("RecolorStimms")
 
   if RecolorStimms and RecolorStimms:is_enabled() then
     if RecolorStimms.get_stimm_argb_255 then
@@ -686,8 +720,13 @@ end
 
 local temp_team_players = {}
 local function update_players(parent, dt, t)
-  local players = PlayerCompositions.players("players", temp_team_players)
+  local game_mode_manager = Managers.state.game_mode
+  local hud_settings = game_mode_manager:hud_settings()
   local hud_player = parent._parent:player()
+  local player_composition = hud_settings.player_composition
+  local players = PlayerCompositions.players(player_composition, temp_team_players)
+
+  feature._player_composition_name = player_composition
 
   local i = 1
   for unique_id, player in pairs(players) do
@@ -700,7 +739,7 @@ local function update_players(parent, dt, t)
         break
       end
 
-      feature._players[i] = player
+      feature._players[i] = unique_id
 
       i = i + 1
     until true
@@ -722,10 +761,23 @@ function feature.update(parent, dt, t)
         break
       end
 
-      local player = feature._players[i]
+      local unique_id = feature._players[i]
+      local player = PlayerCompositions.player_from_unique_id(feature._player_composition_name, unique_id)
       if not player or player.__deleted then
         ally_content.visible = false
         table.remove(feature._players, i)
+
+        local wounds_widgets = feature._wounds_widgets_by_player[player] or {}
+        for _, wounds_widget in pairs(wounds_widgets) do
+          local index = table.index_of(parent._widgets, wounds_widget)
+          if index then
+            parent:_unregister_widget_name(wounds_widget.name)
+            table.remove(parent._widgets, index)
+          end
+        end
+
+        table.clear(wounds_widgets)
+
         break
       end
 

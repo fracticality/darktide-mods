@@ -99,10 +99,29 @@ local function create_color_setting(setting_id, color_name)
 end
 
 local _thresholds = { "full", "high", "low", "critical" }
-local function create_threshold_settings(setting_id)
+local function create_threshold_settings(setting_id, include_bonus)
   local custom_setting_id = "custom_threshold_" .. setting_id
-
   local settings = {}
+
+  if include_bonus then
+    local threshold_id = custom_setting_id .. "_bonus"
+    table.insert(settings, {
+      setting_id = threshold_id,
+      title = "custom_threshold_bonus",
+      type = "checkbox",
+      default_value = false,
+      sub_widgets = {
+        {
+          setting_id = threshold_id .."_color",
+          title = "color",
+          type = "dropdown",
+          default_value = "ui_terminal",
+          options = get_color_options()
+        }
+      }
+    })
+  end
+
   for _, threshold in ipairs(_thresholds) do
     local threshold_id = custom_setting_id .. "_" .. threshold
     local setting = {
@@ -356,7 +375,7 @@ return {
               }
             }
           },
-          unpack(create_threshold_settings("toughness"))
+          unpack(create_threshold_settings("toughness", true))
         },
       },
 
@@ -569,8 +588,7 @@ return {
               create_shadow_setting("reload"),
               create_scale_setting("reload"),
               create_coordinate_setting("reload", "x", 0),
-              create_coordinate_setting("reload", "y", 60),
-              unpack(create_threshold_settings("reload"))
+              create_coordinate_setting("reload", "y", 60)
             }
           }
         }
