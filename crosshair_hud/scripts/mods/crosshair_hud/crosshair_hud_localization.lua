@@ -314,6 +314,7 @@ local localizations = {
 
   custom_threshold_bonus = {
     en = "Bonus Threshold Color",
+    ["zh-cn"] = "超量阈值颜色",
   },
   custom_threshold_full = {
     en = "Full Threshold Color",
