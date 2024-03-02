@@ -1,6 +1,3 @@
---TODO: Add remaining vendors
-
-
 local mod = get_mod("psych_ward")
 
 local ProfileUtils = require("scripts/utilities/profile_utils")
@@ -179,6 +176,16 @@ local function _open_view(view_name)
     end)
   end
 end
+
+mod:hook_safe(CLASS.StoryMissionLoreView, "on_enter", function(self)
+
+  local game_mode_name = Managers.state.game_mode and Managers.state.game_mode:game_mode_name()
+
+  if game_mode_name ~= "hub" then
+    self._widgets_by_name.trailer_button.content.hotspot.disabled = true
+    self._widgets_by_name.trailer_button.content.original_text = mod:localize("cutscenes_hub_only")
+  end
+end)
 
 local _presence_hook_top_views = {
   mission_board_view = true,

@@ -68,5 +68,8 @@ return {
     ja = "%sで終了",
     ["zh-cn"] = "按下%s以退出",
     ru = "Нажмите %s, чтобы выйти",
-  }
+  },
+  cutscenes_hub_only = {
+    en = "Only Viewable from the Hub"
+  },
 }
