@@ -307,17 +307,47 @@ mod:hook_require(main_menu_definitions_file, function(definitions)
 
 end)
 
-mod:hook(CLASS.UIManager, "close_all_views", function(func, self, force_close, optional_excepted_views)
-  optional_excepted_views = optional_excepted_views or {}
-  if not table.contains(optional_excepted_views, "main_menu_view") then
-    table.insert(optional_excepted_views, "main_menu_view")
+local function _open_voting_view(view_context)
+  if not table.is_empty(Managers.ui:active_views()) then
+    Managers.ui:close_all_views(false, {
+      "main_menu_view",
+      "main_menu_background_view"
+    })
   end
 
-  if not table.contains(optional_excepted_views, "main_menu_background_view") then
-    table.insert(optional_excepted_views, "main_menu_background_view")
-  end
+  Managers.ui:open_view("mission_voting_view", nil, false, false, nil, view_context)
+end
 
-  return func(self, force_close, optional_excepted_views)
+local mission_vote_matchmaking_immaterium = "scripts/settings/voting/voting_templates/mission_vote_matchmaking_immaterium"
+
+mod:hook_require(mission_vote_matchmaking_immaterium, function(voting_template)
+  voting_template.on_started = function(voting_id, template, params)
+    if Managers.ui:view_active("system_view") then
+      Managers.ui:close_view("system_view")
+    end
+
+    if GameParameters.debug_mission then
+      Managers.voting:cast_vote(voting_id, "yes")
+    elseif not Managers.voting:has_voted(voting_id, Managers.party_immaterium:get_myself():unique_id()) then
+      if params.qp == "true" then
+        local view_context = {
+          qp = params.qp,
+          voting_id = voting_id,
+          backend_mission_id = params.backend_mission_id
+        }
+
+        _open_voting_view(view_context)
+      else
+        local view_context = {
+          voting_id = voting_id,
+          backend_mission_id = params.backend_mission_id,
+          mission_data = cjson.decode(params.mission_data).mission
+        }
+
+        _open_voting_view(view_context)
+      end
+    end
+  end
 end)
 
 mod:hook(CLASS.StateMainMenu, "_show_reconnect_popup", function(func, self)
