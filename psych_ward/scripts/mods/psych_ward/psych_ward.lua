@@ -11,6 +11,7 @@ local MatchmakingConstants = require("scripts/settings/network/matchmaking_const
 local SINGLEPLAY_TYPES = MatchmakingConstants.SINGLEPLAY_TYPES
 
 local _is_matchmaking_from_main_menu = false
+local _is_in_main_menu = false
 local _setup_complete = false
 local _flag_for_return = false
 local _is_transitioning = false
@@ -307,6 +308,19 @@ mod:hook_require(main_menu_definitions_file, function(definitions)
 
 end)
 
+mod:hook(CLASS.UIManager, "close_all_views", function(func, self, force_close, optional_excepted_views)
+  optional_excepted_views = optional_excepted_views or {}
+  if not table.contains(optional_excepted_views, "main_menu_view") then
+    table.insert(optional_excepted_views, "main_menu_view")
+  end
+
+  if not table.contains(optional_excepted_views, "main_menu_background_view") then
+    table.insert(optional_excepted_views, "main_menu_background_view")
+  end
+
+  return func(self, force_close, optional_excepted_views)
+end)
+
 mod:hook(CLASS.StateMainMenu, "_show_reconnect_popup", function(func, self)
   _flag_for_return = true
 
@@ -322,6 +336,7 @@ mod:hook(CLASS.StateMainMenu, "_show_reconnect_popup", function(func, self)
 end)
 
 mod:hook(CLASS.StateMainMenu, "update", function(func, self, main_dt, main_t)
+  _is_in_main_menu = true
 
   if self._continue and not self:_waiting_for_profile_synchronization() then
 
