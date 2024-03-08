@@ -11,7 +11,6 @@ local MatchmakingConstants = require("scripts/settings/network/matchmaking_const
 local SINGLEPLAY_TYPES = MatchmakingConstants.SINGLEPLAY_TYPES
 
 local _is_matchmaking_from_main_menu = false
-local _is_in_main_menu = false
 local _setup_complete = false
 local _flag_for_return = false
 local _is_transitioning = false
@@ -336,8 +335,6 @@ mod:hook(CLASS.StateMainMenu, "_show_reconnect_popup", function(func, self)
 end)
 
 mod:hook(CLASS.StateMainMenu, "update", function(func, self, main_dt, main_t)
-  _is_in_main_menu = true
-
   if self._continue and not self:_waiting_for_profile_synchronization() then
 
     mod:hook_disable(CLASS.PartyImmateriumMemberMyself, "presence_name")
