@@ -337,8 +337,8 @@ end)
 mod:hook(CLASS.StateMainMenu, "update", function(func, self, main_dt, main_t)
   if self._continue and not self:_waiting_for_profile_synchronization() then
 
-    mod:hook_disable(CLASS.PartyImmateriumMemberMyself, "presence_name")
-    mod:hook_disable(CLASS.PartyImmateriumMember, "presence_name")
+    --mod:hook_disable(CLASS.PartyImmateriumMemberMyself, "presence_name")
+    --mod:hook_disable(CLASS.PartyImmateriumMember, "presence_name")
 
     if _go_to_shooting_range then
       _go_to_shooting_range = false
@@ -449,8 +449,8 @@ mod:hook_safe(CLASS.MainMenuView, "_setup_interactions", function(self)
     end
   end
 
-  mod:hook_enable(CLASS.PartyImmateriumMemberMyself, "presence_name")
-  mod:hook_enable(CLASS.PartyImmateriumMember, "presence_name")
+  --mod:hook_enable(CLASS.PartyImmateriumMemberMyself, "presence_name")
+  --mod:hook_enable(CLASS.PartyImmateriumMember, "presence_name")
 
   _return_to_character_select = false
   _is_transitioning = false
