@@ -25,8 +25,7 @@ local function ui_hud_init_hook(func, self, elements, visibility_groups, params)
   return func(self, elements, visibility_groups, params)
 end
 
-mod:add_require_path(filename)
-mod:hook("UIHud", "init", ui_hud_init_hook)
+--mod:hook("UIHud", "init", ui_hud_init_hook)
 
 local function recreate_hud()
   local ui_manager = Managers.ui
@@ -61,7 +60,7 @@ local function load_talent_icon_packages()
 end
 
 function mod.on_all_mods_loaded()
-  recreate_hud()
+  --recreate_hud()
 end
 
 local _packages_loaded = false
@@ -265,3 +264,12 @@ mod.utils = {
   convert_number_to_display_texts = _convert_number_to_display_texts,
   get_text_color_for_percent_threshold = _get_text_color_for_percent_threshold
 }
+
+mod:register_hud_element({
+  class_name = "HudElementCrosshairHud",
+  filename = filename,
+  use_hud_scale = true,
+  visibility_groups = {
+    "alive"
+  }
+})
