@@ -182,12 +182,7 @@ function template.update(parent, dt, t)
         end
 
       elseif color_static then
-        color = {
-          255,
-          mod:get("coherency_color_static_red") or 255,
-          mod:get("coherency_color_static_green") or 255,
-          mod:get("coherency_color_static_blue") or 255
-        }
+        color = Color[mod:get("coherency_color_static_color")](255, true)
       end
 
       local frame_id = string.format("frame_%s", id)

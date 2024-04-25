@@ -5,9 +5,17 @@ local _definitions = mod:io_dofile("crosshair_hud/scripts/mods/crosshair_hud/hud
 local HudElementCrosshairHud = class("HudElementCrosshairHud", "HudElementBase")
 
 function HudElementCrosshairHud:init(parent, draw_layer, start_scale)
-  local features = _definitions.features
+  self._start_scale = start_scale
+  self:init_features()
+
+  HudElementCrosshairHud.super.init(self, parent, draw_layer, start_scale, _definitions)
+end
+
+function HudElementCrosshairHud:init_features()
+  local features_file = _definitions.features_file
   local scenegraph_definition = _definitions.scenegraph_definition
   local widget_definitions = _definitions.widget_definitions
+  local features = mod:io_dofile(features_file)
   local features_by_name = {}
 
   for feature_name, feature in pairs(features) do
@@ -24,11 +32,16 @@ function HudElementCrosshairHud:init(parent, draw_layer, start_scale)
     end
   end
   self._features_by_name = features_by_name
-
-  HudElementCrosshairHud.super.init(self, parent, draw_layer, start_scale, _definitions)
 end
 
 function HudElementCrosshairHud:update(dt, t, ui_renderer, render_settings, input_service)
+  if self.needs_refresh then
+    self.needs_refresh = nil
+    self:init(self._parent, self._draw_layer, self._start_scale)
+
+    return
+  end
+
   HudElementCrosshairHud.super.update(self, dt, t, ui_renderer, render_settings, input_service)
 
   for feature_name, feature in pairs(self._features_by_name) do

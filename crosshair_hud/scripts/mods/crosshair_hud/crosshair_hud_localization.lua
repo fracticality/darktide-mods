@@ -464,6 +464,18 @@ local localizations = {
   hide_kinetic_flayer_buff = {
     en = "Hide Kinetic Flayer Buff Icon",
     ["zh-cn"] = "隐藏动能剥皮者增益图标",
+  },
+  move_independently = {
+    en = "Move Independently"
+  },
+  move_independently_description = {
+    en = "Move gauge and text independently from one another."
+  },
+  scale_independently = {
+    en = "Scale Independently"
+  },
+  scale_independently_description = {
+    en = "Scale gauge and text independently from one another."
   }
 }
 

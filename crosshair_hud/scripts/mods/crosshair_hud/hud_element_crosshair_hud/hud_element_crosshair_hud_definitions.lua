@@ -8,10 +8,10 @@ local scenegraph_definition = {
 
 local widget_definitions = {}
 
-local features = mod:io_dofile("crosshair_hud/scripts/mods/crosshair_hud/hud_element_crosshair_hud/features/features")
+local features_file = "crosshair_hud/scripts/mods/crosshair_hud/hud_element_crosshair_hud/features/features"
 
 return {
   scenegraph_definition = scenegraph_definition,
   widget_definitions = widget_definitions,
-  features = features
+  features_file = features_file
 }

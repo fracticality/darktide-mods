@@ -91,11 +91,9 @@ function feature.update(parent)
   end
 
   local player_extensions = parent._parent:player_extensions()
-  local unit_data_extension = player_extensions.unit_data
   local visual_loadout_extension = player_extensions.visual_loadout
-  local inventory_component = unit_data_extension:read_component("inventory")
-  local pocketable_name = inventory_component.slot_pocketable
-  local weapon_template = pocketable_name and visual_loadout_extension:weapon_template_from_slot("slot_pocketable")
+  local weapon_template = visual_loadout_extension:weapon_template_from_slot("slot_pocketable")
+
   content.pocketable_icon = weapon_template and weapon_template.hud_icon_small
 end
 

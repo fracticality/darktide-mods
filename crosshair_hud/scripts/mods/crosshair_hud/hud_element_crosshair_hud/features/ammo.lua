@@ -58,6 +58,7 @@ function feature.create_widget_definitions()
         value = "content/ui/materials/hud/icons/party_ammo",
         style_id = "ammo_icon_shadow",
         style = {
+          text_style_id = "ammo_icon",
           size = { 20 * ammo_scale, 20 * ammo_scale },
           vertical_alignment = "bottom",
           horizontal_alignment = "left",
@@ -65,7 +66,7 @@ function feature.create_widget_definitions()
           offset = { 2 * ammo_scale, 2 * ammo_scale, 0}
         },
         visibility_function = function(content, style)
-          return _shadows_enabled("ammo")
+          return style.parent[style.text_style_id].visible and _shadows_enabled("ammo")
         end
       },
       {
@@ -88,6 +89,7 @@ function feature.create_widget_definitions()
         value_id = "clip_ammo",
         style_id = "clip_ammo_shadow",
         style = {
+          text_style_id = "clip_ammo",
           font_size = 30 * ammo_scale,
           font_type = "machine_medium",
           text_vertical_alignment = "top",
@@ -96,7 +98,7 @@ function feature.create_widget_definitions()
           offset = { 12 * ammo_scale, 2 * ammo_scale, 1 }
         },
         visibility_function = function(content, style)
-          return _shadows_enabled("ammo")
+          return style.parent[style.text_style_id].visible and _shadows_enabled("ammo")
         end
       },
       {
@@ -119,6 +121,7 @@ function feature.create_widget_definitions()
         value_id = "reserve_ammo",
         style_id = "reserve_ammo_shadow",
         style = {
+          text_style_id = "reserve_ammo",
           font_size = 18 * ammo_scale,
           font_type = "machine_medium",
           text_vertical_alignment = "bottom",
@@ -127,7 +130,7 @@ function feature.create_widget_definitions()
           offset = { 12 * ammo_scale, 2 * ammo_scale, 1 }
         },
         visibility_function = function(content, style)
-          return _shadows_enabled("ammo")
+          return style.parent[style.text_style_id].visible and _shadows_enabled("ammo")
         end
       }
     }, feature_name)
@@ -135,13 +138,14 @@ function feature.create_widget_definitions()
 end
 
 function feature.update(parent)
-  local ammo_widget = parent._widgets_by_name.ammo_indicator
+  local ammo_widget = parent._widgets_by_name[feature_name]
   if not ammo_widget then
     return
   end
 
+  local content = ammo_widget.content
   local display_ammo_indicator = mod:get("display_ammo_indicator")
-  ammo_widget.content.visible = display_ammo_indicator
+  content.visible = display_ammo_indicator
 
   if not display_ammo_indicator then
     return
@@ -160,7 +164,7 @@ function feature.update(parent)
   local max_ammo = clip_max + reserve_max
 
   if max_ammo == 0 then
-    ammo_widget.content.visible = false
+    content.visible = false
     return
   end
 
@@ -175,7 +179,6 @@ function feature.update(parent)
   reserve_ammo_percent = reserve_ammo / reserve_max
   clip_ammo_percent = clip_ammo / clip_max
 
-  local content = ammo_widget.content
   content.max_ammo = max_ammo or 0
   content.current_ammo = current_ammo or 0
   content.reserve_ammo = reserve_ammo or 0
@@ -193,7 +196,6 @@ function feature.update(parent)
 
   local show_ammo_icon = mod:get("show_ammo_icon")
   icon_style.visible = show_ammo_icon
-  style.ammo_icon_shadow.visible = show_ammo_icon
 end
 
 return feature

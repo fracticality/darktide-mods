@@ -100,26 +100,20 @@ function feature.update(parent)
     end
 
     local player_extensions = parent._parent:player_extensions()
-    local unit_data_extension = player_extensions.unit_data
     local visual_loadout_extension = player_extensions.visual_loadout
-    local inventory_component = unit_data_extension:read_component("inventory")
-    local has_stimm = inventory_component.slot_pocketable_small
-    local item = has_stimm and visual_loadout_extension:item_from_slot("slot_pocketable_small")
+    local weapon_template = visual_loadout_extension:weapon_template_from_slot("slot_pocketable_small")
 
-    if not item then
+    if not weapon_template then
         content.visible = false
 
         return
     end
 
-    local stimm_name = item.weapon_template
-    local weapon_template = visual_loadout_extension:weapon_template_from_slot("slot_pocketable_small")
+    local stimm_name = weapon_template.name
     local color = _stimm_colors[stimm_name]
 
-    if RecolorStimms and RecolorStimms:is_enabled() then
-        if RecolorStimms.get_stimm_argb_255 then
-            color = RecolorStimms.get_stimm_argb_255(stimm_name)
-        end
+    if RecolorStimms and RecolorStimms.get_stimm_argb_255 and RecolorStimms:is_enabled() then
+        color = RecolorStimms.get_stimm_argb_255(stimm_name)
     end
 
     content.stimm_icon = weapon_template and weapon_template.hud_icon_small

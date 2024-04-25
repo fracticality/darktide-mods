@@ -8,6 +8,7 @@ local UIHudSettings = require("scripts/settings/ui/ui_hud_settings")
 
 local global_scale = mod:get("global_scale")
 local health_scale = mod:get("health_scale") * global_scale
+local health_gauge_scale = mod:get("independent_health_gauge_scaling") and (mod:get("health_gauge_scale") * global_scale) or health_scale
 
 local global_offset = {
   mod:get("global_x_offset"),
@@ -47,7 +48,18 @@ feature.scenegraph_definition = {
       global_offset[2] + health_offset[2],
       55
     }
-  }
+  },
+  [feature_name .. "_gauge"] = mod:get("independent_health_gauge") and {
+    parent = "screen",
+    vertical_alignment = "center",
+    horizontal_alignment = "center",
+    size = { 24 * health_gauge_scale, 56 * health_gauge_scale },
+    position = {
+      global_offset[1],
+      global_offset[2],
+      55
+    }
+  } or nil
 }
 
 function feature.create_widget_definitions()
@@ -415,7 +427,7 @@ feature.segment_definition = UIWidget.create_definition({
         { 0, 1 }
       },
       color = UIHudSettings.color_tint_main_1,
-      size = { 24 * health_scale, 56 * health_scale },
+      size = { 24 * health_gauge_scale, 56 * health_gauge_scale },
       offset = { health_gauge_offset[1], 0, 1 }
     },
     visibility_function = function(content, style)
@@ -437,7 +449,7 @@ feature.segment_definition = UIWidget.create_definition({
         { 0, 1 }
       },
       color = UIHudSettings.color_tint_main_2,
-      size = { 24 * health_scale, 56 * health_scale },
+      size = { 24 * health_gauge_scale, 56 * health_gauge_scale },
       offset = { health_gauge_offset[1], 0, 2 }
     },
     visibility_function = function(content, style)
@@ -459,14 +471,14 @@ feature.segment_definition = UIWidget.create_definition({
         { 0, 1 }
       },
       color = UIHudSettings.color_tint_8,
-      size = { 24 * health_scale, 56 * health_scale },
+      size = { 24 * health_gauge_scale, 56 * health_gauge_scale },
       offset = { health_gauge_offset[1], 0, 2 }
     },
     visibility_function = function(content, style)
       return mod:get("display_health_gauge") and content.permanent_damage and content.permanent_damage > 0
     end
   }
-}, feature_name)
+}, mod:get("independent_health_gauge") and (feature_name .. "_gauge") or feature_name)
 
 local function update_gauge(parent, dt, t)
   local visible = mod:get("display_health_gauge")
@@ -486,8 +498,8 @@ local function update_gauge(parent, dt, t)
   local threshold_color = mod_utils.get_text_color_for_percent_threshold(health_percent, "health") or UIHudSettings.color_tint_main_2
   local permanent_color = mod:get("customize_permanent_health_color") and Color[mod:get("permanent_health_color")](255, true) or UIHudSettings.color_tint_8
 
-  local spacing = 1 * health_scale
-  local bar_height = 56 * health_scale
+  local spacing = 1 * health_gauge_scale
+  local bar_height = 56 * health_gauge_scale
   local segment_height = (bar_height - (max_wounds - 1) * spacing) / max_wounds
   local y_offset = health_gauge_offset[2] + (bar_height * 0.5) - segment_height / 2
 

@@ -115,11 +115,7 @@ function feature.create_widget_definitions()
           offset = { 2 * reload_scale, 2 * reload_scale, 1 }
         },
         visibility_function = function(content, style)
-          local enable_shadows = _shadows_enabled("reload")
-          local only_during_reload = mod:get("only_during_reload")
-          local has_reload_time = mod.reload_time and mod.reload_time > 0
-
-          return enable_shadows and (only_during_reload and has_reload_time) or not only_during_reload
+          return style.parent[style.text_style_id].visible and _shadows_enabled("reload")
         end
       }
     }, feature_name)
@@ -131,7 +127,7 @@ local _reload_actions = {
   reload_shotgun = true
 }
 function feature.update(parent)
-  local reload_widget = parent._widgets_by_name.reload_indicator
+  local reload_widget = parent._widgets_by_name[feature_name]
   if not reload_widget then
     return
   end
@@ -183,6 +179,35 @@ function feature.update(parent)
   local reload_bar = reload_style.reload_bar
   reload_widget.content.reload_time = mod.reload_time and string.format("%.2f", mod.reload_time) or ""
   reload_bar.size[1] = reload_bar.max_height * (mod.reload_percent or 0)
+end
+
+if not mod.reload_feature_hooked then
+  local function fixed_update(func, self, dt, t, time_in_action)
+    mod.time_in_action = time_in_action or 0
+
+    return func(self, dt, t, time_in_action)
+  end
+  mod:hook("ActionReloadState", "fixed_update", fixed_update)
+  mod:hook("ActionReloadShotgun", "fixed_update", fixed_update)
+
+  local function _handle_state_transition(self, reload_template, inventory_slot_component, time_in_action, time_scale)
+    local total_time = ReloadStates.get_total_time(reload_template, inventory_slot_component)
+
+    mod.time_in_action = total_time or 0
+  end
+  mod:hook_safe("ActionReloadState", "_handle_state_transition", _handle_state_transition)
+
+  local function start(func, ...)
+    local result = func(...)
+
+    mod.time_in_action = 0
+
+    return result
+  end
+  mod:hook("ActionReloadState", "start", start)
+  mod:hook("ActionReloadShotgun", "start", start)
+
+  mod.reload_feature_hooked = true
 end
 
 return feature

@@ -8,6 +8,7 @@ local UIHudSettings = require("scripts/settings/ui/ui_hud_settings")
 
 local global_scale = mod:get("global_scale")
 local toughness_scale = mod:get("toughness_scale") * global_scale
+local toughness_gauge_scale = mod:get("independent_toughness_gauge_scaling") and (mod:get("toughness_gauge_scale") * global_scale) or toughness_scale
 
 local global_offset = {
   mod:get("global_x_offset"),
@@ -39,7 +40,18 @@ feature.scenegraph_definition = {
       global_offset[2] + toughness_offset[2],
       55
     }
-  }
+  },
+  [feature_name .. "_gauge"] = mod:get("independent_toughness_gauge") and {
+    parent = "screen",
+    vertical_alignment = "center",
+    horizontal_alignment = "center",
+    size = { 24 * toughness_gauge_scale, 56 * toughness_gauge_scale },
+    position = {
+      global_offset[1],
+      global_offset[2],
+      55
+    }
+  } or nil
 }
 
 function feature.create_widget_definitions()
@@ -60,8 +72,9 @@ function feature.create_widget_definitions()
             { 1, 1 }
           },
           color = UIHudSettings.color_tint_main_1,
-          size = { 24 * toughness_scale, 56 * toughness_scale },
-          offset = { toughness_gauge_offset[1], toughness_gauge_offset[2], 3 }
+          size = { 24 * toughness_gauge_scale, 56 * toughness_gauge_scale },
+          offset = { toughness_gauge_offset[1], toughness_gauge_offset[2], 3 },
+          scenegraph_id = mod:get("independent_toughness_gauge") and (feature_name .. "_gauge") or nil
         },
         visibility_function = function(content, style)
           return mod:get("display_toughness_gauge") and _shadows_enabled("toughness")
@@ -82,8 +95,9 @@ function feature.create_widget_definitions()
             { 1, 0 }
           },
           color = UIHudSettings.color_tint_10,
-          size = { 24 * toughness_scale, 56 * toughness_scale },
-          offset = { toughness_gauge_offset[1], toughness_gauge_offset[2], 6 }
+          size = { 24 * toughness_gauge_scale, 56 * toughness_gauge_scale },
+          offset = { toughness_gauge_offset[1], toughness_gauge_offset[2], 6 },
+          scenegraph_id = mod:get("independent_toughness_gauge") and (feature_name .. "_gauge") or nil
         },
       },
       {
@@ -101,8 +115,9 @@ function feature.create_widget_definitions()
             { 1, 0 }
           },
           color = UIHudSettings.color_tint_6,
-          size = { 24 * toughness_scale, 56 * toughness_scale },
-          offset = { toughness_gauge_offset[1], toughness_gauge_offset[2], 4 }
+          size = { 24 * toughness_gauge_scale, 56 * toughness_gauge_scale },
+          offset = { toughness_gauge_offset[1], toughness_gauge_offset[2], 4 },
+          scenegraph_id = mod:get("independent_toughness_gauge") and (feature_name .. "_gauge") or nil
         },
         visibility_function = function(content, style)
           return mod:get("display_toughness_gauge")
@@ -321,15 +336,15 @@ function feature.update(parent, dt, t)
   if has_overshield then
     bonus_style.color = mod_utils.get_text_color_for_percent_threshold(toughness_percent_visual + overshield_percent, "toughness") or UIHudSettings.color_tint_10
     bonus_style.uvs[1][2] = overshield_percent
-    bonus_style.size[2] = 56 * overshield_percent * toughness_scale
-    bonus_style.offset[2] = ((56 * (1 - overshield_percent) * 0.5) * toughness_scale) + toughness_gauge_offset[2]
+    bonus_style.size[2] = 56 * overshield_percent * toughness_gauge_scale
+    bonus_style.offset[2] = ((56 * (1 - overshield_percent) * 0.5) * toughness_gauge_scale) + toughness_gauge_offset[2]
   end
 
   local threshold_color = mod_utils.get_text_color_for_percent_threshold(toughness_percent_visual, "toughness") or UIHudSettings.color_tint_6
   style.toughness.color = threshold_color
   style.toughness.uvs[1][2] = toughness_percent_visual
-  style.toughness.size[2] = 56 * (toughness_percent_visual) * toughness_scale
-  style.toughness.offset[2] = ((56 * (1 - (toughness_percent_visual)) * 0.5) * toughness_scale) + toughness_gauge_offset[2]
+  style.toughness.size[2] = 56 * (toughness_percent_visual) * toughness_gauge_scale
+  style.toughness.offset[2] = ((56 * (1 - (toughness_percent_visual)) * 0.5) * toughness_gauge_scale) + toughness_gauge_offset[2]
 
   if not toughness_always_show and parent.toughness_visible_timer then
     parent.toughness_visible_timer = parent.toughness_visible_timer - dt

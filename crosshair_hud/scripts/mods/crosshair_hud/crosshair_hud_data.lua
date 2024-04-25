@@ -31,6 +31,15 @@ local function get_color_options()
   return table.clone(color_options)
 end
 
+local function get_stat_overlay_options()
+  return table.clone({
+    { text = "none", value = "none" },
+    { text = "critical_strike_chance", value = "critical_strike_chance" },
+    { text = "warp_damage", value = "warp_damage" },
+    { text = "critical_strike_damage", value = "critical_strike_damage" }
+  })
+end
+
 --TODO: Test converting multiple widgets to one widget that updates dynamic value
 --TODO: Recreate these local funcs to reproduce:
 --[[
@@ -224,8 +233,27 @@ return {
                 type = "checkbox",
                 default_value = false
               },
-              create_coordinate_setting("health_gauge", "x", -30),
-              create_coordinate_setting("health_gauge", "y", 0)
+              {
+                setting_id = "independent_health_gauge_scaling",
+                title = "scale_independently",
+                tooltip = "scale_independently_description",
+                type = "checkbox",
+                default_value = false,
+                sub_widgets = {
+                  create_scale_setting("health_gauge")
+                }
+              },
+              {
+                setting_id = "independent_health_gauge",
+                title = "move_independently",
+                tooltip = "move_independently_description",
+                type = "checkbox",
+                default_value = false,
+                sub_widgets = {
+                  create_coordinate_setting("health_gauge", "x", -30),
+                  create_coordinate_setting("health_gauge", "y", 0),
+                }
+              }
             }
           },
           {
@@ -329,8 +357,27 @@ return {
                 type = "checkbox",
                 default_value = false
               },
-              create_coordinate_setting("toughness_gauge", "x", 30),
-              create_coordinate_setting("toughness_gauge", "y", 0)
+              {
+                setting_id = "independent_toughness_gauge_scaling",
+                title = "scale_independently",
+                tootlip = "scale_independently_description",
+                type = "checkbox",
+                default_value = false,
+                sub_widgets = {
+                  create_scale_setting("toughness_gauge")
+                }
+              },
+              {
+                setting_id = "independent_toughness_gauge",
+                title = "move_independently",
+                tooltip = "move_independently_description",
+                type = "checkbox",
+                default_value = false,
+                sub_widgets = {
+                  create_coordinate_setting("toughness_gauge", "x", 30),
+                  create_coordinate_setting("toughness_gauge", "y", 0),
+                }
+              }
             }
           },
           {
@@ -653,6 +700,32 @@ return {
           }
         }
       },
+
+      --- Stat Overlay ---
+      --{
+      --  setting_id = "options_stat_overlay",
+      --  type = "group",
+      --  sub_widgets = {
+      --    {
+      --      setting_id = "display_stat_overlay_1",
+      --      type = "dropdown",
+      --      default_value = "none",
+      --      options = get_stat_overlay_options()
+      --    },
+      --    {
+      --      setting_id = "display_stat_overlay_2",
+      --      type = "dropdown",
+      --      default_value = "none",
+      --      options = get_stat_overlay_options()
+      --    },
+      --    {
+      --      setting_id = "display_stat_overlay_3",
+      --      type = "dropdown",
+      --      default_value = "none",
+      --      options = get_stat_overlay_options()
+      --    }
+      --  }
+      --},
 
       --- Archetypes ---
       {

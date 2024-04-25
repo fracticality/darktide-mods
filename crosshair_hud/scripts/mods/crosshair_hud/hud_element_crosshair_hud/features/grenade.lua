@@ -93,6 +93,7 @@ function feature.create_widget_definitions()
         value_id = "grenade_count",
         style_id = "grenade_count_shadow",
         style = {
+          text_style_id = "grenade_count",
           font_size = 20 * grenade_scale,
           font_type = "machine_medium",
           text_vertical_alignment = "center",
@@ -101,7 +102,7 @@ function feature.create_widget_definitions()
           offset = { 2 * grenade_scale, 2 * grenade_scale, 1 }
         },
         visibility_function = function(content, style)
-          return _shadows_enabled("grenade")
+          return style.parent[style.text_style_id].visible and _shadows_enabled("grenade")
         end
       },
     }, feature_name)

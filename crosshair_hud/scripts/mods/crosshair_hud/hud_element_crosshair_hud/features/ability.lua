@@ -135,7 +135,7 @@ function feature.create_widget_definitions()
         pass_type = "text",
         value_id = "cooldown_text",
         value = "",
-        style_id = "cooldown_enable_shadows",
+        style_id = "cooldown_text_shadow",
         style = {
           text_style_id = "cooldown_text",
           font_size = 14 * ability_scale,
@@ -146,7 +146,12 @@ function feature.create_widget_definitions()
           offset = { -3 * ability_scale, 6 * ability_scale, 1 }
         },
         visibility_function = function(content, style)
-          return style.parent[style.text_style_id].visible and _shadows_enabled("ability")
+          local ability_cooldown_threshold = mod:get("ability_cooldown_threshold")
+          if not content.cooldown or not ability_cooldown_threshold then
+            return
+          end
+
+          return content.cooldown > 0 and content.cooldown <= ability_cooldown_threshold + 1
         end
       }
     }, feature_name)
@@ -174,7 +179,7 @@ local function _get_cooldown_symbol_for_percent_threshold(percent, remaining_abi
 end
 
 function feature.update(parent)
-  local ability_widget = parent._widgets_by_name.ability_indicator
+  local ability_widget = parent._widgets_by_name[feature_name]
 
   if not mod:get("display_ability_cooldown") then
     ability_widget.content.visible = false
@@ -191,7 +196,6 @@ function feature.update(parent)
   local max_ability_cooldown = ability_extension:max_ability_cooldown("combat_ability")
   local max_ability_charges = ability_extension:max_ability_charges("combat_ability")
   local remaining_ability_charges = ability_extension:remaining_ability_charges("combat_ability")
-  local missing_ability_charges = ability_extension:missing_ability_charges("combat_ability")
   local remaining_ability_cooldown = ability_extension:remaining_ability_cooldown("combat_ability")
   local cooldown_percent = 1 - (remaining_ability_cooldown / max_ability_cooldown)
   local symbol = _get_cooldown_symbol_for_percent_threshold(cooldown_percent, remaining_ability_charges)

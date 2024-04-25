@@ -115,7 +115,7 @@ function feature.create_widget_definitions()
 end
 
 function feature.update(parent)
-  local peril_widget = parent._widgets_by_name.peril_indicator
+  local peril_widget = parent._widgets_by_name[feature_name]
   if not peril_widget then
     return
   end
