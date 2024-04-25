@@ -33,9 +33,11 @@ return {
 	},
 
 	error_no_preset_with_modded_loadout = {
-		en = "Cannot create base game presets with modded loadouts\nUse loadout system provided by Loadout Config"
+		en = "Cannot create base game presets with modded loadouts\nUse loadout system provided by Loadout Config",
+		["zh-cn"] = "无法使用模组物品创建官方游戏配装\n请使用自定义配装模组提供的配装系统",
 	},
 	error_only_open_as_host = {
-		en = "Loadout Config can only be opened in the Psykhanium or during a SoloPlay-enabled game."
+		en = "Loadout Config can only be opened in the Psykhanium or during a SoloPlay-enabled game.",
+		["zh-cn"] = "自定义配装仅能在灵能室或单人模组游戏中打开。",
 	}
 }

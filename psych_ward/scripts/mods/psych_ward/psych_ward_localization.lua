@@ -70,6 +70,7 @@ return {
     ru = "Нажмите %s, чтобы выйти",
   },
   cutscenes_hub_only = {
-    en = "Only Viewable from the Hub"
+    en = "Only Viewable from the Hub",
+    ["zh-cn"] = "仅可在大厅内查看",
   },
 }
