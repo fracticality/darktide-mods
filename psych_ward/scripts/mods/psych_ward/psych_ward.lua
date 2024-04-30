@@ -226,6 +226,12 @@ mod:hook(CLASS.MechanismHub, "wanted_transition", function(func, self)
   return func(self)
 end)
 
+mod:hook_safe(CLASS.MechanismLeftSession, "init", function(self, ...)
+  if _return_to_character_select then
+    self._next_state = CLASS.StateExitToMainMenu
+  end
+end)
+
 -- This handles cases where the player skipped post-mission timeout or left a mission
 mod:hook(CLASS.MultiplayerSessionManager, "find_available_session", function(func, ...)
 
@@ -565,4 +571,8 @@ mod:hook_safe(CLASS.TitleView, "_apply_title_text", function(self)
     local text = mod:localize("exit_text", input)
     exit_text_widget.content.text = text
   end
+end)
+
+mod:hook_safe(CLASS.MissionBoardView, "on_enter", function(self)
+  self._regions_latency = self._regions_latency or {}
 end)
