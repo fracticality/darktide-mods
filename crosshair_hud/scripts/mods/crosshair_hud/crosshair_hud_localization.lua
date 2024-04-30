@@ -466,16 +466,20 @@ local localizations = {
     ["zh-cn"] = "隐藏动能剥皮者增益图标",
   },
   move_independently = {
-    en = "Move Independently"
+    en = "Move Independently",
+    ["zh-cn"] = "独立移动",
   },
   move_independently_description = {
-    en = "Move gauge and text independently from one another."
+    en = "Move gauge and text independently from one another.",
+    ["zh-cn"] = "彼此独立地移动指示器和文本。",
   },
   scale_independently = {
-    en = "Scale Independently"
+    en = "Scale Independently",
+    ["zh-cn"] = "独立缩放",
   },
   scale_independently_description = {
-    en = "Scale gauge and text independently from one another."
+    en = "Scale gauge and text independently from one another.",
+    ["zh-cn"] = "彼此独立地缩放指示器和文本。",
   }
 }
 
