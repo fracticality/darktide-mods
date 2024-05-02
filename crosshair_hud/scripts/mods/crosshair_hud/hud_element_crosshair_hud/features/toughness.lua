@@ -99,6 +99,9 @@ function feature.create_widget_definitions()
           offset = { toughness_gauge_offset[1], toughness_gauge_offset[2], 6 },
           scenegraph_id = mod:get("independent_toughness_gauge") and (feature_name .. "_gauge") or nil
         },
+        visibility_function = function(content, style)
+          return mod:get("display_toughness_gauge")
+        end
       },
       {
         pass_type = "texture_uv",
