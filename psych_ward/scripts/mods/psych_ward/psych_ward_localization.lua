@@ -57,6 +57,12 @@ return {
     ["zh-cn"] = "装饰品",
     ja = "装飾品",
   },
+  penance_button = {
+    en = "Penance",
+    ru = "Искупления",
+    ["zh-cn"] = "苦修", -- check it !!!
+    ja = "苦行", -- check it !!!
+  },
   inventory_button = {
     en = "Inventory",
     ["zh-cn"] = "库存",
@@ -72,5 +78,6 @@ return {
   cutscenes_hub_only = {
     en = "Only Viewable from the Hub",
     ["zh-cn"] = "仅可在大厅内查看",
+    ru = "Можно посмотреть только в Хабе",
   },
 }
