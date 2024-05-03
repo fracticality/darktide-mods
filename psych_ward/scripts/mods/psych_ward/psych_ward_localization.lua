@@ -60,8 +60,8 @@ return {
   penance_button = {
     en = "Penance",
     ru = "Искупления",
-    ["zh-cn"] = "苦修", -- check it !!!
-    ja = "苦行", -- check it !!!
+    ["zh-cn"] = "苦修",
+    ja = "苦行",
   },
   inventory_button = {
     en = "Inventory",
