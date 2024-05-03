@@ -24,6 +24,7 @@ local _contracts_button = "contracts_button"
 local _crafting_button = "crafting_button"
 local _inventory_button = "inventory_button"
 local _cosmetics_button = "cosmetics_button"
+local _penance_button = "penance_button"
 local _difficulty_stepper = "difficulty_stepper"
 local _stepper_content
 
@@ -33,11 +34,12 @@ local _view_button_names = {
   _crafting_button,
   _inventory_button,
   _cosmetics_button,
-  _mission_button
+  _mission_button,
+  _penance_button
   --_psykhanium_button
 }
 
-local button_size = { 150, ButtonPassTemplates.terminal_button_small.size[2] }
+local button_size = { 150, ButtonPassTemplates.terminal_button_small.size[2] -7 }
 local button_offset = { 0, button_size[2] + 10, 0 }
 local _button_settings = {
   [_psykhanium_button] = {
@@ -45,7 +47,7 @@ local _button_settings = {
       parent = "character_info",
       vertical_alignment = "top",
       horizontal_alignment = "center",
-      size = { 200, 40 },
+      size = { 240, 50 },
       position = { 0, -25, 0 }
     }
   },
@@ -55,7 +57,7 @@ local _button_settings = {
       parent = "character_info",
       vertical_alignment = "top",
       horizontal_alignment = "center",
-      size = { 200, 40 },
+      size = { 240, 50 },
       position = { 0, -250, 0 }
     }
   },
@@ -108,7 +110,17 @@ local _button_settings = {
       size = button_size,
       position = { -15, button_size[2] + 25, 0 }
     }
-  }
+  },
+  [_penance_button] = {
+    view_name = "penance_overview_view",
+    scenegraph_definition = {
+      parent = _cosmetics_button,
+      vertical_alignment = "top",
+      horizontal_alignment = "right",
+      size = button_size,
+      position = button_offset
+    }
+  },
 }
 
 --[[
