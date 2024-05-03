@@ -58,7 +58,7 @@ return {
     ja = "装飾品",
   },
   penance_button = {
-    en = "Penance",
+    en = "Penances",
     ru = "Искупления",
     ["zh-cn"] = "苦修",
     ja = "苦行",
