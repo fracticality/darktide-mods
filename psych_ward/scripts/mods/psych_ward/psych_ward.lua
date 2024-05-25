@@ -39,7 +39,7 @@ local _view_button_names = {
   --_psykhanium_button
 }
 
-local button_size = { 150, ButtonPassTemplates.terminal_button_small.size[2] -7 }
+local button_size = { 150, ButtonPassTemplates.terminal_button_small.size[2] -12 }
 local button_offset = { 0, button_size[2] + 10, 0 }
 local _button_settings = {
   [_psykhanium_button] = {
@@ -58,7 +58,7 @@ local _button_settings = {
       vertical_alignment = "top",
       horizontal_alignment = "center",
       size = { 240, 50 },
-      position = { 0, -250, 0 }
+      position = { 0, -200, 0 }
     }
   },
   [_vendor_button] = {
