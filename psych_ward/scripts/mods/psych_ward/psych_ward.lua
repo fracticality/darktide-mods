@@ -595,7 +595,7 @@ local sacrifice_package_id = nil
 mod:hook(CLASS.CraftingMechanicusBarterItemsView, "_setup_background_world", function(func, self)
   local game_mode_name = Managers.state.game_mode and Managers.state.game_mode:game_mode_name()
   if game_mode_name ~= "hub" then
-    sacrifice_package_id = not sacrifice_package_id and Managers.package:load("packages/ui/views/masteries_overview_view/masteries_overview_view", mod.name, nil, true)
+    sacrifice_package_id = sacrifice_package_id or Managers.package:load("packages/ui/views/masteries_overview_view/masteries_overview_view", mod.name, nil, true)
     return -- running func causes a crash; there's presumably something else that isn't loaded, but this func is not needed
   end
   func(self)
