@@ -192,7 +192,8 @@ function template.update(parent, dt, t)
       end
 
       local style = widget_style[id]
-      local text = profile.archetype.string_symbol or "•••"
+      local archetype_name = profile.archetype and profile.archetype.name
+      local text = archetype_name and UISettings.archetype_font_icon_simple[archetype_name] or "•"
       widget_content[id] = text
 
       style.text_color = color
