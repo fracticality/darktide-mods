@@ -5,6 +5,12 @@ return {
   description = mod:localize("psych_ward_description"),
   is_toggleable = false,
   options = {
-    widgets = {}
+    widgets = {
+      {
+        setting_id = "allow_chat_main_menu",
+        type = "checkbox",
+        default_value = true,
+      },
+    }
   }
 }

@@ -22,7 +22,7 @@ return {
     ja = "ハブを介さず、サイカニウムへと直接入場できるようになります。",
   },
   psykhanium_button = {
-    en = "Shooting Range",
+    en = "Psykhanium",
     ["zh-cn"] = "训练场",
     ru = "Стрельбище",
     ja = "演習場",
@@ -69,6 +69,12 @@ return {
     ru = "Инвентарь",
     ja = "インベントリ",
   },
+  havoc_button = {
+    en = "Havoc Mission",
+  },
+  meatgrinder_button = {
+    en = "Meat Grinder"
+  },
   exit_text = {
     en = "Press %s to quit",
     ja = "%sで終了",
@@ -79,5 +85,14 @@ return {
     en = "Only Viewable from the Hub",
     ["zh-cn"] = "仅可在大厅内查看",
     ru = "Можно посмотреть только в Хабе",
+  },
+  access_from_hub = {
+    en = "Access from the Hub",
+  },
+  enter_hub = {
+    en = "Enter Hub"
+  },
+  allow_chat_main_menu = {
+    en = "Allow Chat in Character Select screen"
   },
 }

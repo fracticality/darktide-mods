@@ -25,40 +25,44 @@ local _crafting_button = "crafting_button"
 local _inventory_button = "inventory_button"
 local _cosmetics_button = "cosmetics_button"
 local _penance_button = "penance_button"
+local _havoc_button = "havoc_button"
+local _meatgrinder_button = "meatgrinder_button"
 local _difficulty_stepper = "difficulty_stepper"
 local _stepper_content
 
 local _view_button_names = {
+  _psykhanium_button,
   _vendor_button,
   _contracts_button,
   _crafting_button,
   _inventory_button,
   _cosmetics_button,
   _mission_button,
-  _penance_button
-  --_psykhanium_button
+  _penance_button,
+  _havoc_button,
 }
 
 local button_size = { 150, ButtonPassTemplates.terminal_button_small.size[2] -12 }
 local button_offset = { 0, button_size[2] + 10, 0 }
 local _button_settings = {
   [_psykhanium_button] = {
-    scenegraph_definition = {
-      parent = "character_info",
-      vertical_alignment = "top",
-      horizontal_alignment = "center",
-      size = { 240, 50 },
-      position = { 0, -25, 0 }
-    }
-  },
-  [_mission_button] = {
-    view_name = "mission_board_view",
+    view_name = "training_grounds_view",
     scenegraph_definition = {
       parent = "character_info",
       vertical_alignment = "top",
       horizontal_alignment = "center",
       size = { 240, 50 },
       position = { 0, -200, 0 }
+    }
+  },
+  [_mission_button] = {
+    view_name = "mission_board_view",
+    scenegraph_definition = {
+      parent = "play_button",
+      vertical_alignment = "bottom",
+      horizontal_alignment = "left",
+      size = { 240, 50 },
+      position = { 0, 45, 0 }
     }
   },
   [_vendor_button] = {
@@ -119,6 +123,25 @@ local _button_settings = {
       horizontal_alignment = "right",
       size = button_size,
       position = button_offset
+    }
+  },
+  [_havoc_button] = {
+    view_name = "havoc_background_view",
+    scenegraph_definition = {
+      parent = "play_button",
+      vertical_alignment = "bottom",
+      horizontal_alignment = "right",
+      size = { 240, 50 },
+      position = { 0, 45, 0 }
+    }
+  },
+  [_meatgrinder_button] = {
+    scenegraph_definition = {
+      parent = "character_info",
+      vertical_alignment = "top",
+      horizontal_alignment = "center",
+      size = { 240, 50 },
+      position = { 0, -25, 0 }
     }
   },
 }
@@ -189,6 +212,23 @@ local function _open_view(view_name)
   end
 end
 
+mod:hook_safe(CLASS.TrainingGroundsView, "on_enter", function(self)
+  local button_widgets = self._button_widgets
+  for i = 2, #button_widgets do
+    local button_widget = button_widgets[i]
+
+    button_widget.content.hotspot.disabled = true
+    button_widget.content.text = mod:localize("access_from_hub")
+  end
+end)
+
+mod:hook_safe(CLASS.TrainingGroundsOptionsView, "_register_button_callbacks", function(self)
+  local widgets_by_name = self._widgets_by_name
+  local play_button = widgets_by_name.play_button
+
+  play_button.content.hotspot.disabled = Managers.state.mission == nil
+end)
+
 mod:hook_safe(CLASS.StoryMissionLoreView, "on_enter", function(self)
 
   local game_mode_name = Managers.state.game_mode and Managers.state.game_mode:game_mode_name()
@@ -201,7 +241,8 @@ end)
 
 local _presence_hook_top_views = {
   mission_board_view = true,
-  story_mission_play_view = true
+  story_mission_play_view = true,
+  horde_play_view = true,
 }
 
 local function presence_name_hook(func, self)
@@ -270,7 +311,7 @@ mod:hook_require(main_menu_definitions_file, function(definitions)
   table.insert(definitions.legend_inputs, legend_input)
 
   definitions.scenegraph_definition[_difficulty_stepper] = {
-    parent = _psykhanium_button,
+    parent = _meatgrinder_button,
     vertical_alignment = "bottom",
     horizontal_alignment = "center",
     size = { 300, 60 },
@@ -427,9 +468,13 @@ local _wallet_update_t = 5
 mod:hook(CLASS.MainMenuView, "_handle_input", function(func, self, input_service, dt, t)
 
   local constant_elements = Managers.ui:ui_constant_elements()
-  if input_service:get("confirm_pressed") then
-    constant_elements._elements.ConstantElementChat:set_visible(true)
-    return
+  if mod:get("allow_chat_main_menu") then
+    if input_service:get("confirm_pressed") then
+      constant_elements._elements.ConstantElementChat:set_visible(true)
+      return
+    end
+  elseif constant_elements._elements.ConstantElementChat then
+    constant_elements._elements.ConstantElementChat:set_visible(false)
   end
 
   func(self, input_service, dt, t)
@@ -437,14 +482,17 @@ mod:hook(CLASS.MainMenuView, "_handle_input", function(func, self, input_service
   local is_in_matchmaking = Managers.party_immaterium:is_in_matchmaking()
   local play_button_content = self._widgets_by_name.play_button.content
   local create_button_content = self._widgets_by_name.create_button.content
-  local psykhanium_button_content = self._widgets_by_name[_psykhanium_button].content
+  local meatgrinder_button_content = self._widgets_by_name[_meatgrinder_button].content
   local mission_button_content = self._widgets_by_name[_mission_button].content
+  local havoc_button_content = self._widgets_by_name[_havoc_button].content
 
-  psykhanium_button_content.hotspot.disabled = is_in_matchmaking or self._is_main_menu_open
-  psykhanium_button_content.visible = play_button_content.visible
   play_button_content.hotspot.disabled = is_in_matchmaking
+  meatgrinder_button_content.hotspot.disabled = is_in_matchmaking or self._is_main_menu_open
   mission_button_content.hotspot.disabled = is_in_matchmaking
   create_button_content.hotspot.disabled = is_in_matchmaking
+  havoc_button_content.hotspot.disabled = is_in_matchmaking
+
+  meatgrinder_button_content.visible = play_button_content.visible
 
   for i, character_list_widget in ipairs(self._character_list_widgets) do
     character_list_widget.content.hotspot.disabled = is_in_matchmaking
@@ -485,7 +533,7 @@ mod:hook_safe(CLASS.MainMenuView, "_setup_interactions", function(self)
   _stepper_content = widgets_by_name.difficulty_stepper.content
   _stepper_content.danger = challenge_level
 
-  widgets_by_name[_psykhanium_button].content.hotspot.pressed_callback = function()
+  widgets_by_name[_meatgrinder_button].content.hotspot.pressed_callback = function()
     _go_to_shooting_range = true
     self:_on_play_pressed()
   end
@@ -496,6 +544,9 @@ mod:hook_safe(CLASS.MainMenuView, "_setup_interactions", function(self)
       _open_view(content.view_name)
     end
   end
+
+  local play_button_content = widgets_by_name.play_button.content
+  play_button_content.original_text = mod:localize("enter_hub")
 
   --mod:hook_enable(CLASS.PartyImmateriumMemberMyself, "presence_name")
   --mod:hook_enable(CLASS.PartyImmateriumMember, "presence_name")
@@ -607,3 +658,19 @@ mod:hook_safe(CLASS.CraftingView, "on_exit", function(self)
     sacrifice_package_id = nil
   end
 end)
+
+--local extra_package_id
+--
+--mod:hook(CLASS.TabbedMenuViewBase, "_setup_background_world", function(func, self)
+--  local game_mode_name = Managers.state.game_mode_name and Managers.state.game_mode:game_mode_name()
+--  if game_mode_name ~= "hub" then
+--    extra_package_id = extra_package_id or Managers.package:load("packages/ui/views/credits_vendor_view/credits_vendor_view", mod.name, nil, true)
+--  end
+--end)
+--
+--mod:hook_safe(CLASS.CreditsVendorView, "on_exit", function(self)
+--  if extra_package_id then
+--    Managers.package:release(extra_package_id)
+--    extra_package_id = nil
+--  end
+--end)
