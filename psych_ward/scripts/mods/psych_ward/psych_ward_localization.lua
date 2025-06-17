@@ -23,7 +23,7 @@ return {
   },
   psykhanium_button = {
     en = "Psykhanium",
-    ["zh-cn"] = "训练场",
+    ["zh-cn"] = "灵能室",
     ru = "Стрельбище",
     ja = "演習場",
   },
@@ -71,9 +71,11 @@ return {
   },
   havoc_button = {
     en = "Havoc Mission",
+    ["zh-cn"] = "浩劫任务",
   },
   meatgrinder_button = {
-    en = "Meat Grinder"
+    en = "Meat Grinder",
+    ["zh-cn"] = "绞肉机",
   },
   exit_text = {
     en = "Press %s to quit",
@@ -88,11 +90,14 @@ return {
   },
   access_from_hub = {
     en = "Access from the Hub",
+    ["zh-cn"] = "从大厅访问",
   },
   enter_hub = {
-    en = "Enter Hub"
+    en = "Enter Hub",
+    ["zh-cn"] = "进入大厅",
   },
   allow_chat_main_menu = {
-    en = "Allow Chat in Character Select screen"
+    en = "Allow Chat in Character Select screen",
+    ["zh-cn"] = "允许在角色选择界面使用聊天框",
   },
 }
