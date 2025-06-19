@@ -11,6 +11,7 @@ local MatchmakingConstants = require("scripts/settings/network/matchmaking_const
 local SINGLEPLAY_TYPES = MatchmakingConstants.SINGLEPLAY_TYPES
 
 local _is_matchmaking_from_main_menu = false
+local _disable_psykhanium = false
 local _setup_complete = false
 local _flag_for_return = false
 local _is_transitioning = false
@@ -39,7 +40,7 @@ local _view_button_names = {
   _cosmetics_button,
   _mission_button,
   _penance_button,
-  _havoc_button,
+  --_havoc_button,
 }
 
 local button_size = { 150, ButtonPassTemplates.terminal_button_small.size[2] -12 }
@@ -47,6 +48,7 @@ local button_offset = { 0, button_size[2] + 10, 0 }
 local _button_settings = {
   [_psykhanium_button] = {
     view_name = "training_grounds_view",
+    disable_psykhanium = true,
     scenegraph_definition = {
       parent = "character_info",
       vertical_alignment = "top",
@@ -60,7 +62,7 @@ local _button_settings = {
     scenegraph_definition = {
       parent = "play_button",
       vertical_alignment = "bottom",
-      horizontal_alignment = "left",
+      horizontal_alignment = "center",
       size = { 240, 50 },
       position = { 0, 45, 0 }
     }
@@ -125,16 +127,16 @@ local _button_settings = {
       position = button_offset
     }
   },
-  [_havoc_button] = {
-    view_name = "havoc_background_view",
-    scenegraph_definition = {
-      parent = "play_button",
-      vertical_alignment = "bottom",
-      horizontal_alignment = "right",
-      size = { 240, 50 },
-      position = { 0, 45, 0 }
-    }
-  },
+  --[_havoc_button] = {
+  --  view_name = "havoc_background_view",
+  --  scenegraph_definition = {
+  --    parent = "play_button",
+  --    vertical_alignment = "bottom",
+  --    horizontal_alignment = "right",
+  --    size = { 240, 50 },
+  --    position = { 0, 45, 0 }
+  --  }
+  --},
   [_meatgrinder_button] = {
     scenegraph_definition = {
       parent = "character_info",
@@ -213,20 +215,24 @@ local function _open_view(view_name)
 end
 
 mod:hook_safe(CLASS.TrainingGroundsView, "on_enter", function(self)
-  local button_widgets = self._button_widgets
-  for i = 2, #button_widgets do
-    local button_widget = button_widgets[i]
+  if _disable_psykhanium then
+    local button_widgets = self._button_widgets
+    for i = 2, #button_widgets do
+      local button_widget = button_widgets[i]
 
-    button_widget.content.hotspot.disabled = true
-    button_widget.content.text = mod:localize("access_from_hub")
+      button_widget.content.hotspot.disabled = true
+      button_widget.content.text = mod:localize("access_from_hub")
+    end
   end
 end)
 
 mod:hook_safe(CLASS.TrainingGroundsOptionsView, "_register_button_callbacks", function(self)
-  local widgets_by_name = self._widgets_by_name
-  local play_button = widgets_by_name.play_button
+  if _disable_psykhanium then
+    local widgets_by_name = self._widgets_by_name
+    local play_button = widgets_by_name.play_button
 
-  play_button.content.hotspot.disabled = Managers.state.mission == nil
+    play_button.content.hotspot.disabled = Managers.state.mission == nil
+  end
 end)
 
 mod:hook_safe(CLASS.StoryMissionLoreView, "on_enter", function(self)
@@ -454,6 +460,8 @@ mod:hook(CLASS.StateMainMenu, "update", function(func, self, main_dt, main_t)
 
       return next_state, state_context
     end
+
+    _disable_psykhanium = false
   elseif self._continue then
     self._continue = false
   end
@@ -484,13 +492,13 @@ mod:hook(CLASS.MainMenuView, "_handle_input", function(func, self, input_service
   local create_button_content = self._widgets_by_name.create_button.content
   local meatgrinder_button_content = self._widgets_by_name[_meatgrinder_button].content
   local mission_button_content = self._widgets_by_name[_mission_button].content
-  local havoc_button_content = self._widgets_by_name[_havoc_button].content
+  --local havoc_button_content = self._widgets_by_name[_havoc_button].content
 
   play_button_content.hotspot.disabled = is_in_matchmaking
   meatgrinder_button_content.hotspot.disabled = is_in_matchmaking or self._is_main_menu_open
   mission_button_content.hotspot.disabled = is_in_matchmaking
   create_button_content.hotspot.disabled = is_in_matchmaking
-  havoc_button_content.hotspot.disabled = is_in_matchmaking
+  --havoc_button_content.hotspot.disabled = true
 
   meatgrinder_button_content.visible = play_button_content.visible
 
@@ -541,6 +549,7 @@ mod:hook_safe(CLASS.MainMenuView, "_setup_interactions", function(self)
   for _, button_name in ipairs(_view_button_names) do
     local content = widgets_by_name[button_name] and widgets_by_name[button_name].content
     content.hotspot.pressed_callback = function()
+      _disable_psykhanium = _button_settings[button_name].disable_psykhanium
       _open_view(content.view_name)
     end
   end
