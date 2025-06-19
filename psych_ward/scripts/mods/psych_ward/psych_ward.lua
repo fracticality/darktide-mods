@@ -1,9 +1,13 @@
 local mod = get_mod("psych_ward")
+mod.context = mod:persistent_table("mod_context", {
+  button_settings = {},
+})
+
+mod:io_dofile("psych_ward/scripts/mods/psych_ward/patches/title_view")
 
 local ProfileUtils = require("scripts/utilities/profile_utils")
 local Promise = require("scripts/foundation/utilities/promise")
 local UIWidget = require("scripts/managers/ui/ui_widget")
-local InputUtils = require("scripts/managers/input/input_utils")
 local ButtonPassTemplates = require("scripts/ui/pass_templates/button_pass_templates")
 local Missions = require("scripts/settings/mission/mission_templates")
 local StepperPassTemplates = require("scripts/ui/pass_templates/stepper_pass_templates")
@@ -11,14 +15,12 @@ local MatchmakingConstants = require("scripts/settings/network/matchmaking_const
 local SINGLEPLAY_TYPES = MatchmakingConstants.SINGLEPLAY_TYPES
 
 local _is_matchmaking_from_main_menu = false
-local _disable_psykhanium = false
 local _setup_complete = false
 local _flag_for_return = false
 local _is_transitioning = false
 local _return_to_character_select = false
 local _go_to_shooting_range = false
-local _exit_text = "exit_text"
-local _psykhanium_button = "psykhanium_button"
+local _horde_button = "horde_button"
 local _mission_button = "mission_button"
 local _vendor_button = "vendor_button"
 local _contracts_button = "contracts_button"
@@ -32,7 +34,7 @@ local _difficulty_stepper = "difficulty_stepper"
 local _stepper_content
 
 local _view_button_names = {
-  _psykhanium_button,
+  _horde_button,
   _vendor_button,
   _contracts_button,
   _crafting_button,
@@ -40,21 +42,21 @@ local _view_button_names = {
   _cosmetics_button,
   _mission_button,
   _penance_button,
+  _meatgrinder_button,
   --_havoc_button,
 }
 
 local button_size = { 150, ButtonPassTemplates.terminal_button_small.size[2] -12 }
 local button_offset = { 0, button_size[2] + 10, 0 }
 local _button_settings = {
-  [_psykhanium_button] = {
+  [_horde_button] = {
     view_name = "training_grounds_view",
-    disable_psykhanium = true,
     scenegraph_definition = {
       parent = "character_info",
       vertical_alignment = "top",
       horizontal_alignment = "center",
       size = { 240, 50 },
-      position = { 0, -200, 0 }
+      position = { 0, -185, 0 }
     }
   },
   [_mission_button] = {
@@ -176,8 +178,22 @@ function MainMenuView:cb_on_toggle_view_buttons()
   for _, button_name in ipairs(_view_button_names) do
     local button_widget = widgets_by_name[button_name]
     if button_widget then
+      if button_widget.content.visible == nil then
+        button_widget.content.visible = true
+      end
+
       button_widget.content.visible = not button_widget.content.visible
     end
+  end
+
+  local difficulty_stepper_widget = widgets_by_name[_difficulty_stepper]
+  if difficulty_stepper_widget then
+    local widget_content = difficulty_stepper_widget.content
+    if widget_content.visible == nil then
+      widget_content.visible = true
+    end
+
+    widget_content.visible = not widget_content.visible
   end
 end
 
@@ -214,25 +230,12 @@ local function _open_view(view_name)
   end
 end
 
-mod:hook_safe(CLASS.TrainingGroundsView, "on_enter", function(self)
-  if _disable_psykhanium then
-    local button_widgets = self._button_widgets
-    for i = 2, #button_widgets do
-      local button_widget = button_widgets[i]
+mod:hook(CLASS.TrainingGroundsView, "on_enter", function(func, self)
+  local game_mode_name = Managers.state.game_mode and Managers.state.game_mode:game_mode_name()
 
-      button_widget.content.hotspot.disabled = true
-      button_widget.content.text = mod:localize("access_from_hub")
-    end
-  end
-end)
+  self._base_definitions.starting_option_index = game_mode_name ~= "hub" and 1 or nil
 
-mod:hook_safe(CLASS.TrainingGroundsOptionsView, "_register_button_callbacks", function(self)
-  if _disable_psykhanium then
-    local widgets_by_name = self._widgets_by_name
-    local play_button = widgets_by_name.play_button
-
-    play_button.content.hotspot.disabled = Managers.state.mission == nil
-  end
+  return func(self)
 end)
 
 mod:hook_safe(CLASS.StoryMissionLoreView, "on_enter", function(self)
@@ -460,8 +463,6 @@ mod:hook(CLASS.StateMainMenu, "update", function(func, self, main_dt, main_t)
 
       return next_state, state_context
     end
-
-    _disable_psykhanium = false
   elseif self._continue then
     self._continue = false
   end
@@ -492,15 +493,15 @@ mod:hook(CLASS.MainMenuView, "_handle_input", function(func, self, input_service
   local create_button_content = self._widgets_by_name.create_button.content
   local meatgrinder_button_content = self._widgets_by_name[_meatgrinder_button].content
   local mission_button_content = self._widgets_by_name[_mission_button].content
+  local horde_button_content = self._widgets_by_name[_horde_button].content
   --local havoc_button_content = self._widgets_by_name[_havoc_button].content
 
   play_button_content.hotspot.disabled = is_in_matchmaking
   meatgrinder_button_content.hotspot.disabled = is_in_matchmaking or self._is_main_menu_open
   mission_button_content.hotspot.disabled = is_in_matchmaking
   create_button_content.hotspot.disabled = is_in_matchmaking
+  horde_button_content.hotspot.disabled = is_in_matchmaking
   --havoc_button_content.hotspot.disabled = true
-
-  meatgrinder_button_content.visible = play_button_content.visible
 
   for i, character_list_widget in ipairs(self._character_list_widgets) do
     character_list_widget.content.hotspot.disabled = is_in_matchmaking
@@ -548,9 +549,10 @@ mod:hook_safe(CLASS.MainMenuView, "_setup_interactions", function(self)
 
   for _, button_name in ipairs(_view_button_names) do
     local content = widgets_by_name[button_name] and widgets_by_name[button_name].content
-    content.hotspot.pressed_callback = function()
-      _disable_psykhanium = _button_settings[button_name].disable_psykhanium
-      _open_view(content.view_name)
+    if content.view_name then
+      content.hotspot.pressed_callback = function()
+        _open_view(content.view_name)
+      end
     end
   end
 
@@ -565,84 +567,6 @@ mod:hook_safe(CLASS.MainMenuView, "_setup_interactions", function(self)
   _setup_complete = true
 
   Managers.data_service.store:reset()
-end)
-
---[[
-  Title Screen Exit Button
-]]--
-
-local function _quit()
-  Application.quit()
-end
-
-local title_view_definitions_file = "scripts/ui/views/title_view/title_view_definitions"
-mod:hook_require(title_view_definitions_file, function(definitions)
-  definitions.scenegraph_definition[_exit_text] = {
-    parent = "background_image",
-    vertical_alignment = "bottom",
-    horizontal_alignment = "center",
-    size = { 450, 50 },
-    position = { 0, -25, 4 }
-  }
-
-  definitions.widget_definitions[_exit_text] = UIWidget.create_definition({
-    {
-      pass_type = "hotspot",
-      content_id = "hotspot",
-      content = {
-        pressed_callback = _quit
-      },
-    },
-    {
-      pass_type = "text",
-      value = "",
-      value_id = "text",
-      style = {
-        font_size = 24,
-        font_type = "proxima_nova_bold",
-        text_vertical_alignment = "center",
-        text_horizontal_alignment = "center",
-        text_color = Color.text_default(255, true),
-        offset = { 0, 0, 2 }
-      },
-      change_function = function(content, style)
-        local progress = 0.5 + math.sin(Application.time_since_launch() * 3) * 0.5
-        local text_color = style.text_color
-        local progress_color = 180 + 75 * progress
-        text_color[2] = progress_color
-        text_color[3] = progress_color
-        text_color[4] = progress_color
-      end
-    }
-  }, _exit_text)
-
-end)
-
-mod:hook_safe(CLASS.TitleView, "update", function(self, dt, t, input_service)
-  if self._parent:is_loading() then
-    mod:hook_disable(CLASS.TitleView, "update")
-
-    local exit_widget = self._widgets_by_name[_exit_text]
-    local widget_content = exit_widget and exit_widget.content
-    if widget_content then
-      widget_content.visible = false
-    end
-
-    return
-  end
-
-  if input_service:get("hotkey_system") then
-    _quit()
-  end
-end)
-
-mod:hook_safe(CLASS.TitleView, "_apply_title_text", function(self)
-  local exit_text_widget = self._widgets_by_name[_exit_text]
-  if exit_text_widget then
-    local input = InputUtils.input_text_for_current_input_device("View", "close_view", true)
-    local text = mod:localize("exit_text", input)
-    exit_text_widget.content.text = text
-  end
 end)
 
 mod:hook_safe(CLASS.MissionBoardView, "on_enter", function(self)

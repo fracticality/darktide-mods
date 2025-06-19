@@ -16,13 +16,13 @@ return {
     ru = "Психушка",
   },
   psych_ward_description = {
-    en = "Enables logging in straight to the Psykhanium, bypassing the Hub.",
+    en = "Provides access to many Hub features from the Character Select menu.",
     ["zh-cn"] = "启用直接进入灵能室功能，无需进入大厅。",
     ru = "Psych Ward - Позволяет войти прямо на стрельбище в Псайканиум, минуя Хаб.",
     ja = "ハブを介さず、サイカニウムへと直接入場できるようになります。",
   },
-  psykhanium_button = {
-    en = "Psykhanium",
+  horde_button = {
+    en = "Mortis Trials",
     ["zh-cn"] = "灵能室",
     ru = "Стрельбище",
     ja = "演習場",
@@ -87,10 +87,6 @@ return {
     en = "Only Viewable from the Hub",
     ["zh-cn"] = "仅可在大厅内查看",
     ru = "Можно посмотреть только в Хабе",
-  },
-  access_from_hub = {
-    en = "Access from the Hub",
-    ["zh-cn"] = "从大厅访问",
   },
   enter_hub = {
     en = "Enter Hub",
