@@ -12,18 +12,18 @@ mod:add_global_localize_strings({
 return {
   psych_ward = {
     en = "Psych Ward",
-    ["zh-cn"] = "快速灵能室",
+    ["zh-cn"] = "快捷访问",
     ru = "Психушка",
   },
   psych_ward_description = {
     en = "Provides access to many Hub features from the Character Select menu.",
-    ["zh-cn"] = "启用直接进入灵能室功能，无需进入大厅。",
+    ["zh-cn"] = "直接在角色选择页面使用各种大厅功能。",
     ru = "Psych Ward - Позволяет войти прямо на стрельбище в Псайканиум, минуя Хаб.",
     ja = "ハブを介さず、サイカニウムへと直接入場できるようになります。",
   },
   horde_button = {
     en = "Mortis Trials",
-    ["zh-cn"] = "灵能室",
+    ["zh-cn"] = "死灵试炼",
     ru = "Стрельбище",
     ja = "演習場",
   },
