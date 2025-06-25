@@ -155,7 +155,7 @@ function template.update(parent, dt, t)
     local player = Managers.player:player_by_unit(unit)
 
     repeat
-      if player == hud_player then
+      if player == hud_player or not player then
         break
       end
 
