@@ -233,8 +233,9 @@ end
 
 mod:hook(CLASS.TrainingGroundsView, "on_enter", function(func, self)
   local game_mode_name = Managers.state.game_mode and Managers.state.game_mode:game_mode_name()
+  local skip_to_mortis = game_mode_name ~= "hub" and game_mode_name ~= "prologue_hub"
 
-  self._base_definitions.starting_option_index = game_mode_name ~= "hub" and 1 or nil
+  self._base_definitions.starting_option_index = skip_to_mortis and 1 or nil
 
   return func(self)
 end)
