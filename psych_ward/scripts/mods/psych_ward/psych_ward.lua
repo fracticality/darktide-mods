@@ -14,6 +14,7 @@ local StepperPassTemplates = require("scripts/ui/pass_templates/stepper_pass_tem
 local MatchmakingConstants = require("scripts/settings/network/matchmaking_constants")
 local SINGLEPLAY_TYPES = MatchmakingConstants.SINGLEPLAY_TYPES
 
+local _mb_workaround = false
 local _is_matchmaking_from_main_menu = false
 local _setup_complete = false
 local _flag_for_return = false
@@ -473,6 +474,17 @@ mod:hook(CLASS.StateMainMenu, "update", function(func, self, main_dt, main_t)
 
 end)
 
+mod:hook_safe(CLASS.MissionBoardView, "on_enter", function(self)
+  if self._mission_data then
+    mod:notify("Synced missions data")
+    mod:hook_disable(CLASS.MissionBoardViewLogic, "update")
+  end
+end)
+
+mod:hook_safe(CLASS.MissionBoardViewLogic, "_on_missions_data_fetch_success", function(self, results)
+  mod:notify("Missions fetched successfully")
+end)
+
 local _wallet_update_t = 5
 mod:hook(CLASS.MainMenuView, "_handle_input", function(func, self, input_service, dt, t)
 
@@ -571,6 +583,17 @@ end)
 
 mod:hook_safe(CLASS.MissionBoardView, "on_enter", function(self)
   self._regions_latency = self._regions_latency or {}
+
+  if not _mb_workaround then
+    self:_on_group_finder_pressed()
+  end
+end)
+
+mod:hook_safe(CLASS.GroupFinderView, "on_enter", function(self)
+  if not _mb_workaround then
+    self:cb_handle_back_pressed()
+    _mb_workaround = true
+  end
 end)
 
 -- prevent issues with sacrifice menu
