@@ -89,7 +89,7 @@ return {
   meatgrinder_button = {
     en = "Meat Grinder",
     ["zh-cn"] = "绞肉机",
-    ja = "肉挽き機"
+    ja = "肉挽き機",
     ["zh-tw"] = "絞肉機",
   },
   exit_text = {
