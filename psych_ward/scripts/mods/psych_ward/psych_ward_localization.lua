@@ -19,13 +19,13 @@ return {
     en = "Provides access to many Hub features from the Character Select menu.",
     ["zh-cn"] = "直接在角色选择页面使用各种大厅功能。",
     ru = "Psych Ward - Позволяет войти прямо на стрельбище в Псайканиум, минуя Хаб.",
-    ja = "ハブを介さず、サイカニウムへと直接入場できるようになります。",
+    ja = "キャラクター選択画面から様々なハブ機能へとアクセスできるようになります。",
   },
   horde_button = {
     en = "Mortis Trials",
     ["zh-cn"] = "死灵试炼",
     ru = "Стрельбище",
-    ja = "演習場",
+    ja = "モーティスの試練",
   },
   mission_button = {
     en = "Mission Board",
@@ -72,10 +72,12 @@ return {
   havoc_button = {
     en = "Havoc Mission",
     ["zh-cn"] = "浩劫任务",
+    ja = "ハヴォック任務",
   },
   meatgrinder_button = {
     en = "Meat Grinder",
     ["zh-cn"] = "绞肉机",
+    ja = "肉挽き機"
   },
   exit_text = {
     en = "Press %s to quit",
@@ -87,13 +89,16 @@ return {
     en = "Only Viewable from the Hub",
     ["zh-cn"] = "仅可在大厅内查看",
     ru = "Можно посмотреть только в Хабе",
+    ja = "ハブでのみ閲覧可能",
   },
   enter_hub = {
     en = "Enter Hub",
     ["zh-cn"] = "进入大厅",
+    ja = "ハブに行く",
   },
   allow_chat_main_menu = {
     en = "Allow Chat in Character Select screen",
     ["zh-cn"] = "允许在角色选择界面使用聊天框",
+    ja = "キャラクター選択画面でのチャットを許可",
   },
 }
