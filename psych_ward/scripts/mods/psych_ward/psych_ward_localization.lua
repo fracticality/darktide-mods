@@ -7,6 +7,7 @@ mod:add_global_localize_strings({
     ru = "Торговцы",
     ja = "ベンダー",
     ["zh-tw"] = "大廳功能",
+    ko = "로비 기능",
   }
 })
 
@@ -16,6 +17,7 @@ return {
     ["zh-cn"] = "快捷访问",
     ru = "Психушка",
     ["zh-tw"] = "靈能室",
+    ko = "바로가기",
   },
   psych_ward_description = {
     en = "Provides access to many Hub features from the Character Select menu.",
@@ -23,6 +25,7 @@ return {
     ru = "Psych Ward - Позволяет войти прямо на стрельбище в Псайканиум, минуя Хаб.",
     ja = "キャラクター選択画面から様々なハブ機能へとアクセスできるようになります。",
     ["zh-tw"] = "啟用直接進入靈能室功能，無需進入大廳。",
+    ko = "캐릭터 선택 메뉴에서 로비의 다양한 기능에 접근할 수 있습니다.",
   },
   horde_button = {
     en = "Mortis Trials",
@@ -30,6 +33,7 @@ return {
     ru = "Стрельбище",
     ja = "モーティスの試練",
     ["zh-tw"] = "死神試煉",
+    ko = "몰티스 시련",
   },
   mission_button = {
     en = "Mission Board",
@@ -37,6 +41,7 @@ return {
     ["zh-cn"] = "任务面板",
     ru = "Меню выбора миссий",
     ["zh-tw"] = "任務面板",
+    ko = "미션 터미널",
   },
   vendor_button = {
     en = "Armoury",
@@ -44,6 +49,7 @@ return {
     ru = "Оружейная",
     ja = "武器交換",
     ["zh-tw"] = "軍械交易所",
+    ko = "무기 교환소",
   },
   contracts_button = {
     en = "Contracts",
@@ -51,6 +57,7 @@ return {
     ru = "Контракты",
     ja = "週間契約",
     ["zh-tw"] = "領主商店",
+    ko = "계약",
   },
   crafting_button = {
     en = "Crafting",
@@ -58,6 +65,7 @@ return {
     ru = "Кузница",
     ja = "クラフト",
     ["zh-tw"] = "鍛造",
+    ko = "제작",
   },
   cosmetics_button = {
     en = "Cosmetics",
@@ -65,6 +73,7 @@ return {
     ["zh-cn"] = "装饰品",
     ja = "装飾品",
     ["zh-tw"] = "雜貨店",
+    ko = "장식품",
   },
   penance_button = {
     en = "Penances",
@@ -72,6 +81,7 @@ return {
     ["zh-cn"] = "苦修",
     ja = "苦行",
     ["zh-tw"] = "苦修",
+    ko = "고행",
   },
   inventory_button = {
     en = "Inventory",
@@ -79,18 +89,21 @@ return {
     ru = "Инвентарь",
     ja = "インベントリ",
     ["zh-tw"] = "裝備",
+    ko = "인벤토리",
   },
   havoc_button = {
     en = "Havoc Mission",
     ["zh-cn"] = "浩劫任务",
     ja = "ハヴォック任務",
     ["zh-tw"] = "浩劫任務",
+    ko = "하복 임무",
   },
   meatgrinder_button = {
     en = "Meat Grinder",
     ["zh-cn"] = "绞肉机",
     ja = "肉挽き機",
     ["zh-tw"] = "絞肉機",
+    ko = "사이카니움",
   },
   exit_text = {
     en = "Press %s to quit",
@@ -98,6 +111,7 @@ return {
     ["zh-cn"] = "按下%s以退出",
     ru = "Нажмите %s, чтобы выйти",
     ["zh-tw"] = "按下%s以離開",
+    ko = "종료하려면 %s를 누르세요",
   },
   cutscenes_hub_only = {
     en = "Only Viewable from the Hub",
@@ -105,17 +119,20 @@ return {
     ru = "Можно посмотреть только в Хабе",
     ja = "ハブでのみ閲覧可能",
     ["zh-tw"] = "僅可在大廳內查看",
+    ko = "로비에서만 볼 수 있음",
   },
   enter_hub = {
     en = "Enter Hub",
     ["zh-cn"] = "进入大厅",
     ja = "ハブに行く",
     ["zh-tw"] = "進入大廳",
+    ko = "로비로 진입",
   },
   allow_chat_main_menu = {
     en = "Allow Chat in Character Select screen",
     ["zh-cn"] = "允许在角色选择界面使用聊天框",
     ja = "キャラクター選択画面でのチャットを許可",
     ["zh-tw"] = "允許在角色選擇界面使用聊天框",
+    ko = "캐릭터 선택 화면에서 채팅 허용",
   },
 }
