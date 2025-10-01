@@ -435,7 +435,7 @@ mod:hook(CLASS.StateMainMenu, "_show_reconnect_popup", function(func, self)
 end)
 
 mod:hook(CLASS.StateMainMenu, "update", function(func, self, main_dt, main_t)
-  if self._continue and not self:_waiting_for_profile_synchronization() then
+  if self._continue and not self:waiting_for_profile_synchronization() then
 
     --mod:hook_disable(CLASS.PartyImmateriumMemberMyself, "presence_name")
     --mod:hook_disable(CLASS.PartyImmateriumMember, "presence_name")
