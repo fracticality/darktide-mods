@@ -44,20 +44,41 @@ local _view_button_names = {
   _mission_button,
   _penance_button,
   _meatgrinder_button,
-  --_havoc_button,
 }
 
-local button_size = { 150, ButtonPassTemplates.terminal_button_small.size[2] -12 }
-local button_offset = { 0, button_size[2] + 10, 0 }
+-- def button size = { 220, 50 }
+-- def horizontal spacing = 20
+local horizontal_spacing = mod:get("pw_btns_hor_space")
+
 local _button_settings = {
-  [_horde_button] = {
-    view_name = "training_grounds_view",
+  [_inventory_button] = {
+    view_name = "inventory_background_view",
     scenegraph_definition = {
-      parent = "character_info",
-      vertical_alignment = "top",
-      horizontal_alignment = "center",
-      size = { 240, 50 },
-      position = { 0, -185, 0 }
+      parent = "screen",
+      vertical_alignment = "bottom",
+      horizontal_alignment = "right",
+      size = { mod:get("pw_inventory_button_size_h"), mod:get("pw_inventory_button_size_v") },
+      position = { mod:get("pw_inventory_button_pos_h"), mod:get("pw_inventory_button_pos_v"), 0 }
+    }
+  },
+  [_crafting_button] = {
+    view_name = "crafting_view",
+    scenegraph_definition = {
+      parent = "screen",
+      vertical_alignment = "bottom",
+      horizontal_alignment = "right",
+      size = { mod:get("pw_crafting_button_size_h"), mod:get("pw_crafting_button_size_v") },
+      position = { mod:get("pw_crafting_button_pos_h"), mod:get("pw_crafting_button_pos_v"), 0 }
+    }
+  },
+  [_vendor_button] = {
+    view_name = "credits_vendor_background_view",
+    scenegraph_definition = {
+      parent = "screen",
+      vertical_alignment = "bottom",
+      horizontal_alignment = "right",
+      size = { mod:get("pw_vendor_button_size_h"), mod:get("pw_vendor_button_size_v") },
+      position = { mod:get("pw_vendor_button_pos_h"), mod:get("pw_vendor_button_pos_v"), 0 }
     }
   },
   [_mission_button] = {
@@ -66,87 +87,58 @@ local _button_settings = {
       parent = "play_button",
       vertical_alignment = "bottom",
       horizontal_alignment = "center",
-      size = { 240, 50 },
-      position = { 0, 45, 0 }
-    }
-  },
-  [_vendor_button] = {
-    view_name = "credits_vendor_background_view",
-    scenegraph_definition = {
-      parent = _inventory_button,
-      vertical_alignment = "bottom",
-      horizontal_alignment = "right",
-      size = button_size,
-      position = button_offset
+      size = { mod:get("pw_mission_button_size_h"), mod:get("pw_mission_button_size_v") },
+      position = { mod:get("pw_mission_button_pos_h"), mod:get("pw_mission_button_pos_v"), 0 }
     }
   },
   [_contracts_button] = {
     view_name = "contracts_background_view",
     scenegraph_definition = {
-      parent = _vendor_button,
-      vertical_alignment = "top",
-      horizontal_alignment = "right",
-      size = button_size,
-      position = button_offset
-    }
-  },
-  [_crafting_button] = {
-    view_name = "crafting_view",
-    scenegraph_definition = {
-      parent = _contracts_button,
-      vertical_alignment = "top",
-      horizontal_alignment = "right",
-      size = button_size,
-      position = button_offset
-    }
-  },
-  [_cosmetics_button] = {
-    view_name = "cosmetics_vendor_background_view",
-    scenegraph_definition = {
-      parent = _crafting_button,
-      vertical_alignment = "top",
-      horizontal_alignment = "right",
-      size = button_size,
-      position = button_offset
-    }
-  },
-  [_inventory_button] = {
-    view_name = "inventory_background_view",
-    scenegraph_definition = {
-      parent = "wallet_element_background",
+      parent = "screen",
       vertical_alignment = "bottom",
-      horizontal_alignment = "right",
-      size = button_size,
-      position = { -15, button_size[2] + 25, 0 }
+      horizontal_alignment = "center",
+      size = { mod:get("pw_contracts_button_size_h"), mod:get("pw_contracts_button_size_v") },
+      position = { mod:get("pw_contracts_button_pos_h"), mod:get("pw_contracts_button_pos_v"), 0 }
     }
   },
   [_penance_button] = {
     view_name = "penance_overview_view",
     scenegraph_definition = {
-      parent = _cosmetics_button,
-      vertical_alignment = "top",
-      horizontal_alignment = "right",
-      size = button_size,
-      position = button_offset
+      parent = "screen",
+      vertical_alignment = "bottom",
+      horizontal_alignment = "center",
+      size = { mod:get("pw_penance_button_size_h"), mod:get("pw_penance_button_size_v") },
+      position = { mod:get("pw_penance_button_pos_h"), mod:get("pw_penance_button_pos_v"), 0 }
     }
   },
-  --[_havoc_button] = {
-  --  view_name = "havoc_background_view",
-  --  scenegraph_definition = {
-  --    parent = "play_button",
-  --    vertical_alignment = "bottom",
-  --    horizontal_alignment = "right",
-  --    size = { 240, 50 },
-  --    position = { 0, 45, 0 }
-  --  }
-  --},
+  [_cosmetics_button] = {
+    view_name = "cosmetics_vendor_background_view",
+    scenegraph_definition = {
+      parent = "screen",
+      vertical_alignment = "bottom",
+      horizontal_alignment = "center",
+      size = { mod:get("pw_cosmetics_button_size_h"), mod:get("pw_cosmetics_button_size_v") },
+      position = { mod:get("pw_cosmetics_button_pos_h"), mod:get("pw_cosmetics_button_pos_v"), 0 }
+    }
+  },
+
+  [_horde_button] = {
+    view_name = "training_grounds_view",
+    scenegraph_definition = {
+      parent = "character_info",
+      vertical_alignment = "top",
+      horizontal_alignment = "center",
+      size = { 220, 40 },
+      position = { 0, -135, 0 }
+    }
+  },
   [_meatgrinder_button] = {
     scenegraph_definition = {
       parent = "character_info",
       vertical_alignment = "top",
       horizontal_alignment = "center",
-      size = { 240, 50 },
-      position = { 0, -25, 0 }
+      size = { 220, 40 },
+      position = { 0, -5, 0 }
     }
   },
 }
@@ -325,8 +317,8 @@ mod:hook_require(main_menu_definitions_file, function(definitions)
     parent = _meatgrinder_button,
     vertical_alignment = "bottom",
     horizontal_alignment = "center",
-    size = { 300, 60 },
-    position = { -25, -75, 10 }
+    size = { 220, 40 },
+    position = { -23, -65, 10 }
   }
 
   for button_name, button_settings in pairs(_button_settings) do
@@ -435,7 +427,7 @@ mod:hook(CLASS.StateMainMenu, "_show_reconnect_popup", function(func, self)
 end)
 
 mod:hook(CLASS.StateMainMenu, "update", function(func, self, main_dt, main_t)
-  if self._continue and not self:_waiting_for_profile_synchronization() then
+  if self._continue and not self:waiting_for_profile_synchronization() then
 
     --mod:hook_disable(CLASS.PartyImmateriumMemberMyself, "presence_name")
     --mod:hook_disable(CLASS.PartyImmateriumMember, "presence_name")
