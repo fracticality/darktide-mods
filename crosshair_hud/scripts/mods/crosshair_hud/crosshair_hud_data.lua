@@ -17,11 +17,22 @@ if migrations then
 end
 
 local color_options = {}
+local color_map = {}
+-- Deduplicate colors by RGB value to handle duplicates
 for i, color_name in ipairs(Color.list) do
-  table.insert(color_options, {
-    text = color_name,
-    value = color_name
-  })
+  local color = Color[color_name]()
+  -- Color array is [alpha, red, green, blue], safely handle potential nils
+  local r = color[2] or 0
+  local g = color[3] or 0
+  local b = color[4] or 0
+  local key = string.format("%d_%d_%d", r, g, b)
+  if not color_map[key] then
+    color_map[key] = color_name
+    table.insert(color_options, {
+      text = color_name,
+      value = color_name
+    })
+  end
 end
 table.sort(color_options, function(a, b)
   return a.text < b.text

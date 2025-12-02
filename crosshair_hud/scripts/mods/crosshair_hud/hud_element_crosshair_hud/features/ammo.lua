@@ -159,7 +159,9 @@ function feature.update(parent)
     return
   end
 
-  local clip_max = inventory_component.max_ammunition_clip or 0
+  -- Ammunition fields are now tables, use [1] to access the first clip
+  local clip_max_raw = inventory_component.max_ammunition_clip
+  local clip_max = (type(clip_max_raw) == "table" and clip_max_raw[1]) or clip_max_raw or 0
   local reserve_max = inventory_component.max_ammunition_reserve or 0
   local max_ammo = clip_max + reserve_max
 
@@ -168,7 +170,8 @@ function feature.update(parent)
     return
   end
 
-  local clip_ammo = inventory_component.current_ammunition_clip or 0
+  local clip_ammo_raw = inventory_component.current_ammunition_clip
+  local clip_ammo = (type(clip_ammo_raw) == "table" and clip_ammo_raw[1]) or clip_ammo_raw or 0
   local reserve_ammo = inventory_component.current_ammunition_reserve or 0
   local current_ammo = clip_ammo + reserve_ammo
   local current_ammo_percent = 0
@@ -176,8 +179,8 @@ function feature.update(parent)
   local clip_ammo_percent = 0
 
   current_ammo_percent = current_ammo / max_ammo
-  reserve_ammo_percent = reserve_ammo / reserve_max
-  clip_ammo_percent = clip_ammo / clip_max
+  reserve_ammo_percent = reserve_max > 0 and (reserve_ammo / reserve_max) or 0
+  clip_ammo_percent = clip_max > 0 and (clip_ammo / clip_max) or 0
 
   content.max_ammo = max_ammo or 0
   content.current_ammo = current_ammo or 0
