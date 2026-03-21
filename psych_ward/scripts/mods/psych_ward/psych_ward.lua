@@ -29,10 +29,11 @@ local _crafting_button = "crafting_button"
 local _inventory_button = "inventory_button"
 local _cosmetics_button = "cosmetics_button"
 local _penance_button = "penance_button"
-local _havoc_button = "havoc_button"
+-- local _havoc_button = "havoc_button"
 local _meatgrinder_button = "meatgrinder_button"
 local _difficulty_stepper = "difficulty_stepper"
 local _stepper_content
+local _expedition_button = "expedition_button"
 
 local _view_button_names = {
   _horde_button,
@@ -44,6 +45,7 @@ local _view_button_names = {
   _mission_button,
   _penance_button,
   _meatgrinder_button,
+  _expedition_button,
 }
 
 -- def button size = { 220, 50 }
@@ -81,6 +83,7 @@ local _button_settings = {
       position = { mod:get("pw_vendor_button_pos_h"), mod:get("pw_vendor_button_pos_v"), 0 }
     }
   },
+
   [_mission_button] = {
     view_name = "mission_board_view",
     scenegraph_definition = {
@@ -91,6 +94,36 @@ local _button_settings = {
       position = { mod:get("pw_mission_button_pos_h"), mod:get("pw_mission_button_pos_v"), 0 }
     }
   },
+  [_horde_button] = {
+    view_name = "training_grounds_view",
+    scenegraph_definition = {
+      parent = "play_button",
+      vertical_alignment = "bottom",
+      horizontal_alignment = "center",
+      size = { mod:get("pw_mortis_button_size_h"), mod:get("pw_mortis_button_size_v") },
+      position = { mod:get("pw_mortis_button_pos_h"), mod:get("pw_mortis_button_pos_v"), 0 }
+    }
+  },
+  [_expedition_button] = {
+    view_name = "expedition_view",
+    scenegraph_definition = {
+      parent = "play_button",
+      vertical_alignment = "bottom",
+      horizontal_alignment = "center",
+      size = { mod:get("pw_expeditions_button_size_h"), mod:get("pw_expeditions_button_size_v") },
+      position = { mod:get("pw_expeditions_button_pos_h"), mod:get("pw_expeditions_button_pos_v"), 0 }
+    }
+  },
+  [_meatgrinder_button] = {
+    scenegraph_definition = {
+      parent = "character_info",
+      vertical_alignment = "top",
+      horizontal_alignment = "center",
+      size = { mod:get("pw_meatgrinder_button_size_h"), mod:get("pw_meatgrinder_button_size_v") },
+      position = { mod:get("pw_meatgrinder_button_pos_h"), mod:get("pw_meatgrinder_button_pos_v"), 0 }
+    }
+  },
+
   [_contracts_button] = {
     view_name = "contracts_background_view",
     scenegraph_definition = {
@@ -122,25 +155,6 @@ local _button_settings = {
     }
   },
 
-  [_horde_button] = {
-    view_name = "training_grounds_view",
-    scenegraph_definition = {
-      parent = "character_info",
-      vertical_alignment = "top",
-      horizontal_alignment = "center",
-      size = { 220, 40 },
-      position = { 0, -135, 0 }
-    }
-  },
-  [_meatgrinder_button] = {
-    scenegraph_definition = {
-      parent = "character_info",
-      vertical_alignment = "top",
-      horizontal_alignment = "center",
-      size = { 220, 40 },
-      position = { 0, -5, 0 }
-    }
-  },
 }
 
 --[[
@@ -318,7 +332,7 @@ mod:hook_require(main_menu_definitions_file, function(definitions)
     vertical_alignment = "bottom",
     horizontal_alignment = "center",
     size = { 220, 40 },
-    position = { -23, -65, 10 }
+    position = { -23, -75, 10 }
   }
 
   for button_name, button_settings in pairs(_button_settings) do
@@ -488,6 +502,7 @@ mod:hook(CLASS.MainMenuView, "_handle_input", function(func, self, input_service
   local meatgrinder_button_content = self._widgets_by_name[_meatgrinder_button].content
   local mission_button_content = self._widgets_by_name[_mission_button].content
   local horde_button_content = self._widgets_by_name[_horde_button].content
+  local expedition_button_content = self._widgets_by_name[_expedition_button].content
   --local havoc_button_content = self._widgets_by_name[_havoc_button].content
 
   play_button_content.hotspot.disabled = is_in_matchmaking
@@ -495,6 +510,7 @@ mod:hook(CLASS.MainMenuView, "_handle_input", function(func, self, input_service
   mission_button_content.hotspot.disabled = is_in_matchmaking
   create_button_content.hotspot.disabled = is_in_matchmaking
   horde_button_content.hotspot.disabled = is_in_matchmaking
+  expedition_button_content.hotspot.disabled = is_in_matchmaking
   --havoc_button_content.hotspot.disabled = true
 
   for i, character_list_widget in ipairs(self._character_list_widgets) do
