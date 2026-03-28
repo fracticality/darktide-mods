@@ -29,8 +29,9 @@ local _crafting_button = "crafting_button"
 local _inventory_button = "inventory_button"
 local _cosmetics_button = "cosmetics_button"
 local _penance_button = "penance_button"
-local _havoc_button = "havoc_button"
+local _expedition_button = "expedition_button"
 local _meatgrinder_button = "meatgrinder_button"
+--local _havoc_button = "havoc_button"
 local _difficulty_stepper = "difficulty_stepper"
 local _stepper_content
 
@@ -44,90 +45,110 @@ local _view_button_names = {
   _mission_button,
   _penance_button,
   _meatgrinder_button,
+  _expedition_button,
   --_havoc_button,
 }
 
-local button_size = { 150, ButtonPassTemplates.terminal_button_small.size[2] -12 }
-local button_offset = { 0, button_size[2] + 10, 0 }
+--local button_size = { 150, ButtonPassTemplates.terminal_button_small.size[2] -12 }
+--local button_offset = { 0, button_size[2] + 10, 0 }
 local _button_settings = {
   [_horde_button] = {
     view_name = "training_grounds_view",
     scenegraph_definition = {
-      parent = "character_info",
-      vertical_alignment = "top",
-      horizontal_alignment = "center",
-      size = { 240, 50 },
-      position = { 0, -185, 0 }
+      parent = "screen",
+      vertical_alignment = "bottom",
+      horizontal_alignment = "right",
+      size = { mod:get("horde_button_width"), mod:get("horde_button_height") },
+      position = { mod:get("horde_button_x_offset"), mod:get("horde_button_y_offset"), 0 }
     }
   },
   [_mission_button] = {
     view_name = "mission_board_view",
     scenegraph_definition = {
-      parent = "play_button",
+      parent = "screen",
       vertical_alignment = "bottom",
-      horizontal_alignment = "center",
-      size = { 240, 50 },
-      position = { 0, 45, 0 }
+      horizontal_alignment = "right",
+      size = { mod:get("mission_button_width"), mod:get("mission_button_height") },
+      position = { mod:get("mission_button_x_offset"), mod:get("mission_button_y_offset"), 0 }
     }
   },
   [_vendor_button] = {
     view_name = "credits_vendor_background_view",
     scenegraph_definition = {
-      parent = _inventory_button,
+      parent = "screen",
       vertical_alignment = "bottom",
       horizontal_alignment = "right",
-      size = button_size,
-      position = button_offset
+      size = { mod:get("vendor_button_width"), mod:get("vendor_button_height") },
+      position = { mod:get("vendor_button_x_offset"), mod:get("vendor_button_y_offset"), 0 }
     }
   },
   [_contracts_button] = {
     view_name = "contracts_background_view",
     scenegraph_definition = {
-      parent = _vendor_button,
-      vertical_alignment = "top",
+      parent = "screen",
+      vertical_alignment = "bottom",
       horizontal_alignment = "right",
-      size = button_size,
-      position = button_offset
+      size = { mod:get("contracts_button_width"), mod:get("contracts_button_height") },
+      position = { mod:get("contracts_button_x_offset"), mod:get("contracts_button_y_offset"), 0 }
     }
   },
   [_crafting_button] = {
     view_name = "crafting_view",
     scenegraph_definition = {
-      parent = _contracts_button,
-      vertical_alignment = "top",
+      parent = "screen",
+      vertical_alignment = "bottom",
       horizontal_alignment = "right",
-      size = button_size,
-      position = button_offset
+      size = { mod:get("crafting_button_width"), mod:get("crafting_button_height") },
+      position = { mod:get("crafting_button_x_offset"), mod:get("crafting_button_y_offset"), 0 }
     }
   },
   [_cosmetics_button] = {
     view_name = "cosmetics_vendor_background_view",
     scenegraph_definition = {
-      parent = _crafting_button,
-      vertical_alignment = "top",
+      parent = "screen",
+      vertical_alignment = "bottom",
       horizontal_alignment = "right",
-      size = button_size,
-      position = button_offset
+      size = { mod:get("cosmetics_button_width"), mod:get("cosmetics_button_height") },
+      position = { mod:get("cosmetics_button_x_offset"), mod:get("cosmetics_button_y_offset"), 0 }
     }
   },
   [_inventory_button] = {
     view_name = "inventory_background_view",
     scenegraph_definition = {
-      parent = "wallet_element_background",
+      parent = "screen",
       vertical_alignment = "bottom",
       horizontal_alignment = "right",
-      size = button_size,
-      position = { -15, button_size[2] + 25, 0 }
+      size = { mod:get("inventory_button_width"), mod:get("inventory_button_height") },
+      position = { mod:get("inventory_button_x_offset"), mod:get("inventory_button_y_offset"), 0 }
     }
   },
   [_penance_button] = {
     view_name = "penance_overview_view",
     scenegraph_definition = {
-      parent = _cosmetics_button,
-      vertical_alignment = "top",
+      parent = "screen",
+      vertical_alignment = "bottom",
       horizontal_alignment = "right",
-      size = button_size,
-      position = button_offset
+      size = { mod:get("penance_button_width"), mod:get("penance_button_height") },
+      position = { mod:get("penance_button_x_offset"), mod:get("penance_button_y_offset"), 0 }
+    }
+  },
+  [_expedition_button] = {
+    view_name = "expedition_view",
+    scenegraph_definition = {
+      parent = "screen",
+      vertical_alignment = "bottom",
+      horizontal_alignment = "right",
+      size = { mod:get("expedition_button_width"), mod:get("expedition_button_height") },
+      position = { mod:get("expedition_button_x_offset"), mod:get("expedition_button_y_offset"), 0 }
+    }
+  },
+  [_meatgrinder_button] = {
+    scenegraph_definition = {
+      parent = "screen",
+      vertical_alignment = "bottom",
+      horizontal_alignment = "right",
+      size = { mod:get("meatgrinder_button_width"), mod:get("meatgrinder_button_height") },
+      position = { mod:get("meatgrinder_button_x_offset"), mod:get("meatgrinder_button_y_offset"), 0 }
     }
   },
   --[_havoc_button] = {
@@ -140,15 +161,6 @@ local _button_settings = {
   --    position = { 0, 45, 0 }
   --  }
   --},
-  [_meatgrinder_button] = {
-    scenegraph_definition = {
-      parent = "character_info",
-      vertical_alignment = "top",
-      horizontal_alignment = "center",
-      size = { 240, 50 },
-      position = { 0, -25, 0 }
-    }
-  },
 }
 
 --[[
@@ -211,13 +223,18 @@ local legend_input = {
 
 local _is_view_loading
 local function _open_view(view_name)
-  local character_id = Managers.player:local_player(1):profile().character_id
+  local mission_board_service = Managers.data_service.mission_board
+  local player = Managers.player:local_player(1)
+  local account_id = player:account_id()
+  local character_id = player:character_id()
+  local player_journey_promise = mission_board_service:fetch_player_journey_data(account_id, character_id)
+  local skip_campaign_promise = mission_board_service:fetch_character_campaign_skip_data(account_id, character_id)
   local narrative_promise = Managers.narrative:load_character_narrative(character_id)
 
   if not _is_view_loading then
     _is_view_loading = true
 
-    Promise.all(narrative_promise):next(function (_)
+    Promise.all(player_journey_promise, skip_campaign_promise, narrative_promise):next(function (_)
       _is_view_loading = false
 
       Managers.ui:open_view(view_name, nil, nil, nil, nil, {
@@ -254,6 +271,7 @@ local _presence_hook_top_views = {
   mission_board_view = true,
   story_mission_play_view = true,
   horde_play_view = true,
+  expedition_view = true,
 }
 
 local function presence_name_hook(func, self)
@@ -321,14 +339,6 @@ mod:hook_require(main_menu_definitions_file, function(definitions)
 
   table.insert(definitions.legend_inputs, legend_input)
 
-  definitions.scenegraph_definition[_difficulty_stepper] = {
-    parent = _meatgrinder_button,
-    vertical_alignment = "bottom",
-    horizontal_alignment = "center",
-    size = { 300, 60 },
-    position = { -25, -75, 10 }
-  }
-
   for button_name, button_settings in pairs(_button_settings) do
     local button = UIWidget.create_definition(ButtonPassTemplates.terminal_button_small, button_name, {
       text = mod:localize(button_name),
@@ -338,6 +348,14 @@ mod:hook_require(main_menu_definitions_file, function(definitions)
     definitions.widget_definitions[button_name] = button
     definitions.scenegraph_definition[button_name] = button_settings.scenegraph_definition
   end
+
+  definitions.scenegraph_definition[_difficulty_stepper] = {
+    parent = _meatgrinder_button,
+    vertical_alignment = "bottom",
+    horizontal_alignment = "center",
+    size = { 300, 60 },
+    position = { -25, -75, 10 }
+  }
 
   local stepper_template = table.clone(StepperPassTemplates.difficulty_stepper)
   local definition = UIWidget.create_definition(stepper_template, _difficulty_stepper)
@@ -496,6 +514,7 @@ mod:hook(CLASS.MainMenuView, "_handle_input", function(func, self, input_service
   local meatgrinder_button_content = self._widgets_by_name[_meatgrinder_button].content
   local mission_button_content = self._widgets_by_name[_mission_button].content
   local horde_button_content = self._widgets_by_name[_horde_button].content
+  local expedition_button_content = self._widgets_by_name[_expedition_button].content
   --local havoc_button_content = self._widgets_by_name[_havoc_button].content
 
   play_button_content.hotspot.disabled = is_in_matchmaking
@@ -503,6 +522,7 @@ mod:hook(CLASS.MainMenuView, "_handle_input", function(func, self, input_service
   mission_button_content.hotspot.disabled = is_in_matchmaking
   create_button_content.hotspot.disabled = is_in_matchmaking
   horde_button_content.hotspot.disabled = is_in_matchmaking
+  expedition_button_content.hotspot.disabled = is_in_matchmaking
   --havoc_button_content.hotspot.disabled = true
 
   for i, character_list_widget in ipairs(self._character_list_widgets) do
@@ -524,6 +544,8 @@ mod:hook(CLASS.MainMenuView, "_handle_input", function(func, self, input_service
 
     self._wallet_update_t = wallet_update_t
   end
+
+  play_button_content.original_text = mod:localize("enter_hub")
 
   --if is_in_matchmaking then
   --  mod:hook_disable(CLASS.PartyImmateriumMemberMyself, "presence_name")
