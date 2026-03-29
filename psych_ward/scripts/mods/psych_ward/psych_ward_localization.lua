@@ -100,6 +100,7 @@ return {
   },
   expedition_button = {
     en = "Expedition",
+    ko = "원정",
   },
   meatgrinder_button = {
     en = "Meat Grinder",
