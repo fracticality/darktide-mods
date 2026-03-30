@@ -141,17 +141,22 @@ return {
   },
   button_placement = {
     en = "Button Placement",
+    ko = "버튼 배치",
   },
   x_offset = {
     en = "X Offset",
+    ko = "X 오프셋",
   },
   y_offset = {
     en = "Y Offset",
+    ko = "Y 오프셋",
   },
   height = {
     en = "Height",
+    ko = "높이",
   },
   width = {
     en = "Width",
+    ko = "너비",
   },
 }
