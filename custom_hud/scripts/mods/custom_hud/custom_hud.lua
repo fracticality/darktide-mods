@@ -1,6 +1,14 @@
 local mod = get_mod("custom_hud")
 
+-- Cached settings (refreshed on change)
+local _cached_opacity = 1
+
+local function _refresh_cached_settings()
+    _cached_opacity = tonumber(mod:get("opacity")) or 1
+end
+
 local hud_element_customizer_path = "custom_hud/scripts/mods/custom_hud/hud_element_customizer"
+
 local function ui_hud_init_hook(func, self, elements, visibility_groups, params)
     local class_name = "HudElementCustomizer"
     local element_index = table.find_by_key(elements, "class_name", class_name)
@@ -71,6 +79,8 @@ local function reset_hud()
 end
 
 function mod.on_setting_changed(setting_id)
+    _refresh_cached_settings()
+
     if setting_id == "reset_hud" then
         if mod:get("reset_hud") == 1 then
             mod:notify("HUD Reset")
@@ -81,6 +91,7 @@ function mod.on_setting_changed(setting_id)
 end
 
 function mod.on_all_mods_loaded()
+    _refresh_cached_settings()
     recreate_hud()
 end
 
@@ -114,18 +125,14 @@ local function draw_hook(func, self, ...)
     end
 
     local element_name = self.__class_name
-    if not _ignored_elements[element_name] then
-
-        local opacity = tonumber(mod:get("opacity"))
-        if opacity ~= nil and not self._always_full_alpha then
-
+    if not _ignored_elements[element_name] and not self._always_full_alpha then
+        local opacity = _cached_opacity
+        if opacity ~= 1 then
             local element_render_settings = select(4, ...)
             if type(element_render_settings) == "table" then
                 element_render_settings.alpha_multiplier = opacity
             end
-
         end
-
     end
 
     return func(self, ...)
@@ -140,8 +147,10 @@ end)
 
 mod:hook_safe(UIViewHandler, "close_view", function(self, view_name, force_close)
     if view_name == "dmf_options_view" or view_name == "options_view" then
+        _refresh_cached_settings()
         recreate_hud()
     end
 end)
 
 mod._hooked_elements = {}
+mod._cached_opacity = function() return _cached_opacity end
