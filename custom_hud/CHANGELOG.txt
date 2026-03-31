@@ -1,0 +1,128 @@
+Custom HUD - Changelog (Original → Current)
+=============================================
+
+Bug Fixes
+---------
+
+1. CURSOR LOSS FIX (critical)
+   Original: _activate_mouse_cursor() checked input_manager:cursor_active() before
+   pushing, and _deactivate_mouse_cursor() checked it before popping. If cursor was
+   already active from another source (game menu, chat, etc), the push was skipped but
+   _using_cursor was set to true. On deactivate, the mod popped someone else's cursor,
+   causing permanent mouse loss. Double-deactivate from set_visible(false) + update()
+   compounded the issue.
+   
+   Fix: Tracks _cursor_pushed state independently. Only pops what we pushed.
+   Deactivate is now idempotent — safe to call multiple times.
+
+2. NIL CRASH ON GRID TOGGLE
+   Original: /grid command set _grid_line_positions = nil, but _handle_input
+   immediately indexed [1] and [2] on it next frame, causing a nil index crash.
+   
+   Fix: Grid toggle now resets to { {}, {} } instead of nil. Added nil-guards
+   in the snap logic for safety.
+
+3. PER-FRAME mod:get() ELIMINATION
+   Original: opacity, display_grid, snap_to_grid all called mod:get() every frame
+   in hot draw/input paths. mod:get() is the primary FPS killer in Darktide mods.
+   
+   Fix: Opacity cached in custom_hud.lua module scope, refreshed on
+   on_setting_changed. Grid/snap settings cached at init, updated only via
+   commands or settings changes. Per-element hooks in _apply_saved_node_settings
+   now read from mod._cached_opacity() instead of mod:get("opacity").
+
+4. TABLE ALLOCATION IN DRAW PATHS
+   Original: Color table literals { 255, 0, 0, 0 } created per-frame in
+   change_functions and grid drawing, causing GC pressure.
+   
+   Fix: Inner rect size now mutates style.size[1]/[2] in-place instead of
+   allocating new tables. Grid line colors are pre-defined constants.
+
+5. REDUNDANT WIDGET CALLBACKS REMOVED
+   Original data file had manual change/get function overrides on every widget
+   (opacity, display_grid, snap_to_grid, grid_cols, grid_rows). These are
+   unnecessary — DMF handles standard widget persistence automatically.
+   
+   Fix: Removed all redundant change/get overrides from custom_hud_data.lua.
+
+
+New Features
+------------
+
+1. INFO PANEL (right side overlay)
+   Scrollable list of all discovered HUD element nodes, displayed in the
+   customization overlay. Shows hover highlighting and click-to-select.
+   Selected elements highlighted with distinct color. Detail section at bottom
+   for selected element properties.
+   - Mouse wheel scrolls the list when hovering the panel (scroll consumed
+     so it doesn't also scale the selected element)
+   - Toggleable via mod settings checkbox or /panel command
+   - Panel node list is sorted alphabetically
+
+2. RESIZE HANDLES
+   Four corner indicators drawn on the currently selected element.
+   Alt+Drag on any edge or corner enters resize mode — dragging resizes
+   from that edge. Supports all 8 directions (4 corners + 4 edges).
+   Releasing the mouse commits the resize.
+
+3. ALT+ARROW KEYS SIZE CONTROL
+   Pressing Alt + Arrow keys adjusts the selected element's size by ±1px
+   per press. Combined with the existing Arrow keys (move) and
+   Shift+Up/Down (z-order), provides full keyboard control over position,
+   size, and depth.
+
+4. LIVE POSITION/SIZE DISPLAY
+   Selected elements now show a position info line above the element name:
+   "X,Y z:Z WxH" format, updated live during drag/resize operations.
+   Displayed via a new "pos_text" pass in the widget definition.
+
+5. /panel COMMAND
+   Chat command to toggle the info panel visibility without opening
+   mod settings.
+
+
+UI/Settings Changes
+-------------------
+
+1. COLOR-FORMATTED DESCRIPTION
+   Mod description now uses DMF {#color(r,g,b)} markup for readable
+   color-coded text with controls summary visible at a glance.
+
+2. GROUP WIDGET HEADER
+   Added "Settings" group header (gold colored) as a section separator
+   between the description area and actual settings widgets. Prevents
+   description text from overlapping with controls — same pattern used
+   by Markers Improved AIO.
+
+3. SHOW INFO PANEL SETTING
+   New checkbox in mod settings to toggle the info panel on/off.
+
+4. KEYBIND TOOLTIP CONTROLS REFERENCE
+   Full controls reference with color-coded key names moved to the
+   Toggle HUD Customization keybind's description tooltip (shown on hover).
+
+
+Controls Reference
+------------------
+
+  Click             = Select element
+  Ctrl+Click        = Multi-select
+  Shift+Drag        = Move element
+  Scroll            = Scale element
+  Alt+Drag          = Resize (edge/corner)
+  Alt+Arrows        = Resize ±1px
+  Arrows            = Move ±1px
+  Shift+Up/Down     = Z-order
+  Right-click       = Toggle hidden
+  Double-click      = Reset to default
+  Tab               = Reset selected
+
+
+File Summary
+------------
+
+  custom_hud.lua               146 → 156 lines  (cached settings, clean hooks)
+  custom_hud_data.lua          102 →  83 lines  (removed redundant callbacks, added group)
+  custom_hud_localization.lua   82 → 119 lines  (color markup, new setting strings)
+  hud_element_customizer.lua   972 → 1921 lines (info panel, resize, cursor fix, all features)
+  Total                       1302 → 2279 lines
