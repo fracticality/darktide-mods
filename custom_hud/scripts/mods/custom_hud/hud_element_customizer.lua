@@ -152,7 +152,8 @@ local _excluded_element_names = {
     HudElementDamageIndicator = true,
     ConstantElementWatermark = true,
     ConstantElementPopupHandler = true,
-    ConstantElementSoftwareCursor = true
+    ConstantElementSoftwareCursor = true,
+    ConstantElementExpeditionContinue = true,
 }
 
 local _excluded_scenegraphs_by_element = {
