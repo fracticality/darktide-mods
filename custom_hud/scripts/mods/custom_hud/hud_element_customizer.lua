@@ -33,6 +33,72 @@ local PANEL_FONT_TYPE = "proxima_nova_bold"
 local PANEL_FONT_SIZE = 18
 local PANEL_FONT_SIZE_SMALL = 15
 
+local _FONT_OPTIONS = {
+    "proxima_nova_bold",
+    "proxima_nova_light",
+    "proxima_nova_medium",
+    "machine_medium",
+    "itc_novarese_medium",
+    "friz_quadrata",
+    "rexlia",
+}
+
+local function _refresh_panel_font()
+    local idx = mod:get("panel_font") or 1
+    PANEL_FONT_TYPE = _FONT_OPTIONS[idx] or "proxima_nova_bold"
+    local base = mod:get("panel_font_size") or 18
+    PANEL_FONT_SIZE = base
+    PANEL_FONT_SIZE_SMALL = math.max(base - 3, 8)
+end
+
+mod._refresh_panel_font = _refresh_panel_font
+
+local PANEL_SCALE_DEFAULT = 1
+local PANEL_LIST_ROWS_DEFAULT = 18
+
+local function _get_panel_metrics(inverse_scale, has_selected, has_active_edit)
+    local panel_scale = tonumber(mod:get("panel_scale")) or PANEL_SCALE_DEFAULT
+    local list_rows = math.max(6, math.floor(tonumber(mod:get("panel_list_rows")) or PANEL_LIST_ROWS_DEFAULT))
+
+    local width = PANEL_WIDTH * panel_scale * inverse_scale
+    local margin = PANEL_MARGIN * panel_scale * inverse_scale
+    local line_h = PANEL_LINE_HEIGHT * panel_scale * inverse_scale
+    local header_h = PANEL_HEADER_HEIGHT * panel_scale * inverse_scale
+    local base_font = math.max(10, math.floor(PANEL_FONT_SIZE * panel_scale * inverse_scale))
+    local small_font = math.max(8, math.floor(PANEL_FONT_SIZE_SMALL * panel_scale * inverse_scale))
+
+    local detail_h = 0
+    if has_selected then
+        local title_h = 24 * panel_scale * inverse_scale
+        local helper_line_h = 18 * panel_scale * inverse_scale
+        local helper_gap = 8 * panel_scale * inverse_scale
+        local info_top = 8 * panel_scale * inverse_scale
+        local helper1_y = info_top + title_h + 6 * panel_scale * inverse_scale
+        local helper2_y = helper1_y + helper_line_h + helper_gap
+        local editing_y = helper2_y + helper_line_h + helper_gap
+        local fields_top = editing_y + helper_line_h + 14 * panel_scale * inverse_scale
+        local row_h = 24 * panel_scale * inverse_scale
+        local row_gap = 8 * panel_scale * inverse_scale
+        local status_y = fields_top + 5 * (row_h + row_gap) + 10 * panel_scale * inverse_scale
+        detail_h = status_y + 24 * panel_scale * inverse_scale
+        if has_active_edit then
+            detail_h = detail_h + 4 * panel_scale * inverse_scale
+        end
+    end
+
+    return {
+        scale = panel_scale,
+        width = width,
+        margin = margin,
+        line_h = line_h,
+        header_h = header_h,
+        detail_h = detail_h,
+        list_rows = list_rows,
+        font = base_font,
+        font_small = small_font,
+    }
+end
+
 local function _safe_draw_text(ui_renderer, text, font_type, font_size, position, size, color, horizontal_alignment, vertical_alignment)
     if text == nil then
         return false
@@ -226,6 +292,8 @@ function HudElementCustomizer:init(parent, draw_layer, start_scale)
     self._panel_active_field = nil
     self._panel_field_targets = {}
     self._panel_key_repeat = {}
+    self._panel_mouse_over = false
+    self._panel_hover_preview_node = nil
 
     -- Resize state
     self._resize_mode = false
@@ -308,6 +376,8 @@ function HudElementCustomizer:init(parent, draw_layer, start_scale)
         mod:set("show_info_panel", self._show_info_panel)
         mod:notify("Info panel: [%s]", self._show_info_panel and "on" or "off")
     end)
+
+    _refresh_panel_font()
 
     HudElementCustomizer.super.init(self, parent, draw_layer, start_scale, _definitions)
 end
@@ -498,7 +568,7 @@ function HudElementCustomizer:_setup_elements(render_settings)
                                         offset = { 0, -14 * inverse_scale, 4 }
                                     },
                                     visibility_function = function(content, style)
-                                        return content.hotspot.is_hover
+                                        return content.hotspot.is_hover and not content.is_panel_preview_hover and not content.suppress_hover_labels
                                     end
                                 },
                                 -- Scale label
@@ -516,7 +586,7 @@ function HudElementCustomizer:_setup_elements(render_settings)
                                         offset = { 0, 0, 4 }
                                     },
                                     visibility_function = function(content, style)
-                                        return content.hotspot.is_hover or content.hotspot.is_selected
+                                        return (content.hotspot.is_hover and not content.suppress_hover_labels) or content.hotspot.is_selected
                                     end,
                                     change_function = function(content, style)
                                         content.scale_text = string.format("x%.02f", content.scale or 1)
@@ -758,14 +828,73 @@ function HudElementCustomizer:_panel_take_key(key_name)
     if not kb then
         return false
     end
-    local ok, idx = pcall(kb.button_index, key_name)
-    if not ok or not idx then
+
+    local idx
+
+    if kb.button_index then
+        local ok, result = pcall(kb.button_index, key_name)
+        if ok then
+            idx = result
+        end
+    end
+
+    if not idx and kb.button_id then
+        local ok, result = pcall(kb.button_id, key_name)
+        if ok then
+            idx = result
+        end
+    end
+
+    if not idx then
         return false
     end
+
     local down = kb.button(idx) > 0.5
     local was_down = self._panel_key_repeat[key_name]
     self._panel_key_repeat[key_name] = down
+
     return down and not was_down
+end
+
+function HudElementCustomizer:_panel_take_any_pressed_name(matchers, repeat_key)
+    local kb = _get_keyboard()
+    if not kb or not kb.any_pressed or not kb.button_name then
+        return false
+    end
+
+    local ok, pressed_id = pcall(kb.any_pressed)
+    if not ok or not pressed_id then
+        return false
+    end
+
+    local ok_name, pressed_name = pcall(kb.button_name, pressed_id)
+    if not ok_name or not pressed_name then
+        return false
+    end
+
+    local normalized = string.lower(tostring(pressed_name))
+    local matched = false
+
+    for _, matcher in ipairs(matchers) do
+        local needle = string.lower(tostring(matcher))
+        if normalized == needle or normalized:find(needle, 1, true) then
+            matched = true
+            break
+        end
+    end
+
+    if not matched then
+        return false
+    end
+
+    repeat_key = repeat_key or ("any_pressed:" .. normalized)
+
+    if self._panel_key_repeat[repeat_key] then
+        return false
+    end
+
+    self._panel_key_repeat[repeat_key] = true
+    return true
 end
 
 function HudElementCustomizer:_handle_panel_text_input()
@@ -779,13 +908,7 @@ function HudElementCustomizer:_handle_panel_text_input()
     local function prepare_buffer_for_char(char)
         local buffer = active.buffer or ""
         if active.replace_on_first_input then
-            if char == "-" then
-                buffer = "-"
-            elseif char == "." then
-                buffer = "0."
-            else
-                buffer = ""
-            end
+            buffer = ""
             active.replace_on_first_input = false
         end
         return buffer
@@ -841,11 +964,19 @@ function HudElementCustomizer:_handle_panel_text_input()
         changed = true
     end
 
-    if self:_panel_take_key("minus") or self:_panel_take_key("numpad -") then
+    local minus_pressed = self:_panel_take_key("minus") or self:_panel_take_key("numpad -")
+    if not minus_pressed then
+        minus_pressed = self:_panel_take_any_pressed_name({"-", "minus", "subtract", "hyphen", "dash", "numpad -", "num -", "kp_subtract"}, "minus_fallback")
+    end
+    if minus_pressed then
         append_char("-")
     end
 
-    if self:_panel_take_key("period") or self:_panel_take_key("decimal") or self:_panel_take_key("numpad .") then
+    local period_pressed = self:_panel_take_key("period") or self:_panel_take_key("decimal") or self:_panel_take_key("numpad .")
+    if not period_pressed then
+        period_pressed = self:_panel_take_any_pressed_name({".", "period", "decimal", "dot", "numpad .", "num .", "kp_decimal"}, "period_fallback")
+    end
+    if period_pressed then
         append_char(".")
     end
 
@@ -1252,6 +1383,29 @@ function HudElementCustomizer:_handle_input(input_service)
                 self:reset_node(node_name)
             end
 
+            -- Ctrl+Shift+C = center on screen
+            if is_ctrl_held() and is_shift_held() then
+                local kb = _get_keyboard()
+                if kb then
+                    local ok, c_idx = pcall(kb.button_index, "c")
+                    if ok and c_idx and kb.button(c_idx) > 0.5 and not self._center_key_was_down then
+                        local inverse_scale = self._inverse_scale or RESOLUTION_LOOKUP.inverse_scale
+                        local screen_w = RESOLUTION_LOOKUP.width * inverse_scale
+                        local screen_h = RESOLUTION_LOOKUP.height * inverse_scale
+                        local elem_w = size[1]
+                        local elem_h = size[2]
+                        node_settings.x = (screen_w - elem_w) / 2
+                        node_settings.y = (screen_h - elem_h) / 2
+                        self:set_scenegraph_position(node_name, node_settings.x, node_settings.y, node_settings.z)
+                        self._center_key_was_down = true
+                    elseif not (ok and c_idx and kb.button(c_idx) > 0.5) then
+                        self._center_key_was_down = false
+                    end
+                end
+            else
+                self._center_key_was_down = false
+            end
+
             local input = input_service:get("navigation_keys_virtual_axis")
             if input then
                 local alt_held = is_alt_held()
@@ -1373,16 +1527,20 @@ function HudElementCustomizer:update(dt, t, ui_renderer, render_settings, input_
     end
 
     self:_update_group_visibility()
-    self:_handle_widget_presses()
 
-    -- Handle panel input before element input (panel consumes scroll when hovered)
+    -- Handle panel input before widget presses so clicks on the panel do not leak
+    -- through to HUD element hotspots underneath it.
     local panel_consumed = self:_handle_panel_input(input_service)
 
-    if not panel_consumed then
+    if panel_consumed then
+        table.clear(self._widget_press_stack)
+    else
+        self:_handle_widget_presses()
         self:_handle_input(input_service)
     end
 
     HudElementCustomizer.super.update(self, dt, t, ui_renderer, render_settings, input_service)
+    self:_sync_panel_hover_preview()
 end
 
 function HudElementCustomizer:_draw_widgets(dt, t, input_service, ui_renderer, render_settings)
@@ -1488,9 +1646,10 @@ end
 -- ============================================================================
 
 function HudElementCustomizer:_get_panel_position(inverse_scale)
+    local metrics = _get_panel_metrics(inverse_scale, false, false)
     local width = RESOLUTION_LOOKUP.width
-    local default_x = (width - PANEL_WIDTH - PANEL_MARGIN) * inverse_scale
-    local default_y = PANEL_MARGIN * inverse_scale
+    local default_x = (width * inverse_scale) - metrics.width - metrics.margin
+    local default_y = metrics.margin
 
     if not self._panel_position then
         self._panel_position = { default_x, default_y }
@@ -1505,7 +1664,49 @@ function HudElementCustomizer:_save_panel_position()
     end
 end
 
+function HudElementCustomizer:_sync_panel_hover_preview()
+    local widgets_by_name = self._widgets_by_name
+    if not widgets_by_name then
+        return
+    end
+
+    if not self._panel_mouse_over then
+        return
+    end
+
+    local preview_node = self._panel_hover_preview_node
+
+    for node_name, widget in pairs(widgets_by_name) do
+        local content = widget and widget.content
+        local hotspot = content and content.hotspot
+        if content then
+            content.is_panel_preview_hover = false
+            content.suppress_hover_labels = self._panel_mouse_over
+        end
+        if hotspot then
+            hotspot.is_hover = false
+            hotspot.anim_hover_progress = 0
+        end
+    end
+
+    if preview_node then
+        local widget = widgets_by_name[preview_node]
+        local content = widget and widget.content
+        local hotspot = content and content.hotspot
+        if content then
+            content.is_panel_preview_hover = true
+        end
+        if hotspot then
+            hotspot.is_hover = true
+            hotspot.anim_hover_progress = 1
+        end
+    end
+end
+
 function HudElementCustomizer:_handle_panel_input(input_service)
+    self._panel_mouse_over = false
+    self._panel_hover_preview_node = nil
+
     if not self._show_info_panel then
         return false
     end
@@ -1522,13 +1723,16 @@ function HudElementCustomizer:_handle_panel_input(input_service)
 
     local cursor_arr = Vector3.to_array(cursor)
     local inverse_scale = self._inverse_scale or RESOLUTION_LOOKUP.inverse_scale
-    local px, py = self:_get_panel_position(inverse_scale)
-    local panel_w = PANEL_WIDTH * inverse_scale
     local total_nodes = #self._panel_all_node_names
-    local visible_count = math.min(total_nodes, PANEL_MAX_VISIBLE_LINES)
-    local list_height = visible_count * PANEL_LINE_HEIGHT * inverse_scale
-    local panel_h = (PANEL_HEADER_HEIGHT + visible_count * PANEL_LINE_HEIGHT + PANEL_DETAIL_HEIGHT) * inverse_scale
-    local hh = PANEL_HEADER_HEIGHT * inverse_scale
+    local has_selected = #self._selected_node_list > 0
+    local has_active_edit = self._panel_active_field ~= nil
+    local metrics = _get_panel_metrics(inverse_scale, has_selected, has_active_edit)
+    local px, py = self:_get_panel_position(inverse_scale)
+    local panel_w = metrics.width
+    local visible_count = math.min(total_nodes, metrics.list_rows)
+    local list_height = visible_count * metrics.line_h
+    local panel_h = metrics.header_h + list_height + metrics.detail_h
+    local hh = metrics.header_h
 
     local cx = cursor_arr[1] * inverse_scale
     local cy = cursor_arr[2] * inverse_scale
@@ -1579,7 +1783,7 @@ function HudElementCustomizer:_handle_panel_input(input_service)
     end
 
     local list_start_y = py + hh
-    local line_h = PANEL_LINE_HEIGHT * inverse_scale
+    local line_h = metrics.line_h
     if cy >= list_start_y and cy < list_start_y + list_height then
         local rel_y = cy - list_start_y
         local line_index = math.floor(rel_y / line_h) + 1 + self._panel_scroll_offset
@@ -1590,6 +1794,11 @@ function HudElementCustomizer:_handle_panel_input(input_service)
         end
     else
         self._panel_hovered_index = nil
+    end
+
+    self._panel_mouse_over = true
+    if self._panel_hovered_index then
+        self._panel_hover_preview_node = self._panel_all_node_names[self._panel_hovered_index]
     end
 
     if input_service:get("left_pressed") then
@@ -1612,9 +1821,18 @@ function HudElementCustomizer:_handle_panel_input(input_service)
         end
     end
 
+    if input_service:get("right_pressed") and self._panel_hovered_index then
+        local node_name = self._panel_all_node_names[self._panel_hovered_index]
+        if node_name and self._widgets_by_name[node_name] then
+            self:_cancel_panel_field()
+            self:_process_widget_press_right(node_name)
+            return true
+        end
+    end
+
     local scroll_axis = input_service:get("scroll_axis")
     if scroll_axis and scroll_axis[2] ~= 0 then
-        local max_scroll = math.max(0, total_nodes - PANEL_MAX_VISIBLE_LINES)
+        local max_scroll = math.max(0, total_nodes - metrics.list_rows)
         local dir = scroll_axis[2] > 0 and -PANEL_SCROLL_SPEED or PANEL_SCROLL_SPEED
         self._panel_scroll_offset = math.clamp(self._panel_scroll_offset + dir, 0, max_scroll)
         return true
@@ -1645,13 +1863,16 @@ function HudElementCustomizer:_draw_info_panel(ui_renderer, input_service)
         selected_lookup[name] = true
     end
 
-    local visible_count = math.min(total_nodes, PANEL_MAX_VISIBLE_LINES)
-    local panel_content_h = PANEL_HEADER_HEIGHT + visible_count * PANEL_LINE_HEIGHT + PANEL_DETAIL_HEIGHT
+    local has_selected = #selected_list > 0
+    local has_active_edit = self._panel_active_field ~= nil
+    local metrics = _get_panel_metrics(inverse_scale, has_selected, has_active_edit)
+    local visible_count = math.min(total_nodes, metrics.list_rows)
+    local panel_content_h = metrics.header_h + visible_count * metrics.line_h + metrics.detail_h
     local px, py = self:_get_panel_position(inverse_scale)
-    local pw = PANEL_WIDTH * inverse_scale
-    local ph = panel_content_h * inverse_scale
-    local lh = PANEL_LINE_HEIGHT * inverse_scale
-    local hh = PANEL_HEADER_HEIGHT * inverse_scale
+    local pw = metrics.width
+    local ph = panel_content_h
+    local lh = metrics.line_h
+    local hh = metrics.header_h
 
     UIRenderer.draw_rect(ui_renderer, Vector3(px, py, draw_layer), Vector2(pw, ph), PANEL_BG_COLOR)
     UIRenderer.draw_rect(ui_renderer, Vector3(px, py, draw_layer + 1), Vector2(pw, hh), PANEL_HEADER_COLOR)
@@ -1660,9 +1881,9 @@ function HudElementCustomizer:_draw_info_panel(ui_renderer, input_service)
         ui_renderer,
         string.format("Custom HUD Panel (%d)  [drag header]", total_nodes),
         PANEL_FONT_TYPE,
-        math.floor(PANEL_FONT_SIZE * inverse_scale),
-        Vector3(px + 10 * inverse_scale, py + 3 * inverse_scale, draw_layer + 2),
-        Vector2(pw - 20 * inverse_scale, hh - 6 * inverse_scale),
+        metrics.font,
+        Vector3(px + 10 * metrics.scale * inverse_scale, py + 3 * metrics.scale * inverse_scale, draw_layer + 2),
+        Vector2(pw - 20 * metrics.scale * inverse_scale, hh - 6 * metrics.scale * inverse_scale),
         PANEL_TEXT_COLOR,
         "left",
         "center"
@@ -1701,9 +1922,9 @@ function HudElementCustomizer:_draw_info_panel(ui_renderer, input_service)
             ui_renderer,
             short_name .. suffix,
             PANEL_FONT_TYPE,
-            math.floor(PANEL_FONT_SIZE_SMALL * inverse_scale),
-            Vector3(px + 10 * inverse_scale, line_y, draw_layer + 2),
-            Vector2(pw - 20 * inverse_scale, lh),
+            metrics.font_small,
+            Vector3(px + 10 * metrics.scale * inverse_scale, line_y, draw_layer + 2),
+            Vector2(pw - 20 * metrics.scale * inverse_scale, lh),
             text_color,
             "left",
             "center"
@@ -1716,18 +1937,26 @@ function HudElementCustomizer:_draw_info_panel(ui_renderer, input_service)
         local selected_name = selected_list[1]
         local node_settings = self:_get_selected_node_settings(selected_name)
         local detail_y = py + hh + visible_count * lh
-        local detail_h = PANEL_DETAIL_HEIGHT * inverse_scale
+        local detail_h = metrics.detail_h
         UIRenderer.draw_rect(ui_renderer, Vector3(px, detail_y, draw_layer + 1),
             Vector2(pw, detail_h), PANEL_DETAIL_BG_COLOR)
 
-        local title_h = 22 * inverse_scale
+        local panel_scale = metrics.scale
+        local title_h = 24 * panel_scale * inverse_scale
+        local helper_line_h = 18 * panel_scale * inverse_scale
+        local helper_gap = 8 * panel_scale * inverse_scale
+        local info_pad_x = 12 * panel_scale * inverse_scale
+        local info_top = 8 * panel_scale * inverse_scale
+        local helper1_y = detail_y + info_top + title_h + 6 * panel_scale * inverse_scale
+        local helper2_y = helper1_y + helper_line_h + helper_gap
+        local editing_y = helper2_y + helper_line_h + helper_gap
         _safe_draw_text(
             ui_renderer,
             "Selected: " .. short_element_name(selected_name),
             PANEL_FONT_TYPE,
-            math.floor(PANEL_FONT_SIZE_SMALL * inverse_scale),
-            Vector3(px + 10 * inverse_scale, detail_y + 6 * inverse_scale, draw_layer + 2),
-            Vector2(pw - 20 * inverse_scale, title_h),
+            metrics.font_small,
+            Vector3(px + info_pad_x, detail_y + info_top, draw_layer + 2),
+            Vector2(pw - info_pad_x * 2, title_h),
             PANEL_DETAIL_VALUE_COLOR,
             "left",
             "center"
@@ -1737,9 +1966,9 @@ function HudElementCustomizer:_draw_info_panel(ui_renderer, input_service)
             ui_renderer,
             "Click a value label and type to replace it live.",
             PANEL_FONT_TYPE,
-            math.floor((PANEL_FONT_SIZE_SMALL - 1) * inverse_scale),
-            Vector3(px + 10 * inverse_scale, detail_y + 30 * inverse_scale, draw_layer + 2),
-            Vector2(pw - 20 * inverse_scale, title_h),
+            math.max(8, metrics.font_small - 1),
+            Vector3(px + info_pad_x, helper1_y, draw_layer + 2),
+            Vector2(pw - info_pad_x * 2, title_h),
             PANEL_DETAIL_LABEL_COLOR,
             "left",
             "center"
@@ -1749,9 +1978,9 @@ function HudElementCustomizer:_draw_info_panel(ui_renderer, input_service)
             ui_renderer,
             "Click elsewhere to keep it. Esc cancels the active edit.",
             PANEL_FONT_TYPE,
-            math.floor((PANEL_FONT_SIZE_SMALL - 1) * inverse_scale),
-            Vector3(px + 10 * inverse_scale, detail_y + 50 * inverse_scale, draw_layer + 2),
-            Vector2(pw - 20 * inverse_scale, title_h),
+            math.max(8, metrics.font_small - 1),
+            Vector3(px + info_pad_x, helper2_y, draw_layer + 2),
+            Vector2(pw - info_pad_x * 2, title_h),
             PANEL_DETAIL_LABEL_COLOR,
             "left",
             "center"
@@ -1763,9 +1992,9 @@ function HudElementCustomizer:_draw_info_panel(ui_renderer, input_service)
                 ui_renderer,
                 string.format("Editing %s %s = %s", active.group, string.upper(active.key), tostring(active.buffer or "")),
                 PANEL_FONT_TYPE,
-                math.floor((PANEL_FONT_SIZE_SMALL - 1) * inverse_scale),
-                Vector3(px + 10 * inverse_scale, detail_y + 74 * inverse_scale, draw_layer + 2),
-                Vector2(pw - 20 * inverse_scale, title_h),
+                math.max(8, metrics.font_small - 1),
+                Vector3(px + info_pad_x, editing_y, draw_layer + 2),
+                Vector2(pw - info_pad_x * 2, title_h),
                 PANEL_DETAIL_VALUE_COLOR,
                 "left",
                 "center"
@@ -1776,15 +2005,13 @@ function HudElementCustomizer:_draw_info_panel(ui_renderer, input_service)
         defaults.position = defaults.position or {0,0,0}
         defaults.size = defaults.size or {0,0}
 
-        local col_gap = 10 * inverse_scale
-        local box_gap = 6 * inverse_scale
-        local label_w = 18 * inverse_scale
-        local col_w = (pw - 24 * inverse_scale - col_gap) / 2
-        local box_w = (col_w - label_w - box_gap)
-        local row_h = 24 * inverse_scale
-        local row_gap = 6 * inverse_scale
-        local fields_top = detail_y + 102 * inverse_scale
-        local left_x = px + 8 * inverse_scale
+        local col_gap = 12 * panel_scale * inverse_scale
+        local label_w = 18 * panel_scale * inverse_scale
+        local col_w = (pw - 24 * panel_scale * inverse_scale - col_gap) / 2
+        local row_h = 24 * panel_scale * inverse_scale
+        local row_gap = 8 * panel_scale * inverse_scale
+        local fields_top = detail_y + (editing_y - detail_y) + helper_line_h + 14 * panel_scale * inverse_scale
+        local left_x = px + 10 * panel_scale * inverse_scale
         local right_x = left_x + col_w + col_gap
         local current_map = {x = node_settings.x or 0, y = node_settings.y or 0, z = node_settings.z or 0, w = (node_settings.size and node_settings.size[1]) or 0, h = (node_settings.size and node_settings.size[2]) or 0}
         local default_map = {x = defaults.position[1] or 0, y = defaults.position[2] or 0, z = defaults.position[3] or 0, w = defaults.size[1] or 0, h = defaults.size[2] or 0}
@@ -1801,9 +2028,9 @@ function HudElementCustomizer:_draw_info_panel(ui_renderer, input_service)
                 ui_renderer,
                 title,
                 PANEL_FONT_TYPE,
-                math.floor(PANEL_FONT_SIZE_SMALL * inverse_scale),
-                Vector3(base_x, fields_top - 22 * inverse_scale, draw_layer + 2),
-                Vector2(col_w, 18 * inverse_scale),
+                metrics.font_small,
+                Vector3(base_x, fields_top - 24 * panel_scale * inverse_scale, draw_layer + 2),
+                Vector2(col_w, 18 * panel_scale * inverse_scale),
                 PANEL_DETAIL_VALUE_COLOR,
                 "left",
                 "center"
@@ -1826,7 +2053,7 @@ function HudElementCustomizer:_draw_info_panel(ui_renderer, input_service)
                     ui_renderer,
                     string.format("%s: %s", row.label, display_text ~= "" and display_text or "-"),
                     PANEL_FONT_TYPE,
-                    math.floor(PANEL_FONT_SIZE_SMALL * inverse_scale),
+                    metrics.font_small,
                     Vector3(base_x, y, draw_layer + 2),
                     Vector2(col_w, row_h),
                     is_active and PANEL_DETAIL_VALUE_COLOR or PANEL_DETAIL_LABEL_COLOR,
@@ -1844,14 +2071,14 @@ function HudElementCustomizer:_draw_info_panel(ui_renderer, input_service)
         draw_field_column("current", left_x, current_map, "Current")
         draw_field_column("default", right_x, default_map, "Default / Reset")
 
-        local status_y = fields_top + #rows * (row_h + row_gap) + 12 * inverse_scale
+        local status_y = fields_top + #rows * (row_h + row_gap) + 10 * panel_scale * inverse_scale
         _safe_draw_text(
             ui_renderer,
             string.format("Scale: %.2f   Hidden: %s", node_settings.scale or 1, node_settings.is_hidden and "yes" or "no"),
             PANEL_FONT_TYPE,
-            math.floor((PANEL_FONT_SIZE_SMALL - 1) * inverse_scale),
-            Vector3(px + 8 * inverse_scale, status_y, draw_layer + 2),
-            Vector2(pw - 16 * inverse_scale, 18 * inverse_scale),
+            math.max(8, metrics.font_small - 1),
+            Vector3(px + 10 * panel_scale * inverse_scale, status_y, draw_layer + 2),
+            Vector2(pw - 20 * panel_scale * inverse_scale, 18 * panel_scale * inverse_scale),
             PANEL_DETAIL_LABEL_COLOR,
             "left",
             "center"

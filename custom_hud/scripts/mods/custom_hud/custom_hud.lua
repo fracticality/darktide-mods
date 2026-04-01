@@ -81,6 +81,10 @@ end
 function mod.on_setting_changed(setting_id)
     _refresh_cached_settings()
 
+    if mod._refresh_panel_font then
+        mod._refresh_panel_font()
+    end
+
     if setting_id == "reset_hud" then
         if mod:get("reset_hud") == 1 then
             mod:notify("HUD Reset")

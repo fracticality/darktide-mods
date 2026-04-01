@@ -40,6 +40,44 @@ return {
                         default_value = true
                     },
                     {
+                        setting_id = "panel_font",
+                        type = "dropdown",
+                        default_value = 1,
+                        options = {
+                            { text = "font_proxima_nova_bold", value = 1 },
+                            { text = "font_proxima_nova_light", value = 2 },
+                            { text = "font_proxima_nova_medium", value = 3 },
+                            { text = "font_machine_medium", value = 4 },
+                            { text = "font_itc_novarese", value = 5 },
+                            { text = "font_friz_quadrata", value = 6 },
+                            { text = "font_rexlia", value = 7 },
+                        }
+                    },
+                    {
+                        setting_id = "panel_font_size",
+                        type = "numeric",
+                        range = { 10, 28 },
+                        default_value = 18,
+                        decimals_number = 0,
+                        step_size_value = 1
+                    },
+                    {
+                        setting_id = "panel_scale",
+                        type = "numeric",
+                        range = { 0.75, 2.0 },
+                        default_value = 1,
+                        decimals_number = 2,
+                        step_size_value = 0.05
+                    },
+                    {
+                        setting_id = "panel_list_rows",
+                        type = "numeric",
+                        range = { 8, 30 },
+                        default_value = 18,
+                        decimals_number = 0,
+                        step_size_value = 1
+                    },
+                    {
                         setting_id = "display_grid",
                         type = "checkbox",
                         default_value = true,
