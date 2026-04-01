@@ -1620,7 +1620,12 @@ function HudElementCustomizer:_handle_panel_input(input_service)
         return true
     end
 
-    return in_panel or panel_text_consumed
+    local mouse_over_panel = in_panel and (
+        input_service:get("left_pressed") or input_service:get("left_hold") or
+        input_service:get("right_pressed") or input_service:get("right_hold")
+    )
+
+    return panel_text_consumed or mouse_over_panel
 end
 
 function HudElementCustomizer:_draw_info_panel(ui_renderer, input_service)
