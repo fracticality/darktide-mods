@@ -160,6 +160,12 @@ return {
         ["zh-cn"] = "开关是否将元素吸附到网格线上。",
         ru = "Переключение привязки элементов к видимым линиям сетки.",
     },
+    snap_to_elements = {
+        en = "Snap to Elements",
+    },
+    snap_to_elements_description = {
+        en = "Toggles snapping to nearby HUD element edges and centers while dragging a single element.",
+    },
     grid_cols = {
         en = "Columns",
         ["zh-cn"] = "列",

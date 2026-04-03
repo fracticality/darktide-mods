@@ -88,6 +88,11 @@ return {
                                 default_value = true
                             },
                             {
+                                setting_id = "snap_to_elements",
+                                type = "checkbox",
+                                default_value = true
+                            },
+                            {
                                 setting_id = "grid_cols",
                                 type = "numeric",
                                 range = { 1, 54 },

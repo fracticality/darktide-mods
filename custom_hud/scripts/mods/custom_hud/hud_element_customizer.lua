@@ -43,61 +43,69 @@ local _FONT_OPTIONS = {
     "rexlia",
 }
 
+local PANEL_SCALE_DEFAULT = 1
+local PANEL_LIST_ROWS_DEFAULT = 18
+local _cached_panel_scale = PANEL_SCALE_DEFAULT
+local _cached_panel_list_rows = PANEL_LIST_ROWS_DEFAULT
+
 local function _refresh_panel_font()
     local idx = mod:get("panel_font") or 1
     PANEL_FONT_TYPE = _FONT_OPTIONS[idx] or "proxima_nova_bold"
     local base = mod:get("panel_font_size") or 18
     PANEL_FONT_SIZE = base
     PANEL_FONT_SIZE_SMALL = math.max(base - 3, 8)
+    _cached_panel_scale = tonumber(mod:get("panel_scale")) or PANEL_SCALE_DEFAULT
+    _cached_panel_list_rows = math.max(6, math.floor(tonumber(mod:get("panel_list_rows")) or PANEL_LIST_ROWS_DEFAULT))
 end
 
 mod._refresh_panel_font = _refresh_panel_font
 
-local PANEL_SCALE_DEFAULT = 1
-local PANEL_LIST_ROWS_DEFAULT = 18
+-- Pooled metrics table to avoid per-frame allocation
+local _metrics_pool = {
+    scale = 1, width = 0, margin = 0, line_h = 0, header_h = 0,
+    detail_h = 0, list_rows = 18, font = 18, font_small = 15,
+}
 
 local function _get_panel_metrics(inverse_scale, has_selected, has_active_edit)
-    local panel_scale = tonumber(mod:get("panel_scale")) or PANEL_SCALE_DEFAULT
-    local list_rows = math.max(6, math.floor(tonumber(mod:get("panel_list_rows")) or PANEL_LIST_ROWS_DEFAULT))
+    local panel_scale = _cached_panel_scale
+    local list_rows = _cached_panel_list_rows
+    local ps_is = panel_scale * inverse_scale
 
-    local width = PANEL_WIDTH * panel_scale * inverse_scale
-    local margin = PANEL_MARGIN * panel_scale * inverse_scale
-    local line_h = PANEL_LINE_HEIGHT * panel_scale * inverse_scale
-    local header_h = PANEL_HEADER_HEIGHT * panel_scale * inverse_scale
-    local base_font = math.max(10, math.floor(PANEL_FONT_SIZE * panel_scale * inverse_scale))
-    local small_font = math.max(8, math.floor(PANEL_FONT_SIZE_SMALL * panel_scale * inverse_scale))
+    local m = _metrics_pool
+    m.scale = panel_scale
+    m.width = PANEL_WIDTH * ps_is
+    m.margin = PANEL_MARGIN * ps_is
+    m.line_h = PANEL_LINE_HEIGHT * ps_is
+    m.header_h = PANEL_HEADER_HEIGHT * ps_is
+    m.list_rows = list_rows
+    m.font = math.max(10, math.floor(PANEL_FONT_SIZE * ps_is))
+    m.font_small = math.max(8, math.floor(PANEL_FONT_SIZE_SMALL * ps_is))
 
     local detail_h = 0
     if has_selected then
-        local title_h = 24 * panel_scale * inverse_scale
-        local helper_line_h = 18 * panel_scale * inverse_scale
-        local helper_gap = 8 * panel_scale * inverse_scale
-        local info_top = 8 * panel_scale * inverse_scale
-        local helper1_y = info_top + title_h + 6 * panel_scale * inverse_scale
+        local title_h = 24 * ps_is
+        local helper_line_h = 18 * ps_is
+        local helper_gap = 8 * ps_is
+        local info_top = 8 * ps_is
+        local helper1_y = info_top + title_h + 6 * ps_is
         local helper2_y = helper1_y + helper_line_h + helper_gap
         local editing_y = helper2_y + helper_line_h + helper_gap
-        local fields_top = editing_y + helper_line_h + 14 * panel_scale * inverse_scale
-        local row_h = 24 * panel_scale * inverse_scale
-        local row_gap = 8 * panel_scale * inverse_scale
-        local status_y = fields_top + 5 * (row_h + row_gap) + 10 * panel_scale * inverse_scale
-        detail_h = status_y + 24 * panel_scale * inverse_scale
+        local fields_top = editing_y + helper_line_h + 14 * ps_is
+        local row_h = 24 * ps_is
+        local row_gap = 8 * ps_is
+        local status_y = fields_top + 5 * (row_h + row_gap) + 10 * ps_is
+        detail_h = status_y + 24 * ps_is
         if has_active_edit then
-            detail_h = detail_h + 4 * panel_scale * inverse_scale
+            detail_h = detail_h + 4 * ps_is
         end
     end
+    m.detail_h = detail_h
 
-    return {
-        scale = panel_scale,
-        width = width,
-        margin = margin,
-        line_h = line_h,
-        header_h = header_h,
-        detail_h = detail_h,
-        list_rows = list_rows,
-        font = base_font,
-        font_small = small_font,
-    }
+    return m
 end
+
+-- Detect the correct draw_text API signature once, then reuse it.
+local _draw_text_variant -- nil = not yet detected, 1-6 = detected variant
 
 local function _safe_draw_text(ui_renderer, text, font_type, font_size, position, size, color, horizontal_alignment, vertical_alignment)
     if text == nil then
@@ -115,18 +123,31 @@ local function _safe_draw_text(ui_renderer, text, font_type, font_size, position
         word_wrap = false,
     }
 
-    local tries = {
-        function() return UIRenderer.draw_text(ui_renderer, text, font_type, font_size, position, size, color, options) end,
-        function() return UIRenderer.draw_text(ui_renderer, text, font_type, font_size, position, size, color) end,
-        function() return UIRenderer.draw_text(ui_renderer, text, font_size, font_type, position, size, color, options) end,
-        function() return UIRenderer.draw_text(ui_renderer, text, font_size, font_type, position, size, color) end,
-        function() return UIRenderer.draw_text(ui_renderer, text, nil, font_size, font_type, position, size, color, options) end,
-        function() return UIRenderer.draw_text(ui_renderer, text, nil, font_size, font_type, position, size, color) end,
-    }
+    if _draw_text_variant then
+        local v = _draw_text_variant
+        if v == 1 then UIRenderer.draw_text(ui_renderer, text, font_type, font_size, position, size, color, options)
+        elseif v == 2 then UIRenderer.draw_text(ui_renderer, text, font_type, font_size, position, size, color)
+        elseif v == 3 then UIRenderer.draw_text(ui_renderer, text, font_size, font_type, position, size, color, options)
+        elseif v == 4 then UIRenderer.draw_text(ui_renderer, text, font_size, font_type, position, size, color)
+        elseif v == 5 then UIRenderer.draw_text(ui_renderer, text, nil, font_size, font_type, position, size, color, options)
+        elseif v == 6 then UIRenderer.draw_text(ui_renderer, text, nil, font_size, font_type, position, size, color)
+        end
+        return true
+    end
 
-    for i = 1, #tries do
-        local ok = pcall(tries[i])
+    -- First call: probe each variant once to find the right one
+    local probes = {
+        function() UIRenderer.draw_text(ui_renderer, text, font_type, font_size, position, size, color, options) end,
+        function() UIRenderer.draw_text(ui_renderer, text, font_type, font_size, position, size, color) end,
+        function() UIRenderer.draw_text(ui_renderer, text, font_size, font_type, position, size, color, options) end,
+        function() UIRenderer.draw_text(ui_renderer, text, font_size, font_type, position, size, color) end,
+        function() UIRenderer.draw_text(ui_renderer, text, nil, font_size, font_type, position, size, color, options) end,
+        function() UIRenderer.draw_text(ui_renderer, text, nil, font_size, font_type, position, size, color) end,
+    }
+    for i = 1, #probes do
+        local ok = pcall(probes[i])
         if ok then
+            _draw_text_variant = i
             return true
         end
     end
@@ -146,14 +167,13 @@ local _excluded_element_names = {
     HudElementCrosshair = true,
     HudElementInteraction = true,
     HudElementWorldMarkers = true,
-    HudElementTacticalOverlay = true,
     HudElementEmoteWheel = true,
     HudElementSmartTagging = true,
     HudElementDamageIndicator = true,
     ConstantElementWatermark = true,
     ConstantElementPopupHandler = true,
-    ConstantElementSoftwareCursor = true,
-    ConstantElementExpeditionContinue = true,
+	ConstantElementExpeditionContinue = true,
+    ConstantElementSoftwareCursor = true
 }
 
 local _excluded_scenegraphs_by_element = {
@@ -162,7 +182,14 @@ local _excluded_scenegraphs_by_element = {
         weapon_slot_2 = true,
         weapon_slot_3 = true,
         weapon_slot_4 = true
+    },
+    HudElementTacticalOverlay = {
+        background = true,
+        canvas = true,
     }
+}
+
+local _allowed_scenegraphs_by_element = {
 }
 
 -- ============================================================================
@@ -170,6 +197,7 @@ local _excluded_scenegraphs_by_element = {
 -- ============================================================================
 
 local Keyboard = Keyboard
+local _kb_index_cache = {}
 
 local function _get_keyboard()
     if not Keyboard then
@@ -178,19 +206,49 @@ local function _get_keyboard()
     return Keyboard
 end
 
+local function _get_button_index(kb, key_name)
+    local idx = _kb_index_cache[key_name]
+    if idx ~= nil then
+        return idx ~= false and idx or nil
+    end
+    -- Try button_index first, then button_id
+    if kb.button_index then
+        local ok, result = pcall(kb.button_index, key_name)
+        if ok and result then
+            _kb_index_cache[key_name] = result
+            return result
+        end
+    end
+    if kb.button_id then
+        local ok, result = pcall(kb.button_id, key_name)
+        if ok and result then
+            _kb_index_cache[key_name] = result
+            return result
+        end
+    end
+    _kb_index_cache[key_name] = false
+    return nil
+end
+
 local function is_shift_held()
     local kb = _get_keyboard()
-    return kb and kb.button(kb.button_index("left shift")) > 0.5
+    if not kb then return false end
+    local idx = _get_button_index(kb, "left shift")
+    return idx and kb.button(idx) > 0.5
 end
 
 local function is_alt_held()
     local kb = _get_keyboard()
-    return kb and kb.button(kb.button_index("left alt")) > 0.5
+    if not kb then return false end
+    local idx = _get_button_index(kb, "left alt")
+    return idx and kb.button(idx) > 0.5
 end
 
 local function is_ctrl_held()
     local kb = _get_keyboard()
-    return kb and kb.button(kb.button_index("left ctrl")) > 0.5
+    if not kb then return false end
+    local idx = _get_button_index(kb, "left ctrl")
+    return idx and kb.button(idx) > 0.5
 end
 
 -- ============================================================================
@@ -273,6 +331,8 @@ function HudElementCustomizer:init(parent, draw_layer, start_scale)
     if self._display_grid == nil then self._display_grid = true end
     self._snap_to_grid = mod:get("snap_to_grid")
     if self._snap_to_grid == nil then self._snap_to_grid = true end
+    self._snap_to_elements = mod:get("snap_to_elements")
+    if self._snap_to_elements == nil then self._snap_to_elements = true end
     self._show_info_panel = mod:get("show_info_panel")
     if self._show_info_panel == nil then self._show_info_panel = true end
 
@@ -372,6 +432,15 @@ function HudElementCustomizer:init(parent, draw_layer, start_scale)
         mod:notify("Snap to grid: [%s]", active and "on" or "off")
     end)
 
+    mod:command("snap_to_elements", "", function(active)
+        if active == nil then
+            active = not self._snap_to_elements
+        end
+        self._snap_to_elements = active
+        mod:set("snap_to_elements", active)
+        mod:notify("Snap to elements: [%s]", active and "on" or "off")
+    end)
+
     mod:command("panel", "", function()
         self._show_info_panel = not self._show_info_panel
         mod:set("show_info_panel", self._show_info_panel)
@@ -422,6 +491,7 @@ function HudElementCustomizer:_setup_elements(render_settings)
                 end
 
                 local excluded_scenegraphs = _excluded_scenegraphs_by_element[element_name] or {}
+                local allowed_scenegraphs = _allowed_scenegraphs_by_element[element_name]
                 local ui_scenegraph = element._ui_scenegraph
                 local element_definitions = element._definitions
                 local scenegraph_definition = element_definitions and element_definitions.scenegraph_definition
@@ -441,16 +511,38 @@ function HudElementCustomizer:_setup_elements(render_settings)
                             if excluded_scenegraphs[child_name] then
                                 break
                             end
+                            if allowed_scenegraphs and not allowed_scenegraphs[child_name] then
+                                break
+                            end
 
                             child = table.clone(child)
 
                             local node_name = string.format("%s|%s", element_name, child_name)
                             local node_settings = saved_node_settings[node_name]
 
-                            local vertical_alignment = (node_settings and node_settings.vertical_alignment) or "top"
-                            local horizontal_alignment = (node_settings and node_settings.horizontal_alignment) or "left"
-                            local position = (node_settings and node_settings.position) or child.world_position
-                            local size = (node_settings and node_settings.size) or child.size
+                            -- Keep edit-mode boxes on a stable top-left basis.
+                            -- Native pivots are preserved in default_settings for reset/reference,
+                            -- but using them directly for the editor overlay makes many boxes jump or disappear.
+                            local vertical_alignment = "top"
+                            local horizontal_alignment = "left"
+
+                            local live_position = child.world_position or child.position or { 0, 0, 0 }
+                            local live_size = child.size or { 25, 25 }
+                            local saved_position = node_settings and (node_settings.position or {
+                                node_settings.x,
+                                node_settings.y,
+                                node_settings.z,
+                            })
+                            local position = {
+                                (saved_position and saved_position[1]) or live_position[1] or 0,
+                                (saved_position and saved_position[2]) or live_position[2] or 0,
+                                (saved_position and saved_position[3]) or live_position[3] or 0,
+                            }
+                            local saved_size = node_settings and node_settings.size
+                            local size = {
+                                (saved_size and saved_size[1]) or live_size[1] or 25,
+                                (saved_size and saved_size[2]) or live_size[2] or 25,
+                            }
                             local scenegraph_id = child_name
 
                             local scenegraph_node = scenegraph_definition and scenegraph_definition[scenegraph_id]
@@ -656,38 +748,64 @@ function HudElementCustomizer:reset_node(node_name)
         return
     end
 
-    local default_node_settings = node_settings.default_settings
+    local default_node_settings = node_settings.default_settings or self._default_node_settings[node_name]
     if not default_node_settings then
         mod:warning("No default settings for node [%s]!", node_name)
         return
     end
 
-    local element_name, scenegraph_id = split_node_name(node_name)
-    local element = self:_get_element(element_name)
-    if not element then
-        return
-    end
+    local default_position = default_node_settings.position or { 0, 0, 0 }
+    local default_size = default_node_settings.size or { 0, 0 }
 
-    local position = default_node_settings.position
-    local vertical_alignment = default_node_settings.vertical_alignment
-    local horizontal_alignment = default_node_settings.horizontal_alignment
-    element:set_scenegraph_position(scenegraph_id, position[1], position[2], position[3], horizontal_alignment, vertical_alignment)
+    -- Restore the node live without discarding custom default settings.
+    -- Clearing the saved entry entirely causes the next rebuild to fall back
+    -- to the authored scenegraph defaults, which can differ from the user's
+    -- curated reset target for composite/background nodes.
+    node_settings.x = default_position[1] or 0
+    node_settings.y = default_position[2] or 0
+    node_settings.z = default_position[3] or 0
+    node_settings.size = { default_size[1] or 0, default_size[2] or 0 }
+    node_settings.scale = 1
+    node_settings.is_hidden = nil
+    node_settings.position = { node_settings.x, node_settings.y, node_settings.z }
+    node_settings.vertical_alignment = nil
+    node_settings.horizontal_alignment = nil
 
-    self._saved_node_settings[node_name] = nil
-    self._default_node_settings[node_name] = nil
-    self._setup_complete = nil
-    self:_persist_saved_settings()
+    self._default_node_settings[node_name] = default_node_settings
+    self:_apply_node_settings_live(node_name, node_settings)
 end
 
 function HudElementCustomizer:_init_node_settings(node_name)
     local scenegraph_position = self:scenegraph_position(node_name)
     local scenegraph_size = self:scenegraph_size(node_name)
+    local existing_defaults = self._default_node_settings[node_name] or {}
+
+    -- First-time initialization should snapshot the currently resolved live box,
+    -- not the authored scenegraph definition. Many HUD nodes are moved or resized
+    -- by the game/mods before the customizer sees them, so using the live values
+    -- makes reset/default behavior match what the user actually starts with.
+    local default_settings = {
+        position = {
+            scenegraph_position[1] or 0,
+            scenegraph_position[2] or 0,
+            scenegraph_position[3] or 0,
+        },
+        size = {
+            scenegraph_size[1] or 0,
+            scenegraph_size[2] or 0,
+        },
+        vertical_alignment = existing_defaults.vertical_alignment,
+        horizontal_alignment = existing_defaults.horizontal_alignment,
+    }
+
+    self._default_node_settings[node_name] = default_settings
+
     local node_settings = {
         x = scenegraph_position[1],
         y = scenegraph_position[2],
         z = scenegraph_position[3],
         size = { scenegraph_size[1], scenegraph_size[2] },
-        default_settings = self._default_node_settings[node_name]
+        default_settings = default_settings
     }
     self._saved_node_settings[node_name] = node_settings
     self:_persist_saved_settings()
@@ -696,7 +814,34 @@ end
 
 
 function HudElementCustomizer:_persist_saved_settings()
-    mod:set("saved_node_settings", self._saved_node_settings or {})
+    local saved = self._saved_node_settings or {}
+
+    for _, node_settings in pairs(saved) do
+        if node_settings then
+            if node_settings.position then
+                node_settings.x = (node_settings.x ~= nil and node_settings.x) or node_settings.position[1] or 0
+                node_settings.y = (node_settings.y ~= nil and node_settings.y) or node_settings.position[2] or 0
+                node_settings.z = (node_settings.z ~= nil and node_settings.z) or node_settings.position[3] or 0
+            else
+                node_settings.x = node_settings.x or 0
+                node_settings.y = node_settings.y or 0
+                node_settings.z = node_settings.z or 0
+            end
+
+            node_settings.position = { node_settings.x, node_settings.y, node_settings.z }
+            node_settings.vertical_alignment = nil
+            node_settings.horizontal_alignment = nil
+
+            if node_settings.size then
+                node_settings.size = {
+                    node_settings.size[1] or 0,
+                    node_settings.size[2] or 0,
+                }
+            end
+        end
+    end
+
+    mod:set("saved_node_settings", saved)
 end
 
 function HudElementCustomizer:_get_selected_node_settings(node_name)
@@ -708,6 +853,18 @@ function HudElementCustomizer:_get_selected_node_settings(node_name)
 end
 
 function HudElementCustomizer:_apply_node_settings_live(node_name, node_settings)
+    node_settings.x = node_settings.x or 0
+    node_settings.y = node_settings.y or 0
+    node_settings.z = node_settings.z or 0
+    node_settings.position = { node_settings.x, node_settings.y, node_settings.z }
+
+    if node_settings.size then
+        node_settings.size = {
+            node_settings.size[1] or 0,
+            node_settings.size[2] or 0,
+        }
+    end
+
     local widget = self._widgets_by_name[node_name]
     if widget then
         widget.content.size = node_settings.size
@@ -720,7 +877,7 @@ function HudElementCustomizer:_apply_node_settings_live(node_name, node_settings
     if node_settings.size then
         self:_set_scenegraph_size(node_name, node_settings.size[1], node_settings.size[2])
     end
-    self:set_scenegraph_position(node_name, node_settings.x or 0, node_settings.y or 0, node_settings.z or 0)
+    self:set_scenegraph_position(node_name, node_settings.x, node_settings.y, node_settings.z)
     self:_persist_saved_settings()
 end
 
@@ -830,22 +987,7 @@ function HudElementCustomizer:_panel_take_key(key_name)
         return false
     end
 
-    local idx
-
-    if kb.button_index then
-        local ok, result = pcall(kb.button_index, key_name)
-        if ok then
-            idx = result
-        end
-    end
-
-    if not idx and kb.button_id then
-        local ok, result = pcall(kb.button_id, key_name)
-        if ok then
-            idx = result
-        end
-    end
-
+    local idx = _get_button_index(kb, key_name)
     if not idx then
         return false
     end
@@ -898,6 +1040,55 @@ function HudElementCustomizer:_panel_take_any_pressed_name(matchers, repeat_key)
     return true
 end
 
+-- Hoisted: field row definitions and active-edit highlight color
+local _field_rows = {
+    { key = "x", label = "X" },
+    { key = "y", label = "Y" },
+    { key = "z", label = "Z" },
+    { key = "w", label = "W" },
+    { key = "h", label = "H" },
+}
+local _active_field_bg_color = { 120, 85, 110, 140 }
+local _current_map_pool = { x = 0, y = 0, z = 0, w = 0, h = 0 }
+local _default_map_pool = { x = 0, y = 0, z = 0, w = 0, h = 0 }
+local _digit_keys = {
+    {"0", "0"}, {"1", "1"}, {"2", "2"}, {"3", "3"}, {"4", "4"},
+    {"5", "5"}, {"6", "6"}, {"7", "7"}, {"8", "8"}, {"9", "9"},
+    {"numpad 0", "0"}, {"numpad 1", "1"}, {"numpad 2", "2"}, {"numpad 3", "3"}, {"numpad 4", "4"},
+    {"numpad 5", "5"}, {"numpad 6", "6"}, {"numpad 7", "7"}, {"numpad 8", "8"}, {"numpad 9", "9"}
+}
+
+local _minus_matchers = {"-", "minus", "subtract", "hyphen", "dash", "numpad -", "num -", "kp_subtract"}
+local _period_matchers = {".", "period", "decimal", "dot", "numpad .", "num .", "kp_decimal"}
+
+local function _prepare_buffer(active)
+    if active.replace_on_first_input then
+        active.replace_on_first_input = false
+        return ""
+    end
+    return active.buffer or ""
+end
+
+local function _append_char(active, char)
+    local buffer = _prepare_buffer(active)
+    if char == "." then
+        if not string.find(buffer, ".", 1, true) then
+            active.buffer = (buffer == "" or buffer == "-") and (buffer .. "0.") or (buffer .. ".")
+            return true
+        end
+        return false
+    end
+    if char == "-" then
+        if buffer == "" then
+            active.buffer = "-"
+            return true
+        end
+        return false
+    end
+    active.buffer = buffer .. char
+    return true
+end
+
 function HudElementCustomizer:_handle_panel_text_input()
     local active = self._panel_active_field
     if not active then
@@ -906,45 +1097,12 @@ function HudElementCustomizer:_handle_panel_text_input()
 
     local changed = false
 
-    local function prepare_buffer_for_char(char)
-        local buffer = active.buffer or ""
-        if active.replace_on_first_input then
-            buffer = ""
-            active.replace_on_first_input = false
-        end
-        return buffer
-    end
-
-    local function append_char(char)
-        local buffer = prepare_buffer_for_char(char)
-        if char == "." then
-            if not string.find(buffer, ".", 1, true) then
-                active.buffer = (buffer == "" or buffer == "-") and (buffer .. "0.") or (buffer .. ".")
-                changed = true
-            end
-            return
-        end
-        if char == "-" then
-            if buffer == "" then
-                active.buffer = "-"
-                changed = true
-            end
-            return
-        end
-        active.buffer = buffer .. char
-        changed = true
-    end
-
-    local digit_keys = {
-        {"0", "0"}, {"1", "1"}, {"2", "2"}, {"3", "3"}, {"4", "4"},
-        {"5", "5"}, {"6", "6"}, {"7", "7"}, {"8", "8"}, {"9", "9"},
-        {"numpad 0", "0"}, {"numpad 1", "1"}, {"numpad 2", "2"}, {"numpad 3", "3"}, {"numpad 4", "4"},
-        {"numpad 5", "5"}, {"numpad 6", "6"}, {"numpad 7", "7"}, {"numpad 8", "8"}, {"numpad 9", "9"}
-    }
-
-    for _, entry in ipairs(digit_keys) do
+    for i = 1, #_digit_keys do
+        local entry = _digit_keys[i]
         if self:_panel_take_key(entry[1]) then
-            append_char(entry[2])
+            if _append_char(active, entry[2]) then
+                changed = true
+            end
         end
     end
 
@@ -967,18 +1125,18 @@ function HudElementCustomizer:_handle_panel_text_input()
 
     local minus_pressed = self:_panel_take_key("minus") or self:_panel_take_key("numpad -")
     if not minus_pressed then
-        minus_pressed = self:_panel_take_any_pressed_name({"-", "minus", "subtract", "hyphen", "dash", "numpad -", "num -", "kp_subtract"}, "minus_fallback")
+        minus_pressed = self:_panel_take_any_pressed_name(_minus_matchers, "minus_fallback")
     end
     if minus_pressed then
-        append_char("-")
+        if _append_char(active, "-") then changed = true end
     end
 
     local period_pressed = self:_panel_take_key("period") or self:_panel_take_key("decimal") or self:_panel_take_key("numpad .")
     if not period_pressed then
-        period_pressed = self:_panel_take_any_pressed_name({".", "period", "decimal", "dot", "numpad .", "num .", "kp_decimal"}, "period_fallback")
+        period_pressed = self:_panel_take_any_pressed_name(_period_matchers, "period_fallback")
     end
     if period_pressed then
-        append_char(".")
+        if _append_char(active, ".") then changed = true end
     end
 
     if self:_panel_take_key("escape") then
@@ -1068,10 +1226,13 @@ function HudElementCustomizer:_process_widget_press_right(node_name)
     local should_hide = not node_widget.content.is_hidden
     node_widget.content.is_hidden = should_hide
 
-    if element.set_visible then
-        element:set_visible(not should_hide)
+    local is_tactical_overlay_node = element_name == "HudElementTacticalOverlay" and scenegraph_id ~= nil and scenegraph_id ~= ""
+    if not is_tactical_overlay_node then
+        if element.set_visible then
+            element:set_visible(not should_hide)
+        end
+        element._is_hidden = should_hide
     end
-    element._is_hidden = should_hide
 
     local saved_node_settings = self._saved_node_settings
     local node_settings = saved_node_settings[node_name]
@@ -1229,6 +1390,71 @@ function HudElementCustomizer:_detect_resize_edge(node_name, cursor_pos)
     return nil
 end
 
+
+-- Returns the best snap position for one axis, or nil if no snap within threshold.
+local function _best_snap_axis(dest_pos, size_axis, other_pos, other_size_axis, threshold)
+    local best_diff = threshold + 1
+    local best_snap = nil
+
+    local current_mid = dest_pos + size_axis * 0.5
+    local current_max = dest_pos + size_axis
+    local other_mid = other_pos + other_size_axis * 0.5
+    local other_max = other_pos + other_size_axis
+
+    -- min-min
+    local d = math.abs(dest_pos - other_pos)
+    if d < best_diff then best_diff = d; best_snap = other_pos end
+    -- mid-mid
+    d = math.abs(current_mid - other_mid)
+    if d < best_diff then best_diff = d; best_snap = other_mid - size_axis * 0.5 end
+    -- max-max
+    d = math.abs(current_max - other_max)
+    if d < best_diff then best_diff = d; best_snap = other_max - size_axis end
+    -- min-max
+    d = math.abs(dest_pos - other_max)
+    if d < best_diff then best_diff = d; best_snap = other_max end
+    -- max-min
+    d = math.abs(current_max - other_pos)
+    if d < best_diff then best_diff = d; best_snap = other_pos - size_axis end
+
+    return best_snap, best_diff
+end
+
+function HudElementCustomizer:_apply_element_snapping(node_name, dest_x, dest_y, size)
+    local snap_threshold = 10
+    local best_x_diff = snap_threshold + 1
+    local best_y_diff = snap_threshold + 1
+    local snapped_x = dest_x
+    local snapped_y = dest_y
+    local all_node_names = self._panel_all_node_names or {}
+
+    for i = 1, #all_node_names do
+        local other_node_name = all_node_names[i]
+        local other_node_settings = self._saved_node_settings and self._saved_node_settings[other_node_name]
+
+        if other_node_name ~= node_name and not (other_node_settings and other_node_settings.is_hidden) then
+            local other_pos = self:scenegraph_position(other_node_name)
+            local other_size = self:scenegraph_size(other_node_name)
+
+            if other_pos and other_size then
+                local snap_x, diff_x = _best_snap_axis(dest_x, size[1], other_pos[1], other_size[1], snap_threshold)
+                if snap_x and diff_x < best_x_diff then
+                    best_x_diff = diff_x
+                    snapped_x = snap_x
+                end
+
+                local snap_y, diff_y = _best_snap_axis(dest_y, size[2], other_pos[2], other_size[2], snap_threshold)
+                if snap_y and diff_y < best_y_diff then
+                    best_y_diff = diff_y
+                    snapped_y = snap_y
+                end
+            end
+        end
+    end
+
+    return snapped_x, snapped_y
+end
+
 -- ============================================================================
 -- Input handling
 -- ============================================================================
@@ -1329,12 +1555,14 @@ function HudElementCustomizer:_handle_input(input_service)
             local dest_x = cursor_diff_x + node_settings.x
             local dest_y = cursor_diff_y + node_settings.y
 
-            -- Grid snapping
+            -- Snapping
             local ctrl_held = is_ctrl_held()
-            local should_snap = (num_selected_nodes == 1) and self._display_grid
+            local should_snap_to_grid = (num_selected_nodes == 1) and self._display_grid
                 and ((ctrl_held and not self._snap_to_grid) or (not ctrl_held and self._snap_to_grid))
+            local should_snap_to_elements = (num_selected_nodes == 1)
+                and ((ctrl_held and not self._snap_to_elements) or (not ctrl_held and self._snap_to_elements))
 
-            if should_snap and self._grid_line_positions then
+            if should_snap_to_grid and self._grid_line_positions then
                 local alt_held = is_alt_held()
                 local grid_y = self._grid_line_positions[1]
                 local grid_x = self._grid_line_positions[2]
@@ -1368,6 +1596,10 @@ function HudElementCustomizer:_handle_input(input_service)
                         end
                     end
                 end
+            end
+
+            if should_snap_to_elements then
+                dest_x, dest_y = self:_apply_element_snapping(node_name, dest_x, dest_y, size)
             end
 
             if self._start_dragging then
@@ -2014,15 +2246,16 @@ function HudElementCustomizer:_draw_info_panel(ui_renderer, input_service)
         local fields_top = detail_y + (editing_y - detail_y) + helper_line_h + 14 * panel_scale * inverse_scale
         local left_x = px + 10 * panel_scale * inverse_scale
         local right_x = left_x + col_w + col_gap
-        local current_map = {x = node_settings.x or 0, y = node_settings.y or 0, z = node_settings.z or 0, w = (node_settings.size and node_settings.size[1]) or 0, h = (node_settings.size and node_settings.size[2]) or 0}
-        local default_map = {x = defaults.position[1] or 0, y = defaults.position[2] or 0, z = defaults.position[3] or 0, w = defaults.size[1] or 0, h = defaults.size[2] or 0}
-        local rows = {
-            { key = "x", label = "X" },
-            { key = "y", label = "Y" },
-            { key = "z", label = "Z" },
-            { key = "w", label = "W" },
-            { key = "h", label = "H" },
-        }
+        _current_map_pool.x = node_settings.x or 0
+        _current_map_pool.y = node_settings.y or 0
+        _current_map_pool.z = node_settings.z or 0
+        _current_map_pool.w = (node_settings.size and node_settings.size[1]) or 0
+        _current_map_pool.h = (node_settings.size and node_settings.size[2]) or 0
+        _default_map_pool.x = defaults.position[1] or 0
+        _default_map_pool.y = defaults.position[2] or 0
+        _default_map_pool.z = defaults.position[3] or 0
+        _default_map_pool.w = defaults.size[1] or 0
+        _default_map_pool.h = defaults.size[2] or 0
 
         local function draw_field_column(group_name, base_x, values, title)
             _safe_draw_text(
@@ -2037,7 +2270,8 @@ function HudElementCustomizer:_draw_info_panel(ui_renderer, input_service)
                 "center"
             )
 
-            for row_index, row in ipairs(rows) do
+            for row_index = 1, #_field_rows do
+                local row = _field_rows[row_index]
                 local y = fields_top + (row_index - 1) * (row_h + row_gap)
                 local active = self._panel_active_field
                 local is_active = active and active.node_name == selected_name and active.group == group_name and active.key == row.key
@@ -2047,7 +2281,7 @@ function HudElementCustomizer:_draw_info_panel(ui_renderer, input_service)
                 local row_w = col_w
 
                 if is_active then
-                    UIRenderer.draw_rect(ui_renderer, Vector3(row_x, y, draw_layer + 1), Vector2(row_w, row_h), {120, 85, 110, 140})
+                    UIRenderer.draw_rect(ui_renderer, Vector3(row_x, y, draw_layer + 1), Vector2(row_w, row_h), _active_field_bg_color)
                 end
 
                 _safe_draw_text(
@@ -2069,10 +2303,10 @@ function HudElementCustomizer:_draw_info_panel(ui_renderer, input_service)
             end
         end
 
-        draw_field_column("current", left_x, current_map, "Current")
-        draw_field_column("default", right_x, default_map, "Default / Reset")
+        draw_field_column("current", left_x, _current_map_pool, "Current")
+        draw_field_column("default", right_x, _default_map_pool, "Default / Reset")
 
-        local status_y = fields_top + #rows * (row_h + row_gap) + 10 * panel_scale * inverse_scale
+        local status_y = fields_top + #_field_rows * (row_h + row_gap) + 10 * panel_scale * inverse_scale
         _safe_draw_text(
             ui_renderer,
             string.format("Scale: %.2f   Hidden: %s", node_settings.scale or 1, node_settings.is_hidden and "yes" or "no"),
@@ -2120,7 +2354,10 @@ function HudElementCustomizer:_apply_saved_node_settings()
 
                 local ok = pcall(element.set_scenegraph_position, element, scenegraph_id, x, y, z, "left", "top")
                 if ok then
-                    element._is_hidden = node_settings.is_hidden
+                    local is_tactical_overlay_node = element_name == "HudElementTacticalOverlay" and scenegraph_id ~= nil and scenegraph_id ~= ""
+                    if not is_tactical_overlay_node then
+                        element._is_hidden = node_settings.is_hidden
+                    end
 
                     local hooked_elements = mod._hooked_elements
                     if not hooked_elements[element] then
