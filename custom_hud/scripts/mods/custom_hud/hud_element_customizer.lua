@@ -172,7 +172,6 @@ local _excluded_element_names = {
     HudElementDamageIndicator = true,
     ConstantElementWatermark = true,
     ConstantElementPopupHandler = true,
-	ConstantElementExpeditionContinue = true,
     ConstantElementSoftwareCursor = true
 }
 
@@ -1879,10 +1878,14 @@ end
 -- ============================================================================
 
 function HudElementCustomizer:_get_panel_position(inverse_scale)
-    local metrics = _get_panel_metrics(inverse_scale, false, false)
+    -- Compute only the two values we need directly, avoiding a _get_panel_metrics
+    -- call that would overwrite the shared pool mid-use by callers.
+    local ps_is = _cached_panel_scale * inverse_scale
+    local panel_w = PANEL_WIDTH * ps_is
+    local panel_margin = PANEL_MARGIN * ps_is
     local width = RESOLUTION_LOOKUP.width
-    local default_x = (width * inverse_scale) - metrics.width - metrics.margin
-    local default_y = metrics.margin
+    local default_x = (width * inverse_scale) - panel_w - panel_margin
+    local default_y = panel_margin
 
     if not self._panel_position then
         self._panel_position = { default_x, default_y }
