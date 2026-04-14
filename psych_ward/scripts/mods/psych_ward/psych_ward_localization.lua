@@ -4,7 +4,7 @@ mod:add_global_localize_strings({
   loc_toggle_view_buttons = {
     en = "Vendors",
     ["zh-cn"] = "大厅功能",
-    ru = "Торговцы",
+    ru = "Отображение кнопок",
     ja = "ベンダー",
     ["zh-tw"] = "大廳功能",
     ko = "로비 기능",
@@ -22,7 +22,7 @@ return {
   psych_ward_description = {
     en = "Provides access to many Hub features from the Character Select menu.",
     ["zh-cn"] = "直接在角色选择页面使用各种大厅功能。",
-    ru = "Psych Ward - Позволяет войти прямо на стрельбище в Псайканиум, минуя Хаб.",
+    ru = "Psych Ward - Даёт доступ к разным магазинам и режимам в меню выбора персонажей.",
     ja = "キャラクター選択画面から様々なハブ機能へとアクセスできるようになります。",
     ["zh-tw"] = "啟用直接進入靈能室功能，無需進入大廳。",
     ko = "캐릭터 선택 메뉴에서 로비의 다양한 기능에 접근할 수 있습니다.",
@@ -30,7 +30,7 @@ return {
   horde_button = {
     en = "Mortis Trials",
     ["zh-cn"] = "死灵试炼",
-    ru = "Стрельбище",
+    ru = "Мортис",
     ja = "モーティスの試練",
     ["zh-tw"] = "死神試煉",
     ko = "몰티스 시련",
@@ -39,7 +39,7 @@ return {
     en = "Mission Board",
     ja = "ミッションボード",
     ["zh-cn"] = "任务面板",
-    ru = "Меню выбора миссий",
+    ru = "Меню миссий",
     ["zh-tw"] = "任務面板",
     ko = "미션 터미널",
   },
@@ -97,10 +97,12 @@ return {
     ja = "ハヴォック任務",
     ["zh-tw"] = "浩劫任務",
     ko = "하복 임무",
+    ru = "Хавок",
   },
   expedition_button = {
     en = "Expedition",
     ko = "원정",
+    ru = "Экспедиции",
   },
   meatgrinder_button = {
     en = "Meat Grinder",
@@ -108,6 +110,7 @@ return {
     ja = "肉挽き機",
     ["zh-tw"] = "絞肉機",
     ko = "사이카니움",
+    ru = "Стрельбище",
   },
   exit_text = {
     en = "Press %s to quit",
@@ -131,6 +134,7 @@ return {
     ja = "ハブに行く",
     ["zh-tw"] = "進入大廳",
     ko = "로비로 진입",
+    ru = "Войти в Хаб",
   },
   allow_chat_main_menu = {
     en = "Allow Chat in Character Select screen",
@@ -138,25 +142,31 @@ return {
     ja = "キャラクター選択画面でのチャットを許可",
     ["zh-tw"] = "允許在角色選擇界面使用聊天框",
     ko = "캐릭터 선택 화면에서 채팅 허용",
+    ru = "Разрешить чат в меню выбора персонажей",
   },
   button_placement = {
     en = "Button Placement",
     ko = "버튼 배치",
+    ru = "Расположение кнопок",
   },
   x_offset = {
     en = "X Offset",
     ko = "X 오프셋",
+    ru = "Смещение по горизонтали",
   },
   y_offset = {
     en = "Y Offset",
     ko = "Y 오프셋",
+    ru = "Смещение по вертикали",
   },
   height = {
     en = "Height",
     ko = "높이",
+    ru = "Высота",
   },
   width = {
     en = "Width",
     ko = "너비",
+    ru = "Ширина",
   },
 }
