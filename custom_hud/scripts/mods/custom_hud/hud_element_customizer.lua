@@ -6,6 +6,8 @@ local UIRenderer = mod:original_require("scripts/managers/ui/ui_renderer")
 local ColorUtilities = mod:original_require("scripts/utilities/ui/colors")
 local UIHudSettings = mod:original_require("scripts/settings/ui/ui_hud_settings")
 
+local _cached_opacity = mod._cached_opacity
+
 -- ============================================================================
 -- Constants
 -- ============================================================================
@@ -2334,12 +2336,13 @@ function HudElementCustomizer:_apply_saved_node_settings()
         return
     end
 
+    mod._position_overrides = {}
     local inverse_hud_scale = self:_get_inverse_hud_scale()
     for node_name, node_settings in pairs(saved_node_settings) do
         local element_name, scenegraph_id = split_node_name(node_name)
         local element = self:_get_element(element_name)
         if element and type(element._ui_scenegraph) == "table" then
-            local has_scenegraph_id = rawget(element._ui_scenegraph, scenegraph_id) ~= nil
+            local has_scenegraph_id = element._ui_scenegraph[scenegraph_id] ~= nil
 
             if has_scenegraph_id then
                 local is_constant_element = string.starts_with(element_name, "ConstantElement")
@@ -2356,30 +2359,114 @@ function HudElementCustomizer:_apply_saved_node_settings()
                 end
 
                 local ok = pcall(element.set_scenegraph_position, element, scenegraph_id, x, y, z, "left", "top")
+                if not ok then
+                    ok = pcall(element.set_scenegraph_position, element, scenegraph_id, x, y, z)
+                end
                 if ok then
                     local is_tactical_overlay_node = element_name == "HudElementTacticalOverlay" and scenegraph_id ~= nil and scenegraph_id ~= ""
                     if not is_tactical_overlay_node then
                         element._is_hidden = node_settings.is_hidden
                     end
 
+                    local pos_overrides = mod._position_overrides
+                    if not pos_overrides[element] then
+                        pos_overrides[element] = {}
+                    end
+                    local defaults = node_settings.default_settings
+                    local default_pos = defaults and defaults.position or {}
+                    local delta_x = x - (default_pos[1] or 0)
+                    local delta_y = y - (default_pos[2] or 0)
+                    pos_overrides[element][scenegraph_id] = { x, y, z, delta_x = delta_x, delta_y = delta_y }
+
                     local hooked_elements = mod._hooked_elements
                     if not hooked_elements[element] then
-                        mod:hook(element, "draw", function(func, self, ...)
+                        mod:hook(element, "draw", function(func, self, dt, t, ui_renderer, render_settings, input_service)
                             if self._is_hidden then
                                 return
                             end
 
-                            local element_render_settings = select(4, ...)
-                            local opacity = mod._cached_opacity()
-                            if opacity ~= 1 then
-                                if type(element_render_settings) == "table" then
-                                    element_render_settings.alpha_multiplier = opacity
+                            local opacity = _cached_opacity and _cached_opacity() or 1
+                            if opacity ~= 1 and render_settings then
+                                render_settings.alpha_multiplier = opacity
+                            end
+
+                            return func(self, dt, t, ui_renderer, render_settings, input_service)
+                        end)
+                        hooked_elements[element] = true
+                    end
+
+                    -- CLASS-level hook on element's update to re-apply position AFTER
+                    -- super.update() calls update_scenegraph (which resets world_position).
+                    -- draw() reads world_position set here, so position holds each frame.
+                    local class_name = element.__class_name
+                    local hooked_classes = mod._hooked_element_classes
+                    if class_name and CLASS and CLASS[class_name] and not hooked_classes[class_name] then
+                        mod:hook(CLASS[class_name], "update", function(func, self, ...)
+                            local ret = func(self, ...)
+                            local overrides = mod._position_overrides[self]
+                            if overrides then
+                                for sid, pos in pairs(overrides) do
+                                    local ok2 = pcall(self.set_scenegraph_position, self, sid, pos[1], pos[2], pos[3], "left", "top")
+                                    if not ok2 then
+                                        pcall(self.set_scenegraph_position, self, sid, pos[1], pos[2], pos[3])
+                                    end
+                                end
+                            end
+                            return ret
+                        end)
+                        hooked_classes[class_name] = true
+                    end
+
+                    -- For elements like HudElementWeaponCounter that compute widget positions
+                    -- in _draw_widgets from crosshair/aim rather than scenegraph, the scenegraph
+                    -- pivot is math-cancelled and set_scenegraph_position has no visual effect.
+                    -- Hook _draw_widgets to redraw slot widgets at crosshair + delta offset.
+                    local hooked_dw = mod._hooked_element_draw_widgets
+                    if class_name and CLASS and CLASS[class_name]
+                        and CLASS[class_name]._draw_widgets
+                        and not hooked_dw[class_name] then
+                        mod:hook(CLASS[class_name], "_draw_widgets", function(func, self, dt, t, input_service, ui_renderer, render_settings)
+                            local overrides = mod._position_overrides[self]
+                            local has_delta = false
+                            if overrides and self._slot_widgets then
+                                for _, pos in pairs(overrides) do
+                                    if pos.delta_x and pos.delta_y and (pos.delta_x ~= 0 or pos.delta_y ~= 0) then
+                                        has_delta = true
+                                        break
+                                    end
                                 end
                             end
 
-                            return func(self, ...)
+                            -- Suppress vanilla slot_widget draw so we can reposition them.
+                            -- Swap to empty table: pairs({}) = no iterations, no draw.
+                            local slot_widgets
+                            if has_delta then
+                                slot_widgets = self._slot_widgets
+                                self._slot_widgets = {}
+                            end
+
+                            func(self, dt, t, input_service, ui_renderer, render_settings)
+
+                            if has_delta then
+                                self._slot_widgets = slot_widgets
+                                local scale = ui_renderer.scale
+                                for _, pos in pairs(overrides) do
+                                    local dx = pos.delta_x
+                                    local dy = pos.delta_y
+                                    if dx and dy and (dx ~= 0 or dy ~= 0) then
+                                        local cx = self._crosshair_position_x + dx * scale
+                                        local cy = self._crosshair_position_y + dy * scale
+                                        for _, widget in pairs(slot_widgets) do
+                                            local wo = widget.offset
+                                            wo[1] = cx
+                                            wo[2] = cy
+                                            UIWidget.draw(widget, ui_renderer)
+                                        end
+                                    end
+                                end
+                            end
                         end)
-                        hooked_elements[element] = true
+                        hooked_dw[class_name] = true
                     end
                 end
             else

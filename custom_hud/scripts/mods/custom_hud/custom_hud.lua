@@ -123,7 +123,7 @@ local _ignored_elements = {
     HudElementCrosshair = true
 }
 
-local function draw_hook(func, self, ...)
+local function draw_hook(func, self, dt, t, ui_renderer, render_settings, input_service)
     if self._is_hidden then
         return
     end
@@ -131,15 +131,12 @@ local function draw_hook(func, self, ...)
     local element_name = self.__class_name
     if not _ignored_elements[element_name] and not self._always_full_alpha then
         local opacity = _cached_opacity
-        if opacity ~= 1 then
-            local element_render_settings = select(4, ...)
-            if type(element_render_settings) == "table" then
-                element_render_settings.alpha_multiplier = opacity
-            end
+        if opacity ~= 1 and render_settings then
+            render_settings.alpha_multiplier = opacity
         end
     end
 
-    return func(self, ...)
+    return func(self, dt, t, ui_renderer, render_settings, input_service)
 end
 
 mod:hook(HudElementBase, "draw", draw_hook)
@@ -157,4 +154,7 @@ mod:hook_safe(UIViewHandler, "close_view", function(self, view_name, force_close
 end)
 
 mod._hooked_elements = {}
+mod._hooked_element_classes = {}
+mod._hooked_element_draw_widgets = {}
+mod._position_overrides = {}
 mod._cached_opacity = function() return _cached_opacity end
