@@ -1,4 +1,32 @@
 # Changelog
+## v2.1.4
+
+### Added
+
+- **User-managed ignore list** - The customization panel can now ignore noisy or unwanted HUD elements without deleting their saved layout. Double-click a panel row to ignore an element, open the **Ignore** side panel to review ignored elements, and double-click an ignored entry to restore it.
+- **Fixed Arrow Movement** - Added an optional fixed-step arrow-key movement mode for edit mode. When enabled, each arrow-key tap moves the selected element by a configurable pixel step instead of continuously nudging by 1px while the key is held.
+- **Additional protected elements** - Added built-in exclusions for `HudElementCrosshairHud`, `HudElementRingHud_player`, and `HudElementRingHud_team_docked` so crosshair and external overlay elements are not exposed for editing.
+
+### Changed
+
+- **DMF enable/disable handling** - Custom HUD now checks the mod enabled state during HUD init, toggle commands, draw/update hooks, saved-layout application, and visibility validation.
+- **HUD recreation cleanup** - HUD rebuilds now remove stale Custom HUD element and visibility-group entries, skip unloadable element definitions, and safely no-op when UI or player state is unavailable.
+- **Options-view behavior** - Closing the options views now refreshes cached settings and exits customization mode without forcing a full HUD rebuild.
+- **Draw hook cleanup** - Draw hooks now use explicit draw arguments and the cached opacity accessor instead of vararg/select handling.
+
+### Fixed
+
+- **Disable cleanup** - Disabling the mod now clears edit/hidden state, removes runtime position overrides, unhides affected elements, and recreates the HUD cleanly.
+- **Position overrides after update** - Saved scenegraph positions are re-applied after element updates so HUD elements that rebuild their scenegraph each frame keep their customized position.
+- **Crosshair-anchored widget movement** - Elements such as `HudElementWeaponCounter` that derive slot-widget positions from the crosshair can now be moved by applying the saved delta during `_draw_widgets`.
+- **Ignored element persistence** - Ignored elements keep their saved settings while ignored, render at their vanilla position, and restore with their previous layout when removed from the ignore list.
+- **Saved layout safety** - Saved scenegraph references are checked with `rawget` so layouts that reference disabled or missing mod elements do not trip strict-readonly scenegraph tables.
+- **Scenegraph position fallback** - Applying saved positions now retries without forced `left`/`top` alignment if the first `set_scenegraph_position` call fails.
+- **Panel interaction safety** - The ignore side panel consumes mouse input separately from the main element list, keeping hover, selection, and scroll state consistent when elements are ignored or restored.
+
+### Localization
+
+- Added English, Chinese, and Russian strings for Fixed Arrow Movement, Arrow Step, and the ignore-list panel help text.
 
 ## v2.1.2
 

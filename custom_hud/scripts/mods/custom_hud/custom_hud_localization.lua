@@ -43,7 +43,9 @@ return {
             .. "{#color(" .. colours.key .. ")}  Right-click{#color(" .. colours.text .. ")} = Toggle hidden\n"
             .. "{#color(" .. colours.key .. ")}  Double-click{#color(" .. colours.text .. ")} = Reset to default\n"
             .. "{#color(" .. colours.key .. ")}  Tab{#color(" .. colours.text .. ")} = Reset selected\n"
-            .. "{#color(" .. colours.key .. ")}  Ctrl+Shift+C{#color(" .. colours.text .. ")} = Center on screen{#reset()}",
+            .. "{#color(" .. colours.key .. ")}  Ctrl+Shift+C{#color(" .. colours.text .. ")} = Center on screen\n"
+            .. "{#color(" .. colours.key .. ")}  Double-click panel row{#color(" .. colours.text .. ")} = Ignore element\n"
+            .. "{#color(" .. colours.key .. ")}  Ignore button{#color(" .. colours.text .. ")} = Open ignore list (double-click to restore){#reset()}",
         ["zh-cn"] = "切换 HUD 自定义功能的开关。",
         ru = "Включение/отключение оверлея настройки интерфейса.",
     },
@@ -139,6 +141,26 @@ return {
         en = "Adjust the overall HUD opacity multiplier.",
         ["zh-cn"] = "调整元素不透明度。",
         ru = "Настройте прозрачность элементов.",
+    },
+    fixed_arrow_move = {
+        en = "Fixed Arrow Movement",
+        ["zh-cn"] = "固定方向键移动",
+        ru = "Фиксированный шаг стрелками",
+    },
+    fixed_arrow_move_description = {
+        en = "When enabled, each arrow-key tap moves the selected element by a fixed number of pixels instead of the default continuous ±1px while held.",
+        ["zh-cn"] = "启用后，每次按下方向键将所选元素移动固定的像素数，而不是按住时连续 ±1像素。",
+        ru = "Если включено, каждое нажатие стрелки сдвигает выбранный элемент на фиксированное число пикселей вместо непрерывного ±1px при удержании.",
+    },
+    arrow_move_step = {
+        en = "Arrow Step (px)",
+        ["zh-cn"] = "方向键步长 (像素)",
+        ru = "Шаг стрелки (px)",
+    },
+    arrow_move_step_description = {
+        en = "Number of pixels the element moves per arrow-key tap when Fixed Arrow Movement is enabled.",
+        ["zh-cn"] = "启用固定方向键移动时，每次按下方向键元素移动的像素数。",
+        ru = "На сколько пикселей сдвигается элемент за одно нажатие стрелки при включённом фиксированном шаге.",
     },
     display_grid = {
         en = "Display Grid",

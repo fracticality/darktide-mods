@@ -78,6 +78,21 @@ return {
                         step_size_value = 1
                     },
                     {
+                        setting_id = "fixed_arrow_move",
+                        type = "checkbox",
+                        default_value = false,
+                        sub_widgets = {
+                            {
+                                setting_id = "arrow_move_step",
+                                type = "numeric",
+                                range = { 1, 100 },
+                                default_value = 5,
+                                decimals_number = 0,
+                                step_size_value = 1
+                            }
+                        }
+                    },
+                    {
                         setting_id = "display_grid",
                         type = "checkbox",
                         default_value = true,
