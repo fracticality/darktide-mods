@@ -18,7 +18,7 @@ return {
             .. "{#color(" .. colours.key .. ")}Arrows{#color(" .. colours.text .. ")} move ±1px, {#color(" .. colours.key .. ")}Alt+Arrows{#color(" .. colours.text .. ")} resize ±1px, {#color(" .. colours.key .. ")}Shift+Up/Down{#color(" .. colours.text .. ")} z-order\n"
             .. "{#color(" .. colours.key .. ")}Right-click{#color(" .. colours.text .. ")} hide, {#color(" .. colours.key .. ")}Double-click{#color(" .. colours.text .. ")} reset, {#color(" .. colours.key .. ")}Tab{#color(" .. colours.text .. ")} reset selected, {#color(" .. colours.key .. ")}Ctrl+Shift+C{#color(" .. colours.text .. ")} center{#reset()}",
         ["zh-cn"] = "允许自定义排列和调整 HUD 元素大小。",
-        ["zh-tw"] = ,
+        ["zh-tw"] = "允許自訂排列和調整 HUD 元素大小。",
         ru = "Позволяет перемещать и изменять размер элементов интерфейса.",
     },
     settings_header = {
@@ -49,7 +49,7 @@ return {
             .. "{#color(" .. colours.key .. ")}  Tab{#color(" .. colours.text .. ")} = Reset selected\n"
             .. "{#color(" .. colours.key .. ")}  Ctrl+Shift+C{#color(" .. colours.text .. ")} = Center on screen{#reset()}",
         ["zh-cn"] = "切换 HUD 自定义功能的开关。",
-        ["zh-tw"] = ,
+        ["zh-tw"] = "切換 HUD 自訂功能的開關。",
         ru = "Включение/отключение оверлея настройки интерфейса.",
     },
     toggle_hud_hidden_key = {
