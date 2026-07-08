@@ -10,6 +10,7 @@ local UISettings = require("scripts/settings/ui/ui_settings")
 local player_slot_colors = UISettings.player_slot_colors
 
 local PlayerCompositions = require("scripts/utilities/players/player_compositions")
+local Ammo = require("scripts/utilities/ammo")
 local WarpCharge = require("scripts/utilities/warp_charge")
 local ArchetypeWarpChargeTemplates = require("scripts/settings/warp_charge/archetype_warp_charge_templates")
 
@@ -586,37 +587,37 @@ end
 local function update_ammo(parent, dt, t, widget, player)
   local unit_data_extension = ScriptUnit.has_extension(player.player_unit, "unit_data_system")
   local inventory_component = unit_data_extension and unit_data_extension:read_component("slot_secondary")
-
   if not inventory_component then
+    widget.style.ammo_icon.visible = false
     return
   end
 
-  local clip_max = inventory_component.max_ammunition_clip or 0
-  local reserve_max = inventory_component.max_ammunition_reserve or 0
-  local max_ammo = clip_max + reserve_max
+  -- Use Ammo utility functions
+  local max_reserve = Ammo.max_ammo_in_reserve(inventory_component) or 0
+  local current_reserve = Ammo.current_ammo_in_reserve(inventory_component) or 0
+  local max_clip = Ammo.max_ammo_in_clips(inventory_component) or 0
+  local current_clip = Ammo.current_ammo_in_clips(inventory_component) or 0
 
+  local max_ammo = max_clip + max_reserve
   widget.style.ammo_icon.visible = max_ammo > 0
 
   if max_ammo == 0 then
     return
   end
 
-  local clip_ammo = inventory_component.current_ammunition_clip or 0
-  local reserve_ammo = inventory_component.current_ammunition_reserve or 0
-  local current_ammo = clip_ammo + reserve_ammo
+  local current_ammo = current_clip + current_reserve
   local current_ammo_percent = current_ammo / max_ammo
-  local current_clip_percent = clip_ammo / clip_max
-
-  current_ammo_percent = current_ammo / max_ammo
+  local reserve_ammo_percent = max_reserve > 0 and (current_reserve / max_reserve) or 0
+  local clip_ammo_percent = max_clip > 0 and (current_clip / max_clip) or 0
 
   local content = widget.content
-  content.max_ammo = reserve_ammo
-  content.current_ammo = clip_ammo
+  content.max_ammo = current_reserve
+  content.current_ammo = current_clip
 
   local style = widget.style
   local icon_style = style.ammo_icon
-  local clip_color = mod_utils.get_text_color_for_percent_threshold(current_clip_percent, "ammo")
-  local reserve_color = mod_utils.get_text_color_for_percent_threshold(current_ammo_percent, "ammo")
+  local clip_color = mod_utils.get_text_color_for_percent_threshold(clip_ammo_percent, "ammo")
+  local reserve_color = mod_utils.get_text_color_for_percent_threshold(reserve_ammo_percent, "ammo")
 
   style.current_ammo.text_color = clip_color
   style.max_ammo.text_color = reserve_color
