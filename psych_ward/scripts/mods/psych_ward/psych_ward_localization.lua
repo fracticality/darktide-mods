@@ -101,6 +101,7 @@ return {
   },
   expedition_button = {
     en = "Expedition",
+    ["zh-tw"] = "遠征任務",
     ko = "원정",
     ru = "Экспедиции",
   },
@@ -146,26 +147,31 @@ return {
   },
   button_placement = {
     en = "Button Placement",
+    ["zh-tw"] = "按鈕位置",
     ko = "버튼 배치",
     ru = "Расположение кнопок",
   },
   x_offset = {
     en = "X Offset",
+    ["zh-tw"] = "X 偏移量",
     ko = "X 오프셋",
     ru = "Смещение по горизонтали",
   },
   y_offset = {
     en = "Y Offset",
+    ["zh-tw"] = "Y 偏移量",
     ko = "Y 오프셋",
     ru = "Смещение по вертикали",
   },
   height = {
     en = "Height",
+    ["zh-tw"] = "高度",
     ko = "높이",
     ru = "Высота",
   },
   width = {
     en = "Width",
+    ["zh-tw"] = "寬度",
     ko = "너비",
     ru = "Ширина",
   },
