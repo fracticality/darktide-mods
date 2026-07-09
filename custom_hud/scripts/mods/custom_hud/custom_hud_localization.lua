@@ -131,7 +131,7 @@ return {
     panel_list_rows = {
         en = "Panel List Rows",
         ["zh-tw"] = "面板列表行數",
-    }
+    },
     panel_list_rows_description = {
         en = "Limit how many list entries are shown before the panel starts scrolling.",
         ["zh-tw"] = "限制在面板開始滾動之前顯示多少列表條目。",
