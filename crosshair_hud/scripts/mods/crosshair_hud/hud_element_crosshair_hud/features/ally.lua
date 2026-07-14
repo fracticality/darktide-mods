@@ -632,7 +632,7 @@ local function update_status(parent, dt, t, widget, player)
   end
 
   local archetype_name = profile.archetype and profile.archetype.name
-  local string_symbol = archetype_name and UISettings.archetype_font_icon_simple[archetype_name] or "•"
+  local string_symbol = archetype_name and UISettings.archetype_font_icon[archetype_name] or "•"
   local player_name = player:name()
   local is_alive = unit_alive(player.player_unit)
 
