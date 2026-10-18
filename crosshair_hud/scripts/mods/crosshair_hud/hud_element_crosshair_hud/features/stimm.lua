@@ -175,7 +175,9 @@ function feature.update(parent)
         end
 
         if stimm_countdown == "" then
-            local cooldown = ability_ext:remaining_ability_cooldown("pocketable_ability") or 0
+            -- A game patch removed remaining_ability_cooldown; reconstruct real
+            -- seconds from the new resource model (see mod.utils.ability_cooldown).
+            local cooldown = mod_utils.remaining_ability_cooldown(ability_ext, "pocketable_ability")
             if cooldown >= 0.05 then
                 stimm_countdown = string.format("%.0f", math.ceil(cooldown))
                 countdown_color = { 255, 255, 0, 0 }

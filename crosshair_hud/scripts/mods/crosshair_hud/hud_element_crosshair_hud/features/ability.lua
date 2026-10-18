@@ -288,11 +288,14 @@ function feature.update(parent)
     return
   end
 
-  local max_ability_cooldown = ability_extension:max_ability_cooldown("combat_ability")
   local max_ability_charges = ability_extension:max_ability_charges("combat_ability")
   local remaining_ability_charges = ability_extension:remaining_ability_charges("combat_ability")
-  local remaining_ability_cooldown = ability_extension:remaining_ability_cooldown("combat_ability")
-  local cooldown_percent = 1 - (remaining_ability_cooldown / max_ability_cooldown)
+  -- A game patch removed max_ability_cooldown/remaining_ability_cooldown; abilities
+  -- now use a regenerating resource. Reconstruct real seconds + fill progress from
+  -- the new resource model (see mod.utils.ability_cooldown).
+  local cooldown_seconds, cooldown_percent = mod_utils.ability_cooldown(ability_extension, "combat_ability")
+  local remaining_ability_cooldown = cooldown_seconds or 0
+  cooldown_percent = cooldown_percent or 1
   local symbol = _get_cooldown_symbol_for_percent_threshold(cooldown_percent, remaining_ability_charges)
   local content = ability_widget.content
   local style = ability_widget.style

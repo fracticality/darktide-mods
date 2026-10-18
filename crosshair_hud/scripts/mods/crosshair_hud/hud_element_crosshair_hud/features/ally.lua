@@ -632,7 +632,10 @@ local function update_status(parent, dt, t, widget, player)
   end
 
   local archetype_name = profile.archetype and profile.archetype.name
-  local string_symbol = archetype_name and UISettings.archetype_font_icon_simple[archetype_name] or "•"
+  -- A game patch removed UISettings.archetype_font_icon_simple; the same class
+  -- icons now live in UISettings.archetype_font_icon. Fall back to it.
+  local archetype_icons = UISettings.archetype_font_icon_simple or UISettings.archetype_font_icon
+  local string_symbol = archetype_name and archetype_icons and archetype_icons[archetype_name] or "•"
   local player_name = player:name()
   local is_alive = unit_alive(player.player_unit)
 

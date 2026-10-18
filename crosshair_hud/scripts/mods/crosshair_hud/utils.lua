@@ -126,10 +126,75 @@ local function get_feature_scale(feature_name)
     return mod:get("global_scale") * mod:get(feature_name .. "_scale")
 end
 
+-- Game patch 1.13 turned ability cooldowns into a regenerating resource and removed
+-- PlayerUnitAbilityExtension:remaining_ability_cooldown / :max_ability_cooldown.
+-- These helpers reconstruct the real seconds-to-next-charge from the resource model,
+-- mirroring the game's own regen math (player_unit_ability_extension.lua update loop):
+--   net_regen_per_second = (base + flat_buff) * modifier_buff - cost_per_second
+--   seconds = missing_resource / net_regen_per_second
+-- so the timers match for both charge-based and resource-based abilities.
+local function _ability_resource_regen_per_second(ability_extension, ability_type, ability)
+    local buff_extension = ability_extension._buff_extension
+    local stat_buffs = buff_extension and buff_extension:stat_buffs() or {}
+    local max_resource = ability_extension:max_ability_resource(ability_type)
+    local base = (ability.resource_regen_per_second or 0)
+        + max_resource * (ability.resource_regen_percent_per_second or 0)
+    local flat = stat_buffs[ability_type .. "_resource_flat_regen"] or 0
+    local modifier = stat_buffs[ability_type .. "_resource_regen_modifier"] or 1
+    local cost_per_second = ability_extension:get_ability_resource_cost_per_second(ability_type) or 0
+    return (base + flat) * modifier - cost_per_second
+end
+
+-- Returns (seconds_until_next_charge, fill_progress_0_to_1).
+-- seconds is nil when there is nothing to count down (ready, paused, no timed regen).
+local function _ability_cooldown(ability_extension, ability_type)
+    local abilities = ability_extension._equipped_abilities
+    local ability = abilities and abilities[ability_type]
+    if not ability or not ability_extension.missing_ability_resource_until_next_charge then
+        return nil, 1
+    end
+    if ability_extension:is_ability_resource_regen_paused(ability_type) then
+        return nil, 0
+    end
+    local progress = ability_extension:get_ability_resource_regen_progress(ability_type) or 1
+    if progress ~= progress then
+        progress = 1
+    end
+    local missing, missing_percent = ability_extension:missing_ability_resource_until_next_charge(ability_type)
+    if not missing or missing <= 0 then
+        return 0, progress
+    end
+    if ability.only_uses_charges then
+        return nil, progress
+    end
+    -- Husk extensions (e.g. the spectated teammate while you are dead) have no buff
+    -- extension and error() on get_ability_resource_cost_per_second, so fall back to
+    -- the synced per-charge regen time there.
+    if not ability_extension._buff_extension then
+        local max_regen_time = ability_extension:max_regen_time_for_ability_charge(ability_type) or 0
+        local seconds = (missing_percent or 0) * max_regen_time
+        if seconds <= 0 then
+            return nil, progress
+        end
+        return seconds, progress
+    end
+    local rate = _ability_resource_regen_per_second(ability_extension, ability_type, ability)
+    if rate <= 0 then
+        return nil, progress
+    end
+    return missing / rate, progress
+end
+
+local function _remaining_ability_cooldown(ability_extension, ability_type)
+    return (_ability_cooldown(ability_extension, ability_type)) or 0
+end
+
 mod.utils = {
     shadows_enabled = _shadows_enabled,
     convert_number_to_display_texts = _convert_number_to_display_texts,
     get_text_color_for_percent_threshold = _get_text_color_for_percent_threshold,
     get_feature_offset = get_feature_offset,
-    get_feature_scale = get_feature_scale
+    get_feature_scale = get_feature_scale,
+    ability_cooldown = _ability_cooldown,
+    remaining_ability_cooldown = _remaining_ability_cooldown
 }
