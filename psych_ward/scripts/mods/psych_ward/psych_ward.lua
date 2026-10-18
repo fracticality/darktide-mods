@@ -11,8 +11,6 @@ local UIWidget = require("scripts/managers/ui/ui_widget")
 local ButtonPassTemplates = require("scripts/ui/pass_templates/button_pass_templates")
 local Missions = require("scripts/settings/mission/mission_templates")
 local StepperPassTemplates = require("scripts/ui/pass_templates/stepper_pass_templates")
-local MatchmakingConstants = require("scripts/settings/network/matchmaking_constants")
-local SINGLEPLAY_TYPES = MatchmakingConstants.SINGLEPLAY_TYPES
 
 local _mb_workaround = false
 local _is_matchmaking_from_main_menu = false
@@ -465,7 +463,6 @@ mod:hook(CLASS.StateMainMenu, "update", function(func, self, main_dt, main_t)
 
       local mechanism_context = {
         mission_name = "tg_shooting_range",
-        singleplay_type = SINGLEPLAY_TYPES.training_grounds,
         challenge_level = challenge_level
       }
 
